@@ -1,0 +1,31 @@
+#include "pch.h"
+#include "Engine/Source/Runtime/GameplayAbilities/Public/AbilitySystemComponent.h"
+
+#include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
+
+void AbilitySystemComponent::InternalServerTryActivateAbility(UAbilitySystemComponent* Component, FGameplayAbilitySpecHandle Handle, bool, FPredictionKey& PredictionKey, FGameplayEventData* TriggerEventData)
+{
+    auto Spec = Component->ActivatableAbilities.Items.Search([Handle](FGameplayAbilitySpec& item)
+        { return item.Handle.Handle == Handle.Handle; });
+    if (!Spec)
+        return Component->ClientActivateAbilityFailed(Handle, PredictionKey.Current);
+    Spec->InputPressed = true;
+
+    UGameplayAbility* AbilityOut = nullptr;
+    if (!((bool (*)(UAbilitySystemComponent * AbilitySystemComp, FGameplayAbilitySpecHandle, FPredictionKey, UGameplayAbility**, void*, const FGameplayEventData*))(ImageBase + 0x7AEFE28))(Component, Handle, PredictionKey, &AbilityOut, nullptr, TriggerEventData))
+    {
+        Component->ClientActivateAbilityFailed(Handle, PredictionKey.Current);
+        Spec->InputPressed = false;
+    }
+    Component->ActivatableAbilities.MarkItemDirty(*Spec);
+}
+
+void AbilitySystemComponent::Setup()
+{
+    UHook* Hook = new UHook();
+
+    Hook->Address = 0x11B;
+    Hook->Class = UAbilitySystemComponent::StaticClass();
+    Hook->Detour = InternalServerTryActivateAbility;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+}

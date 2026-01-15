@@ -1,0 +1,870 @@
+#include "pch.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Player/FortPlayerController.h"
+
+#include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
+#include "Engine/Plugins/PapayaManagerLibrary/Private/PapayaManager.h"
+#include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaLivingWorldManager.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaVehicle.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Movement/FortMovementMode_BaseExtLogic.h"
+#include "SDK/SDK/VaultingCodeRuntime_classes.hpp"
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
+
+void VHook3(void* Base, uintptr_t Index, void* Detour, void** Original = nullptr) {
+    auto VTable = (*(void***)Base);
+    if (!VTable)
+        return;
+
+    if (!VTable[Index])
+        return;
+
+    if (Original)
+        *Original = VTable[Index];
+
+    DWORD dwOld;
+    VirtualProtect(&VTable[Index], 8, PAGE_EXECUTE_READWRITE, &dwOld);
+    VTable[Index] = Detour;
+    DWORD dwTemp;
+    VirtualProtect(&VTable[Index], 8, dwOld, &dwTemp);
+}
+
+void FortPlayerController::ServerAcknowledgePossession(AFortPlayerControllerAthena* Controller, AFortPawn* Pawn)
+{
+    auto PlayerState = (AFortPlayerStateZone*)Controller->PlayerState;
+    Controller->AcknowledgedPawn = Pawn;
+
+    if (Controller->CosmeticLoadoutPC.Character)
+    {
+        PlayerState->HeroType = Controller->CosmeticLoadoutPC.Character->HeroDefinition;
+        UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(PlayerState);
+    }
+    
+    reinterpret_cast<void(*)(void*)>(ImageBase + 0x993F158)(PlayerState->GetInterfaceAddress<IAbilitySystemInterface>()); // ability stuff
+
+    if (CurrentGamemode == EGameModeType::Athena) {
+        Controller->XPComponent->bRegisteredWithQuestManager = true;
+        Controller->XPComponent->OnRep_bRegisteredWithQuestManager();
+        Controller->GetQuestManager(ESubGame::Athena)->InitializeQuestAbilities(Pawn);
+        
+        auto Comp = (UFortControllerComponent_MapDiscoverability*)Controller->GetComponentByClass(UFortControllerComponent_MapDiscoverability::StaticClass());
+        TArray<AActor*> Actors;
+        UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFortPoiVolume::StaticClass(), &Actors);
+        for (auto Actor : Actors) {
+            auto PoiVolume = (AFortPoiVolume*)Actor;
+            void(__fastcall * HandleInitializedPOIVolume)(UFortControllerComponent_MapDiscoverability*, AFortPoiVolume*) = decltype(HandleInitializedPOIVolume)(ImageBase + 0x8EA5F18);
+            HandleInitializedPOIVolume(Comp, PoiVolume);
+        }
+    }
+}
+
+void FortPlayerController::ServerPlayEmoteItem(AFortPlayerController* PlayerController, UFortMontageItemDefinitionBase* EmoteAsset, float EmoteRandomNumber)
+{
+
+    if (!PlayerController || !EmoteAsset || !PlayerController->MyFortPawn)
+        return;
+
+    static UClass* DanceAbility = StaticLoadObject<UClass>("/Game/Abilities/Emotes/GAB_Emote_Generic.GAB_Emote_Generic_C");
+    static UClass* SprayAbility = StaticLoadObject<UClass>("/Game/Abilities/Sprays/GAB_Spray_Generic.GAB_Spray_Generic_C");
+
+    if (!DanceAbility || !SprayAbility)
+        return;
+
+    auto EmoteDef = (UAthenaDanceItemDefinition*)EmoteAsset;
+    if (!EmoteDef)
+        return;
+
+    PlayerController->MyFortPawn->bMovingEmote = EmoteDef->bMovingEmote;
+    PlayerController->MyFortPawn->EmoteWalkSpeed = EmoteDef->WalkForwardSpeed;
+    PlayerController->MyFortPawn->bMovingEmoteForwardOnly = EmoteDef->bMoveForwardOnly;
+    PlayerController->MyFortPawn->EmoteWalkSpeed = EmoteDef->WalkForwardSpeed;
+
+    FGameplayAbilitySpec Spec{};
+    UGameplayAbility* Ability = nullptr;
+    if (EmoteAsset->IsA(UAthenaSprayItemDefinition::StaticClass()))
+    {
+        Ability = (UGameplayAbility*)SprayAbility->DefaultObject;
+    }
+
+    if (Ability == nullptr) {
+        Ability = (UGameplayAbility*)DanceAbility->DefaultObject;
+    }
+    if (Ability) {
+        static __int64 (*SpecConstructor)(FGameplayAbilitySpec*, UObject*, int, int, UObject*) = decltype(SpecConstructor)(ImageBase + 0x7B28E6C);
+        static FGameplayAbilitySpecHandle(*GiveAbilityAndActivateOnce)(UAbilitySystemComponent * ASC, FGameplayAbilitySpecHandle*, FGameplayAbilitySpec, __int64) = decltype(GiveAbilityAndActivateOnce)(ImageBase + 0x7AEF168);
+        FGameplayAbilitySpec Spec{};
+        SpecConstructor(&Spec, Ability, 1, -1, EmoteAsset);
+        GiveAbilityAndActivateOnce(((AFortPlayerStateAthena*)PlayerController->PlayerState)->AbilitySystemComponent, &Spec.Handle, Spec, 0);
+    }
+}
+
+void FortPlayerController::MovingEmoteStopped(UObject* Context, FFrame& Stack)
+{
+    Stack.IncrementCode();
+
+    AFortPawn* Pawn = (AFortPawn*)Context;
+    Pawn->bMovingEmote = false;
+    Pawn->bMovingEmoteForwardOnly = false;
+    Pawn->bMovingEmoteFollowingOnly = false;
+}
+
+void FortPlayerController::ServerAttemptInventoryDrop(AFortPlayerController* Controller, const struct FGuid& ItemGuid, int32 Count, bool bTrash)
+{
+    if (Count < 1)
+        return;
+    auto Inventory = (AFortInventory*)Controller->WorldInventory.ObjectPointer;
+    if (!Inventory)
+        return;
+    auto Entry = Inventory->Inventory.ReplicatedEntries.Search([&](FFortItemEntry& entry) {
+        return entry.ItemGuid == ItemGuid;
+        });
+    if (!Entry)
+        return;
+    if (Entry->Count < Count)
+        return;
+    
+    FortKismetLibrary::SpawnPickup(Controller->Pawn->K2_GetActorLocation(), *Entry, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::TossedByPlayer, Controller->MyFortPawn, 1, true, false, false);
+    Entry->Count -= Count;
+    Inventory->ReplaceEntry(*Entry);
+}
+
+// TODO: switch to AFortPlayerControllerAthena::OnPawnDied (proper func, fixes some issues)
+void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport) {
+
+    auto GameMode = (AFortGameModeAthena*)UWorld::GetWorld()->AuthorityGameMode;
+    auto GameState = (AFortGameStateAthena*)GameMode->GameState;
+    auto GamePhaseLogic = GetLogic();
+    if (!PlayerController || GamePhaseLogic->GamePhase == EAthenaGamePhase::Warmup)
+        return ClientOnPawnDiedOG(PlayerController, DeathReport);
+
+    if (auto Projectile = DeathReport.DamageCauser.Get() ? Cast<AFortProjectileBase>(DeathReport.DamageCauser.Get()) : nullptr)
+    {
+        auto Weapon = Projectile->GetOwnerWeapon();
+        if (Weapon) {
+            if (Weapon->WeaponData) {
+                for (auto Tag : Weapon->WeaponData->GameplayTags.GameplayTags) {
+                    DeathReport.Tags.GameplayTags.Add(Tag);
+                }
+            }
+        }
+    }
+
+    auto PlayerState = (AFortPlayerStateAthena*)PlayerController->PlayerState;
+
+    auto KillerPlayerState = (AFortPlayerStateAthena*)DeathReport.KillerPlayerState;
+    auto KillerPawn = (AFortPlayerPawnAthena*)DeathReport.KillerPawn.Get();
+
+    PlayerState->PawnDeathLocation = PlayerController->MyFortPawn ? PlayerController->MyFortPawn->K2_GetActorLocation() : FVector();
+    PlayerState->DeathInfo.bDBNO = PlayerController->MyFortPawn ? PlayerController->MyFortPawn->IsDBNO() : false;
+    PlayerState->DeathInfo.DeathLocation = PlayerState->PawnDeathLocation;
+    PlayerState->DeathInfo.DeathTags = DeathReport.Tags;
+    PlayerState->DeathInfo.DeathCause = AFortPlayerStateAthena::ToDeathCause(PlayerState->DeathInfo.DeathTags, PlayerState->DeathInfo.bDBNO);
+    if (PlayerState->DeathInfo.bDBNO)
+        PlayerState->DeathInfo.Downer = KillerPlayerState;
+    PlayerState->DeathInfo.FinisherOrDowner = KillerPlayerState;
+
+
+    PlayerState->DeathInfo.bInitialized = true;
+    PlayerState->OnRep_DeathInfo();
+
+    bool bWasVictory = false;
+
+    if (GameMode->AlivePlayers.Num() < 1 || GameMode->AlivePlayers.Num() == 1)
+    {
+        bWasVictory = true;
+    }
+    if (KillerPlayerState && KillerPawn && KillerPawn->Controller && KillerPawn->Controller->IsA(AFortPlayerControllerAthena::StaticClass()) && KillerPawn->Controller != PlayerController)
+    {
+        KillerPlayerState->KillScore++;
+        KillerPlayerState->OnRep_Kills();
+        KillerPlayerState->TeamKillScore++;
+        KillerPlayerState->OnRep_TeamKillScore();
+
+        KillerPlayerState->ClientReportKill(PlayerState);
+        KillerPlayerState->ClientReportTeamKill(KillerPlayerState->TeamKillScore);
+
+        auto KillerPC = (AFortPlayerControllerAthena*)KillerPlayerState->Owner;
+    }
+    if (GameState->IsRespawningAllowed(PlayerState)) {
+        AFortWeapon* DamageCauser = nullptr;
+        if (auto Projectile = DeathReport.DamageCauser.Get() ? Cast<AFortProjectileBase>(DeathReport.DamageCauser.Get()) : nullptr)
+        {
+            DamageCauser = Projectile->GetOwnerWeapon();
+        }
+            
+        else if (auto Weapon = DeathReport.DamageCauser.Get() ? Cast<AFortWeapon>(DeathReport.DamageCauser.Get()) : nullptr)
+            DamageCauser = Weapon;
+
+        return ClientOnPawnDiedOG(PlayerController, DeathReport);
+    }
+
+    if (!GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
+    {
+        PlayerState->Place = GameState->PlayersLeft;
+        PlayerState->OnRep_Place();
+        FAthenaMatchStats& Stats = PlayerController->MatchReport->MatchStats;
+        FAthenaMatchTeamStats& TeamStats = PlayerController->MatchReport->TeamStats;
+
+        Stats.Stats[3] = PlayerState->KillScore;
+        Stats.Stats[8] = PlayerState->SquadID;
+        PlayerController->ClientSendMatchStatsForPlayer(Stats);
+
+        TeamStats.Place = PlayerState->Place;
+        TeamStats.TotalPlayers = GameState->TotalPlayers;
+        PlayerController->ClientSendTeamStatsForPlayer(TeamStats);
+
+        AFortWeapon* DamageCauser = nullptr;
+        if (auto Projectile = DeathReport.DamageCauser.Get() ? Cast<AFortProjectileBase>(DeathReport.DamageCauser.Get()) : nullptr)
+        {
+            DamageCauser = Projectile->GetOwnerWeapon();
+        }
+        else if (auto Weapon = DeathReport.DamageCauser.Get() ? Cast<AFortWeapon>(DeathReport.DamageCauser.Get()) : nullptr)
+            DamageCauser = Weapon;
+
+        ((void (*)(AFortGameModeAthena*, AFortPlayerController*, APlayerState*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char))(ImageBase + 0x8FD53FC))(GameMode, PlayerController, KillerPlayerState == PlayerState ? nullptr : KillerPlayerState, KillerPawn, DamageCauser ? DamageCauser->WeaponData : nullptr, PlayerState->DeathInfo.DeathCause, 0);
+
+        PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, PlayerController->MatchReport->EndOfMatchResults);
+        if (PlayerController->MyFortPawn && ((KillerPlayerState && KillerPlayerState->Place == 1) || PlayerState->Place == 1))
+        {
+            if (PlayerState->Place == 1)
+            {
+                KillerPlayerState = PlayerState;
+                KillerPawn = (AFortPlayerPawnAthena*)PlayerController->MyFortPawn;
+            }
+            auto KillerPlayerController = (AFortPlayerControllerAthena*)KillerPlayerState->Owner;
+            auto KillerWeapon = DamageCauser ? DamageCauser->WeaponData : nullptr;
+
+            KillerPlayerController->PlayWinEffects(KillerPawn, KillerWeapon, PlayerState->DeathInfo.DeathCause, false, ERoundVictoryAnimation::ERoundVictoryAnimation_MAX);
+            KillerPlayerController->ClientNotifyWon(KillerPawn, KillerWeapon, PlayerState->DeathInfo.DeathCause);
+            KillerPlayerController->ClientNotifyTeamWon(KillerPawn, KillerWeapon, PlayerState->DeathInfo.DeathCause);
+
+            if (KillerPlayerState != PlayerState)
+            {
+                KillerPlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, KillerPlayerController->MatchReport->EndOfMatchResults);
+
+                FAthenaMatchStats& KillerStats = KillerPlayerController->MatchReport->MatchStats;
+                FAthenaMatchTeamStats& KillerTeamStats = KillerPlayerController->MatchReport->TeamStats;
+
+
+                KillerStats.Stats[3] = KillerPlayerState->KillScore;
+                KillerStats.Stats[8] = KillerPlayerState->SquadID;
+                KillerPlayerController->ClientSendMatchStatsForPlayer(KillerStats);
+
+                KillerTeamStats.Place = KillerPlayerState->Place;
+                KillerTeamStats.TotalPlayers = GameState->TotalPlayers;
+                KillerPlayerController->ClientSendTeamStatsForPlayer(KillerTeamStats);
+            }
+
+            GameState->WinningTeam = KillerPlayerState->TeamIndex;
+            GameState->OnRep_WinningTeam();
+            GameState->WinningPlayerState = KillerPlayerState;
+            GameState->OnRep_WinningPlayerState();
+        }
+    }
+
+    PlayerController->StateName = UKismetStringLibrary::Conv_StringToName(L"Spectating");
+
+    return ClientOnPawnDiedOG(PlayerController, DeathReport);
+}
+bool FortPlayerController::RemoveInventoryItem(IFortInventoryOwnerInterface* Interface, FGuid* ItemGuid, int Count)
+{
+    // alr this whole func is not proper prob and its ass asf so 
+        
+    // this shit calls const getforpawn
+    const AFortPawn* Pawn = ((const AFortPawn* (*)(IFortInventoryOwnerInterface*))(*(void***)Interface)[9])(Interface);
+    if (!Pawn) return false;
+    auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
+    auto Inventory = (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
+    
+    for (const auto& Item : Inventory->Inventory.ItemInstances)
+    {
+        if (Item->ItemEntry.ItemGuid == *ItemGuid)
+        {
+            auto ItemClass = Item->ItemEntry.ItemDefinition->Class;
+            if (ItemClass->IsA(UFortAmmoItemDefinition::StaticClass()) && PlayerController->bInfiniteAmmo)
+                return false;
+            if (ItemClass->IsA(UFortResourceItemDefinition::StaticClass()) && PlayerController->bBuildFree)
+                return false;
+
+            Item->ItemEntry.Count -= Count;
+            Inventory->ReplaceEntry(Item->ItemEntry);
+            return true;
+        }
+    }
+    return false;
+}
+
+void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena* Controller, FCreateBuildingActorData& CreateBuildingData)
+{
+    AFortGameStateAthena* GameState = Cast<AFortGameStateAthena>(UWorld::GetWorld()->GameState);
+    TArray<ABuildingActor*> BuildingActors;
+
+    for (auto& BuildableClass : GameState->AllPlayerBuildableClassesIndexLookup)
+    {
+        if (BuildableClass.Value() == CreateBuildingData.BuildingClassHandle)
+            CreateBuildingData.BuildingClassData.BuildingClass = BuildableClass.Key();
+    }
+
+    if (auto BuildingClass = CreateBuildingData.BuildingClassData.BuildingClass)
+    {
+        EFortBuildPreviewMarkerOptionalAdjustment Adjustment;
+
+        EFortStructuralGridQueryResults QueryResult = GameState->StructuralSupportSystem->CanAddBuildingActorClassToGrid(
+            UWorld::GetWorld(),
+            BuildingClass,
+            CreateBuildingData.BuildLoc,
+            CreateBuildingData.BuildRot,
+            CreateBuildingData.bMirrored,
+            &BuildingActors,
+            &Adjustment,
+            false);
+
+        if (QueryResult == EFortStructuralGridQueryResults::CanAdd)
+        {
+            for (int32 i = 0; i < BuildingActors.Num(); i++)
+            {
+                ABuildingActor* ExistingBuilding = BuildingActors[i];
+                if (!ExistingBuilding)
+                    continue;
+
+                ExistingBuilding->K2_DestroyActor();
+            }
+
+            static void* (*CanAffordToPlaceBuildableClass)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClass)(
+                ImageBase + 0xA1CABF8);
+            if (!CanAffordToPlaceBuildableClass(Controller, &CreateBuildingData.BuildingClassData))
+                return;
+
+            static void* (*PayBuildableClassPlacementCost)(AFortPlayerController*, FBuildingClassData*) = decltype(PayBuildableClassPlacementCost)(
+                ImageBase + 0xA202570);
+            PayBuildableClassPlacementCost(Controller, &CreateBuildingData.BuildingClassData);
+
+            ABuildingSMActor* BuildingSMActor = UWorld::GetWorld()->SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot);
+            if (BuildingSMActor)
+            {
+                BuildingSMActor->CurrentBuildingLevel = CreateBuildingData.BuildingClassData.UpgradeLevel = 0;
+
+                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, Controller, true, nullptr, true);
+                BuildingSMActor->bPlayerPlaced = true;
+
+                AFortPlayerStateAthena* PlayerState = Cast<AFortPlayerStateAthena>(Controller->PlayerState);
+                if (PlayerState)
+                {
+                    BuildingSMActor->Team = EFortTeam(PlayerState->TeamIndex);
+                    BuildingSMActor->OnRep_Team();
+                    BuildingSMActor->SetTeam(PlayerState->TeamIndex);
+                }
+            }
+        }
+    }
+}
+
+void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit)
+{
+    AFortPlayerStateZone* PlayerStateZone = Cast<AFortPlayerStateZone>(PlayerController->PlayerState);
+    if (!PlayerStateZone || !BuildingActorToEdit || !PlayerController->MyFortPawn)
+        return;
+
+    BuildingActorToEdit->EditingPlayer = PlayerStateZone;
+
+    auto AssetManager = GetAssetManager();
+    static UFortEditToolItemDefinition* EditToolItemDefinition = AssetManager->GameDataCommon->EditToolItem.Get();
+    if (!EditToolItemDefinition)
+    {
+        EditToolItemDefinition = AssetManager->GameDataCommon->EditToolItem.Get();
+    }
+
+    auto ItemEntry = ((AFortInventory*)PlayerController->WorldInventory.ObjectPointer)->Inventory.ReplicatedEntries.Search([](FFortItemEntry& entry)
+        { return entry.ItemDefinition == EditToolItemDefinition; });
+    if (ItemEntry &&
+        EditToolItemDefinition &&
+        PlayerController->MyFortPawn->EquipWeaponDefinition(EditToolItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false))
+    {
+        AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
+
+        if (EditingTool)
+        {
+            EditingTool->EditActor = BuildingActorToEdit;
+            EditingTool->OnRep_EditActor();
+        }
+    }
+}
+
+void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit, TSubclassOf<ABuildingSMActor> BuildingClass, uint8 Rot, bool Mirrored)
+{
+    if (!PlayerController || !BuildingActorToEdit || !BuildingActorToEdit->IsA(ABuildingSMActor::StaticClass()) || !PlayerController->MyFortPawn)
+        return;
+
+    BuildingActorToEdit->EditingPlayer = nullptr;
+
+    static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(
+        ImageBase + 0x93CBCD0);
+
+    int32 CurrentBuildingLevel = BuildingActorToEdit->CurrentBuildingLevel;
+    ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingActorToEdit, 1, BuildingClass, CurrentBuildingLevel, Rot, Mirrored, PlayerController);
+    if (NewBuild) NewBuild->bPlayerPlaced = true;
+}
+
+void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit)
+{
+    if (!BuildingActorToEdit ||
+        BuildingActorToEdit->EditingPlayer != PlayerController->PlayerState ||
+        BuildingActorToEdit->bDestroyed || !PlayerController->MyFortPawn)
+        return;
+
+    BuildingActorToEdit->EditingPlayer = nullptr;
+
+    AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
+    if (EditingTool)
+    {
+        EditingTool->EditActor = BuildingActorToEdit;
+        EditingTool->OnRep_EditActor();
+    }
+}
+
+void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Controller, FGuid ItemGuid)
+{
+    if (!Controller || !Controller->MyFortPawn) return;
+    auto Inventory = (AFortInventory*)Controller->WorldInventory.GetObjectRef();
+    
+    FFortItemEntry* Entry = Inventory->Inventory.ReplicatedEntries.Search([&](FFortItemEntry& entry) {
+        return entry.ItemGuid == ItemGuid;
+    });
+
+    if (Entry)
+    {
+        if (Entry->ItemDefinition->IsA(UFortDecoItemDefinition::StaticClass()))
+        {
+            auto DecoItemDefinition = Cast<UFortDecoItemDefinition>(Entry->ItemDefinition);
+            if (!DecoItemDefinition) return;
+    
+            Controller->MyFortPawn->PickUpActor(nullptr, DecoItemDefinition);
+            Controller->MyFortPawn->CurrentWeapon->ItemEntryGuid = ItemGuid;
+
+            if (auto ContextTrap = Cast<AFortDecoTool_ContextTrap>(Controller->MyFortPawn->CurrentWeapon))
+                ContextTrap->SetContextTrapItemDefinition(Cast<UFortContextTrapItemDefinition>(DecoItemDefinition));
+            return;
+        }
+        if (Entry->ItemDefinition->IsA(UFortGadgetItemDefinition::StaticClass()))
+        {
+            auto GadgetItemDefinition = Cast<UFortGadgetItemDefinition>(Entry->ItemDefinition);
+            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)GadgetItemDefinition->WeaponItemDefinition, Entry->ItemGuid, Entry->TrackerGuid, false); 
+        }
+        else
+        {
+            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Entry->ItemDefinition, Entry->ItemGuid, Entry->TrackerGuid, false); 
+        }
+    }
+}
+void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, FString Msg) {
+    auto PlayerState = Cast<AFortPlayerStateAthena>(Controller->PlayerState);
+    auto PlayerName = PlayerState->GetPlayerName().ToString();
+    auto Pawn = (AFortPlayerPawnAthena*)Controller->Pawn;
+    bool isMsgEmpty = Msg.Num() <= 0;
+
+    std::vector<UEAllocatedString> Arguments;
+    std::string OldMsg = "";
+    if (!isMsgEmpty)
+        OldMsg = Msg.ToString();
+
+    if (!isMsgEmpty)
+    {
+        auto Message = Msg.ToString();
+        while (Message.find(" ") != std::string::npos)
+        {
+            auto arg = Message.substr(0, Message.find(' '));
+            Arguments.push_back(arg);
+            Message.erase(0, Message.find(' ') + 1);
+        }
+        Arguments.push_back(Message);
+    }
+    auto NumArgs = Arguments.size() == 0 ? 0 : Arguments.size() - 1;
+    if (Arguments.size() >= 1)
+    {
+        auto& Command = Arguments[0];
+        std::transform(Command.begin(), Command.end(), Command.begin(), ::tolower);
+
+        if (Command == "startaircraft")
+        {
+            GetGameMode()->StartAircraftPhase();
+        }
+        if (Command == "testcar")
+        {
+            auto Vehicle = (AFortAthenaVehicle*)Pawn->CurrentVehicle;
+            auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
+            
+            
+            if (VehicleConfigClass) {
+                auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
+
+                if (Vehicle) {
+                    TArray<FVehicleDamageablePart> Old;
+                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
+                        Old.Add(Vehicle->DamageableParts[i]);
+                    }
+
+                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
+                        Vehicle->DamageableParts[i].Health = 0;
+                    }
+                    Vehicle->OnRep_DamageableParts(Old);
+                }
+            }
+        }
+        if (Command == "testcar2")
+        {
+            auto Vehicle = (AFortAthenaVehicle*)Pawn->CurrentVehicle;
+            auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
+
+
+            if (VehicleConfigClass) {
+                auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
+
+                if (Vehicle) {
+                    TArray<FVehicleDamageablePart> Old;
+                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
+                        Old.Add(Vehicle->DamageableParts[i]);
+                    }
+
+                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
+                        Vehicle->DamageableParts[i].Health = 10;
+                    }
+                    Vehicle->OnRep_DamageableParts(Old);
+                }
+            }
+        }
+        if (Command == "testvolumes") {
+            TArray<AActor*> Actors;
+            UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFortPoiVolume::StaticClass(), &Actors);
+            for (auto Actor : Actors) {
+                std::wstring LocationTagsStr = L"";
+                for (auto Tag : ((AFortPoiVolume*)Actor)->LocationTags.GameplayTags) {
+                    LocationTagsStr += std::wstring(Tag.TagName.GetRawWString().c_str()) + L" ";
+                }
+                auto Location = Actor->K2_GetActorLocation();
+                std::wstring Out = std::wstring(Actor->Name.GetRawWString().c_str()) + std::wstring(LocationTagsStr) + LocationTagsStr;
+
+                Controller->ClientMessage(Out.c_str(), FName(), 1);
+            }
+        }
+        if (Command == "getpos") {
+            auto Location = Pawn->K2_GetActorLocation();
+            std::cout << Location.X << " " << Location.Y << " " << Location.Z << "\n";
+        }
+        if (Command == "testdiscover") {
+            auto Comp = (UFortControllerComponent_MapDiscoverability*)Controller->GetComponentByClass(UFortControllerComponent_MapDiscoverability::StaticClass());
+            Comp->DiscoverAllAreas();
+            Comp->DiscoverAllPois();
+            Comp->DiscoveredData.MarkArrayDirty();
+        }
+        if (Command == "testdiscover2") {
+            auto Comp = (UFortControllerComponent_MapDiscoverability*)Controller->GetComponentByClass(UFortControllerComponent_MapDiscoverability::StaticClass());
+            TArray<AActor*> Actors;
+            UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFortPoiVolume::StaticClass(), &Actors);
+            for (auto Actor : Actors) {
+                FPoiDiscoverabilityDataEntry Entry = {};
+                Entry.bWasInitiallyDiscovered = false;
+                Entry.DiscoveredState = EPoiDiscoveredState::Undiscovered;
+                Entry.VisitCounter++;
+                FGameplayTag Tag;
+                Tag.TagName = ((AFortPoiVolume*)Actor)->LocationTags.GameplayTags[0].TagName;
+                Entry.POITag = Tag;
+                Comp->DiscoveredData.Entries.Add(Entry);
+                
+            }
+            Comp->DiscoveredData.MarkArrayDirty();
+        }
+
+        if (Command == "modbench")
+        {
+            auto loc = Controller->MyFortPawn->K2_GetActorLocation();
+            auto newloc = FVector(loc.X + 250.0f, loc.Y, loc.Z);
+
+
+            auto idkclass = StaticLoadObject<UClass>("/WeaponModStation/Gameplay/Actors/BP_WeaponModStation_v2.BP_WeaponModStation_v2_C");
+            GetWorld()->SpawnActor(idkclass, newloc, {} );
+        }
+        if (Command == "vehicleinfo")
+        {
+            auto Vehicle =  (AFortAthenaVehicle*)Pawn->CurrentVehicle;
+            auto VehicleCfgClass =  Vehicle->VehicleConfigsClass_BR.Get();
+            auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleCfgClass->DefaultObject;
+            
+            std::cout << Vehicle->Name.ToString().c_str() << std::endl;
+            // i think we get the current config through the interface
+            auto VehicleInterface = Vehicle->GetInterface<IFortVehicleInterface>(IFortVehicleInterface::StaticClass());
+
+        
+            if (VehicleConfig)
+            {
+                std::cout << VehicleConfig->DamageableParts.Num() <<  std::endl;
+            }
+            for (auto Part : Vehicle->DamageableParts)
+            {
+                std::cout << "ShapeName: " << Part.ShapeName.ToString().c_str() << "Health: " << Part.Health << std::endl;
+            }
+
+            for (auto Part : Vehicle->ToggledParts)
+            {
+                std::cout << "ShapeName: "  << Part.ShapeName.ToString().c_str() << "Enabled: "  << Part.bEnabled << std::endl;
+            }
+        }
+
+        if (Command == "getcurrentconfig")
+        {
+            auto Vehicle =  (AFortAthenaVehicle*)Pawn->CurrentVehicle;
+            auto VehicleCfgClass =  Vehicle->VehicleConfigsClass_BR.Get();
+            auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleCfgClass->DefaultObject;
+            
+            std::cout << Vehicle->Name.ToString().c_str() << std::endl;
+            // i think we get the current config through the interface
+           if (VehicleConfig)
+           {
+
+               for (auto Part : VehicleConfig->DamageableParts)
+               {
+                  std::cout << Part.ShapeName.ToString().c_str() << std::endl;
+               }
+           }
+            
+        }
+        if (Command == "testmme") {
+            auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
+            for (auto RuntimeData : Comp->GetReplicatedRuntimeDatas()) {
+                if (RuntimeData->IsA(UFortMovementMode_TacSprintRuntimeData::StaticClass())) {
+                    //Comp->NewlyAddedMovementModeExtensionRuntimeData.Add(RuntimeData);
+                    Comp->PushedMovementModeExtensionRuntimeData.Add(RuntimeData);
+                    __int64(__fastcall * IdkWhatIsThatFunction)(UFortMovementComp_Character * Comp) = decltype(IdkWhatIsThatFunction)(ImageBase+0x139B788);
+                    IdkWhatIsThatFunction(Comp);
+                    auto Num = Comp->ActiveLayeredMovementModeRuntimeData.Num();
+                    Controller->ClientMessage(std::to_wstring(Num).c_str(), FName(), 1);
+                }
+            }
+        }
+        if (Command == "spawnbot")
+        {
+            static auto SpawnerDataClass = StaticLoadObject<UClass>("/Game/Athena/AI/Phoebe/BP_AISpawnerData_Phoebe.BP_AISpawnerData_Phoebe_C");
+            auto DefaultObject = (UFortAthenaAIBotSpawnerData*)SpawnerDataClass->DefaultObject;
+            auto ComponentList = DefaultObject->CreateComponentList(DefaultObject);
+            auto Transform = FTransform();
+            Transform.Translation = Controller->Pawn->K2_GetActorLocation();
+            Transform.Rotation = FQuat();
+            auto One = FVector();
+            One.X = 1;
+            One.Y = 1;
+            One.Z = 1;
+            Transform.Scale3D = One;
+
+            ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, Transform, false);
+        }
+        if (Command == "clearmme") {
+            auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
+            Comp->PushedMovementModeExtensionRuntimeData.Clear();
+            Comp->NewlyAddedMovementModeExtensionRuntimeData.Clear();
+            Comp->ActiveLayeredMovementModeRuntimeData.Clear();
+        }
+
+        if (Command == "modmod") {
+            auto TurretClass = StaticLoadObject<UClass>("/VehicleMods/Mods/SocketPropDestructor/Tire/VMConfig_SocketPropDestructor_Tire.VMConfig_SocketPropDestructor_Tire_C", UBlueprintGeneratedClass::StaticClass());
+            auto ModConfig = (UFortVehicleModConfig*)TurretClass->DefaultObject;
+            auto Car = Pawn->CurrentVehicle;
+            if (Car) {
+                void (__fastcall* ApplyToVehicleInternal)(UFortVehicleModConfig* ModConfig, IFortVehicleInterface* Vehicle) = decltype(ApplyToVehicleInternal)(ImageBase + 0xA644268);
+                auto VehicleInterface = Car->GetInterface<IFortVehicleInterface>(IFortVehicleInterface::StaticClass());
+                if (VehicleInterface) {
+                    ApplyToVehicleInternal(ModConfig, VehicleInterface);
+                }
+                else {
+                    std::cout << "Car has no interface\n";
+                }
+            }
+        }
+        if (Command == "cacheconfig")
+        {
+            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
+
+            LWM->CachedConfig = const_cast<UFortAthenaLivingWorldConfigData*>(LWM->GetConfig());
+        }
+        if (Command == "initcategories")
+        {
+            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
+            LWM->InitializeCategories();
+        }
+        if (Command == "spawnnpc")
+        {
+            static auto SpawnerClass = StaticLoadObject<UClass>("/NPCLibrary/NPCs/BaoBros/BaoBros/BP_AIBotSpawnerData_NPC_BaoBros.BP_AIBotSpawnerData_NPC_BaoBros_C");
+            auto ComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(SpawnerClass, UWorld::GetWorld());
+            
+           auto List =  ComponentList->GetList();
+            for (auto Component : List)
+            {
+                std::cout << Component->Class->Name.ToString().c_str() << std::endl;
+                std::cout << Component->Name.ToString().c_str() << std::endl;
+            }
+            // that loc is aids
+            auto Transform = FTransform();
+            Transform.Translation = Controller->Pawn->K2_GetActorLocation();
+            Transform.Rotation = FQuat();
+            auto One = FVector();
+            One.X = 1;
+            One.Y = 1;
+            One.Z = 1;
+            Transform.Scale3D = One;
+            
+            ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, Transform, false);
+        }
+        if (Command == "init")
+        {
+            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
+            void (*Initialize)(UFortAthenaLivingWorldManager *LWM) = decltype(Initialize)(ImageBase + 0xB689864);
+            Initialize(LWM);
+        }
+        if (Command == "getcategories")
+        {
+            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
+            TArray<FFortAthenaLivingWorldCategory*> Categories;
+            LWM->GetAllCategories(Categories, L"UFortAthenaLivingWorldManager::InitializeCategories");
+            std::cout << Categories.Num() << std::endl;
+        }
+        if (Command == "giveitem")
+        {
+            if (NumArgs < 1)
+            {
+                return;
+            }
+
+            auto& weaponName = Arguments[1];
+            int count = 1;
+
+            try
+            {
+                if (NumArgs >= 2)
+                    count = std::stoi(Arguments[2].c_str());
+            }
+            catch (...)
+            {
+            }
+
+            auto WID = StaticFindObject<UFortWorldItemDefinition>(weaponName, nullptr, (UObject*)-1);
+
+            if (!WID)
+            {
+                Controller->ClientMessage(L"Invalid Id", FName(0), 1);
+            }
+
+
+            Controller->GetInventory()->AddItem(WID, count, 1);
+
+        }
+        if (Command == "dev")
+        {
+            Controller->bBuildFree = !Controller->bBuildFree;
+            Controller->bInfiniteAmmo = !Controller->bInfiniteAmmo;
+        }
+        if (Command == "getmmeinfo") {
+            auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
+            Controller->ClientMessage(L"ActiveLayeredMovementModeRuntimeData", FName(), 1);
+            for (auto RuntimeData : Comp->ActiveLayeredMovementModeRuntimeData) {
+                auto Name = RuntimeData->GetName();
+                Controller->ClientMessage(std::wstring(Name.begin(), Name.end()).c_str(), FName(), 1);
+            }
+
+            Controller->ClientMessage(L"PushedMovementModeExtensionRuntimeData", FName(), 1);
+            for (auto RuntimeData : Comp->PushedMovementModeExtensionRuntimeData) {
+                auto Name = RuntimeData->GetName();
+                Controller->ClientMessage(std::wstring(Name.begin(), Name.end()).c_str(), FName(), 1);
+            }
+
+            Controller->ClientMessage(L"NewlyAddedMovementModeExtensionRuntimeData", FName(), 1);
+            for (auto RuntimeData : Comp->NewlyAddedMovementModeExtensionRuntimeData) {
+                auto Name = RuntimeData->GetName();
+                Controller->ClientMessage(std::wstring(Name.begin(), Name.end()).c_str(), FName(), 1);
+            }
+            Controller->ClientMessage(L"ReceivedPackMovementModeExtensionRuntimeData", FName(), 1);
+            for (auto RuntimeData : Comp->ReceivedPackMovementModeExtensionRuntimeData) {
+                auto Name = RuntimeData->GetName();
+                Controller->ClientMessage(std::wstring(Name.begin(), Name.end()).c_str(), FName(), 1);
+            }
+            Controller->ClientMessage(L"RuntimeData", FName(), 1);
+            for (auto RuntimeData : Comp->GetReplicatedRuntimeDatas()) {
+                auto Name = RuntimeData->GetName();
+                Controller->ClientMessage(std::wstring(Name.begin(), Name.end()).c_str(), FName(), 1);
+            }
+            
+        }
+    }
+}
+
+
+void FortPlayerController::Init()
+{
+
+    for (auto i = 0; i < UObject::GObjects->Num(); i++) {
+        auto Object = UObject::GObjects->GetByIndex(i);
+
+        if (!Object || !Object->IsDefaultObject() || !Object->IsA(AFortAthenaVehicle::StaticClass()))
+            continue;
+
+        auto InterfaceAddress = Object->GetInterface<IFortVehicleInterface>(IFortInventoryOwnerInterface::StaticClass());
+        if (InterfaceAddress) {
+            VHook3(InterfaceAddress, 198 / 8, RemoveInventoryItem);
+        } 
+    }
+    
+    UHook* Hook = new UHook();
+
+    Hook->Address = 0x133;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerAcknowledgePossession;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+    Hook->Address = 0x22F;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerExecuteInventoryItem;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+    Hook->Address = 0x23A;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerAttemptInventoryDrop;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+    Hook->Address = 0x250;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerCreateBuildingActor;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+
+    Hook->Address = 0x257;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerBeginEditingBuildingActor;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+
+    Hook->Address = 0x252;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerEditBuildingActor;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+
+    Hook->Address = 0x255;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerEndEditingBuildingActor;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+
+    Hook->Address = 0x1FB;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerPlayEmoteItem;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+
+    Hook->Address = 0xA2541D0 + ImageBase;
+    Hook->Detour = ClientOnPawnDied;
+    Hook->Original = (void**)&ClientOnPawnDiedOG;
+    UKismetHookingLibrary::Hook(Hook, EHook::Address);
+
+    Hook->Address = 0x1F9;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerCheat;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+
+    Hook->Path = "/Script/FortniteGame.FortPawn.MovingEmoteStopped";
+    Hook->Detour = MovingEmoteStopped;
+    UKismetHookingLibrary::Hook(Hook, EHook::Exec);
+
+    delete Hook;
+}
