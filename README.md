@@ -1,6 +1,6 @@
 # To-Do:
 
-1. Fix sprinting(weapon is holstered crap)
+1. Dynamic Mme
 2. Proper Emotong
 3. Inventory Hooks
 5. Find a good way to spawn world partition stuff
