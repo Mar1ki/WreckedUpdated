@@ -344,6 +344,9 @@ class TMemoryAllocator
 		inline const ArrayElementType& GetUnsafe(int32 Index) const { return Data[Index]; }
 
 	public:
+		inline void SetNumElements(int32 NewNum) {
+			NumElements = NewNum;
+		}
 		inline void Reserve(const int Num)
 		{
 			if (Num + NumElements > MaxElements) Data = FMemory::ReallocForType<ArrayElementType>(Data, MaxElements = Num + NumElements);

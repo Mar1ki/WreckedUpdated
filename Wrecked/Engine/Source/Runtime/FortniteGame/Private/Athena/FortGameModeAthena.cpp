@@ -552,18 +552,10 @@ void FortGameModeAthena::InitialSafeZone(AFortGameModeAthena* GameMode)
 
 	FFortSafeZoneDefinition Definition = GameState->MapInfo->SafeZoneDefinition;
     float ZoneCount = Definition.Count.Evaluate();
-	
-    TArray<float> Radii;
-    for (float i = 0; i < ZoneCount; i++)
-        Radii.Add(Definition.Radius.EvaluateIndex(i));
-    
-    unsigned int seed = static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
-    FortAthenaMapInfo::PrepareStormCircles(
-        GameState->MapInfo, 
-        seed,
-        Radii
-    );
-	
+	auto SafeZoneLocations = *(TArray<FVector>*)(__int64(GetLogic()) + 0x468);
+	TArray<FVector4> Blacklist = {};
+	auto MapCenter = GameState->MapInfo->GetMapCenter();
+	GameState->MapInfo->GenerateSafeZoneLocations(SafeZoneLocations, Blacklist, &MapCenter, 0, false);
     UClass* IndicatorClass = Logic->SafeZoneIndicatorClass;
     AFortSafeZoneIndicator* Indicator = GetWorld()->SpawnActor<AFortSafeZoneIndicator>(IndicatorClass, FVector{});
 	
@@ -580,7 +572,7 @@ void FortGameModeAthena::InitialSafeZone(AFortGameModeAthena* GameMode)
     {
         FFortSafeZonePhaseInfo Phase{};
         
-        Phase.Radius = Radii[(int)i]; 
+        Phase.Radius = Definition.Radius.EvaluateIndex(i);
         Phase.WaitTime = Definition.WaitTime.EvaluateIndex(i);
         Phase.ShrinkTime = Definition.ShrinkTime.EvaluateIndex(i);
         Phase.PlayerCap = (int)Definition.PlayerCapSolo.EvaluateIndex(i);
@@ -594,7 +586,7 @@ void FortGameModeAthena::InitialSafeZone(AFortGameModeAthena* GameMode)
     	Phase.StormCampingIncrementTimeAfterDelay = Logic->StormCampingIncrementTimeAfterDelay.EvaluateIndex(i);
     	Phase.StormCampingInitialDelayTime = Logic->StormCampingInitialDelayTime.EvaluateIndex(i);
         Phase.MegaStormGridCellThickness = (int)Definition.MegaStormGridCellThickness.EvaluateIndex(i);
-        Phase.Center = FortAthenaMapInfo::StormCircles[(int)i];
+        Phase.Center = SafeZoneLocations[(int)i];
         
         UE_LOG(LogStorm, Log, "Phase %.0f - Radius: %.2f, WaitTime: %.2f, ShrinkTime: %.2f, PlayerCap: %d, Center: (%.2f, %.2f, %.2f), MegaStormGridCellThickness: %d",
                i, Phase.Radius, Phase.WaitTime, Phase.ShrinkTime, Phase.PlayerCap,

@@ -57329,7 +57329,8 @@ public:
 	struct FVector PickSafeZoneLocation(const struct FSafeZoneLocationParams& Params_0, const TArray<struct FVector4>& BlacklistLocations) const;
 	struct FVector PickSupplyDropLocation(const struct FVector& CenterLocation, const float MaxRadius, const bool bAvoidWater, const float TraceStartZ, const float TraceEndZ, const bool bAvoidUnwalkableTerrain) const;
 	void TryDynamicStormCircleModification(const struct FSafeZoneRoundData& RoundData, const float NewSafeZoneWaitTime, const float NewSafeZoneShrinkTime, const float NewSafeZoneRadius, float* OutWaitTime, float* OutShrinkTime, float* OutRadius) const;
-
+	void GenerateSafeZoneLocations(TArray<FVector>& OutLocations, TArray<FVector4>& BlacklistLocations, FVector* CenterLocation, int CurrentSafeZoneIndex, bool bForceLastSafeZoneToCenterLocation);
+	int GetSafeZoneCount();
 public:
 	static class UClass* StaticClass()
 	{
