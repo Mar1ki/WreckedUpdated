@@ -183,6 +183,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortInventoryOwnerInterface.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\InventoryManagementLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldEvent.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldManager.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementComp_Character.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementMode_BaseExtLogic.h" />
@@ -293,6 +294,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldEvent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldManager.cpp">
       <AssemblerOutput>NoListing</AssemblerOutput>
       <AssemblerListingLocation>x64\Release\</AssemblerListingLocation>

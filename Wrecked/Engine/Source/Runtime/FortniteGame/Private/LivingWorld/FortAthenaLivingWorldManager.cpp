@@ -1,8 +1,5 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
-#include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
-#include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
-
 void RegisterToLivingWorldManager(IFortAthenaLivingWorldPointProviderInterface* Interface, AFortAthenaLivingWorldStaticPointProvider* PointProvider)
 {
     auto GameState = GetGameState();
@@ -96,8 +93,10 @@ void ComputeActiveRuntimeSpawnData()
 char (*DensityGridAddActorOG)(FFortAthenaLivingWorldDensityGrid*, AActor*, double, double);
 char DensityGridAddActor(FFortAthenaLivingWorldDensityGrid *DensityGrid, AActor *InActor, double DensityValue, double DensityRange)
 {
+
    std::cout <<  InActor->Name.ToString().c_str() << std::endl;
-    DensityGrid->bIsInitialized = true;
+
+    
 
     
   return DensityGridAddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
@@ -113,6 +112,7 @@ void __fastcall sub_B68AEB8()
 {
    std::cout << "InitializeEventFromTable" << std::endl;
 }
+
 __int64 __fastcall sub_B686074(__int64 a1, __int64 a2)
 {
     std::cout << "noieda" << std::endl;
