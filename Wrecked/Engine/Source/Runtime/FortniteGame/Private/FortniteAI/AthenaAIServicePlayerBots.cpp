@@ -61,6 +61,10 @@ bool NeedsLoadForClient() {
 	return true;
 }
 
+void __fastcall InitializeForWorld(UNavigationSystemV1* Nav,UWorld* World, EFNavigationSystemRunMode Mode)
+{
+	abort();
+}
 void AthenaAIServicePlayerBots::Init() {
 
 	UHook* Hook = new UHook();
@@ -93,7 +97,18 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Class = AAthenaNavMesh::StaticClass();
 	Hook->Address = 0x108 / 8;
 	Hook->Detour = NeedsLoadForClient;
-	UKismetHookingLibrary::Hook(Hook, EveryVFT);	
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+
+	Hook->Class = UNavigationSystemV1::StaticClass();
+	Hook->Address = 0x108 / 8;
+	Hook->Detour = NeedsLoadForClient;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	
+	Hook->Class = UNavigationSystemV1::StaticClass();
+	Hook->Address = 0x5E;
+	Hook->Detour = InitializeForWorld;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	delete Hook;
 }

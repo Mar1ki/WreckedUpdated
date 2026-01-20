@@ -23,6 +23,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortWorldItem.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/InventoryManagementLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortInventoryOwnerInterface.h"
+#include "SDK/SDK/InfernoRuntime_classes.hpp"
 #endif
 //#define Client
 inline __int64 (*SendRequestNowOG)(UMcpProfileGroup* Group, void* HttpRequest, int a3);
@@ -260,7 +261,9 @@ void Main()
     *(int*)(ImageBase + 0x12BCB180) = 7;
     *(int*)(ImageBase + 0x12BD3B70) = 7; // something with lwm
     *(int*)(ImageBase + 0x12BCB0A8) = 7;
-    *(int*)(ImageBase + 0x12CEABC0) = 7; // recharge weapon thing
+    *(int*)(ImageBase + 0x12CEABC0) = 7; // recharge weapon log
+    *(bool*)(ImageBase + 0x12D84D92) = false; 
+
 
     if (CurrentGamemode == EGameModeType::Papaya)
     {
@@ -276,7 +279,7 @@ void Main()
     }
     else if (CurrentGamemode == EGameModeType::Delmar)
     {
-        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open DelMar_Tutorials_SeamlessTutorialRun", nullptr);
+        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open DelMar_RootLevel", nullptr);
     } else
     {
         UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open Helios_Terrain", nullptr);
