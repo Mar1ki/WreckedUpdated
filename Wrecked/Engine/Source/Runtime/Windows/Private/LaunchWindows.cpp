@@ -3,7 +3,7 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/Engine/Classes/Engine//NetDriver.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
-#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaLivingWorldManager.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaVehicle.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortGameModeAthena.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Player/FortPlayerControllerAthena.h"
