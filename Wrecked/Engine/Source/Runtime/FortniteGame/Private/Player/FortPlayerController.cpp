@@ -4,7 +4,7 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Plugins/PapayaManagerLibrary/Private/PapayaManager.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
-#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaLivingWorldManager.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaVehicle.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Movement/FortMovementMode_BaseExtLogic.h"
