@@ -712,19 +712,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             
             ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, Transform, false);
         }
-        if (Command == "init")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-            void (*Initialize)(UFortAthenaLivingWorldManager *LWM) = decltype(Initialize)(ImageBase + 0xB689864);
-            Initialize(LWM);
-        }
-        if (Command == "getcategories")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-            TArray<FFortAthenaLivingWorldCategory*> Categories;
-            LWM->GetAllCategories(Categories, L"UFortAthenaLivingWorldManager::InitializeCategories");
-            std::cout << Categories.Num() << std::endl;
-        }
         if (Command == "giveitem")
         {
             if (NumArgs < 1)
