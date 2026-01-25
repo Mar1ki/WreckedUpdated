@@ -55,24 +55,43 @@ void FortAthenaAISpawnerData::AIBotBehaviourOnSpawned(UFortAthenaAISpawnerDataCo
 
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
 	AIBotController->RunBehaviorTree(Component->GetBehaviorTree());//this would prob never work)
-	UE_LOG(LogAI, Log, "OnSpawned for bot behaviour! Started bt!");
 }
 
 void FortAthenaAISpawnerData::AIBotCosmeticLibraryOnSpawned(UFortAthenaAISpawnerDataComponent_CosmeticLibrary* SpawnData, AFortAIPawn* Pawn) {
-	return;
+	//return;
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
-	auto LibraryData = SpawnData->CosmeticLibraries[0].Get();
+	auto LibraryData = SpawnData->CosmeticLibraries[0].Get(); // doing it that way is bad asf
 	auto AssetManager = GetAssetManager();
 	UObject* (__fastcall * GetUObject)(UFortAssetManager*, FPrimaryAssetId*) = decltype(GetUObject)(AssetManager->VTable[0x320 / 8]);
 
-	if (LibraryData) {
-		FFortAthenaLoadout Lodout;
-		auto BackPackData = PickWeighted<FFortBotCosmeticItemDataTableRow>(LibraryData->BackpacksDataTable.Get());
+	/*if (LibraryData) {
+		FFortAthenaLoadout Loadout;
+		auto BackPackData = PickWeighted<FFortBotCosmeticItemDataTableRow>(LibraryData->BackpacksDataTable.Get()); // crashes here
 		auto Object = GetUObject(AssetManager, &BackPackData->PrimaryAssetId);
-		UE_LOG(LogTemp, Log, "BackpackData: %s", Object->GetName().c_str());
-	}
+		UE_LOG(LogTemp, Log, "BackpackData: %s", Object->GetFullName().c_str());
+	} */
 }
 
+void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
+	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
+
+	if (!AIBotController->Inventory.ObjectPointer)
+	{
+		FActorSpawnParameters SpawnParams{};
+		SpawnParams.NameMode = Required_Fatal;
+		SpawnParams.ObjectFlags = EObjectFlags::Transactional;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.bNoFail = true;
+		
+		AFortInventory* Object = ((AFortInventory * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(ImageBase + 0x1A8087C))(GetWorld(), AFortInventory::StaticClass(), new FTransform(FVector(), {}), &SpawnParams);
+		Object->SetOwner(Pawn);
+		AIBotController->Inventory.ObjectPointer = Object;
+		AIBotController->Inventory.InterfacePointer = Object->GetInterfaceAddress<IFortInventoryInterface>();
+		Pawn->Inventory = Object;
+		Pawn->bHasInventory = true;
+	}
+	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
+}
 
 void FortAthenaAISpawnerData::Init() {
 	UHook* Hook = new UHook();
@@ -91,6 +110,12 @@ void FortAthenaAISpawnerData::Init() {
 	Hook->Detour = AIBotBehaviourOnSpawned;
 	Hook->Original = (void**)&AIBotBehaviourOnSpawnedOG;
 	UKismetHookingLibrary::Hook(Hook, Address);
-
+	
+	Hook->Address = 0x59;
+	Hook->Class = UFortAthenaAISpawnerDataComponent_InventoryBase::StaticClass();
+	Hook->Detour = AIBotInventoryBaseOnSpawned;
+	Hook->Original = (void**)&AIBotInventoryBaseOnSpawnedOG;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	
 	delete Hook;
 }
