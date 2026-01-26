@@ -4,12 +4,13 @@
 
 TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager)
 {
+    std::cout << "GetAllWorldEvents" << std::endl;
     auto WorldConfig = LivingWorldManager->GetConfig(); // ik we can get the default config by just lwm->DefaultLagerConfig but it doesnt load the cfg sometimes idk why
     TArray<FFortAthenaLivingWorldEvent*> AllEvents;
     for (auto& LivingWorldCategory : WorldConfig->CategoryTableDatas)
     {
-        // UE_LOG(LogLivingWorldManager, Log, "CategoryTableName: %s", LivingWorldCategory.Name.ToString().c_str());
-        // UE_LOG(LogLivingWorldManager, Log, "IsEnabled: %s", std::to_string(LivingWorldCategory.IsEnabled.Value).c_str());
+         //UE_LOG(LogLivingWorldManager, Log, "CategoryTableName: %s", LivingWorldCategory.Name.ToString().c_str());
+       //  UE_LOG(LogLivingWorldManager, Log, "IsEnabled: %s", std::to_string(LivingWorldCategory.IsEnabled.Value).c_str());
         
         auto* CategoryDataTable = LivingWorldCategory.CategoryTable.Get();
         // idk it works but for me it feels like its unproper
@@ -28,6 +29,15 @@ TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEven
                     {
                         auto* EventRowData = EventRow.Value();
                         auto* Event = (FFortAthenaLivingWorldEvent*)EventRowData;
+
+                        for (auto EventDatas : Event->EventDatas)
+                        {
+                            for (auto idk : EventDatas.EventData.Get()->ActorDescriptions)
+                            {
+                               std::cout << idk.ActorClass->Name.ToString().c_str() << std::endl;
+                            }
+                            
+                        }
                         AllEvents.Add(Event);
                     }
                 }
