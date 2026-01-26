@@ -550,6 +550,9 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             auto Location = Pawn->K2_GetActorLocation();
             std::cout << Location.X << " " << Location.Y << " " << Location.Z << "\n";
         }
+        if (Command == "god") {
+            Controller->bCanBeDamaged = !(bool)Controller->bCanBeDamaged;
+        }
         if (Command == "testdiscover") {
             auto Comp = (UFortControllerComponent_MapDiscoverability*)Controller->GetComponentByClass(UFortControllerComponent_MapDiscoverability::StaticClass());
             Comp->DiscoverAllAreas();

@@ -264,19 +264,7 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	return Pawn;
 }
 
-class UFunction* FindFunctionByFName(UClass *Class, FName FuncName)
-{
-	for (const UStruct* Clss = Class; Clss; Clss = Clss->Super)
-	{
-		for (UField* Field = Clss->Children; Field; Field = Field->Next)
-		{
-			if (Field->HasTypeFlag(EClassCastFlags::Function) && Field->Name == FuncName)
-				return static_cast<class UFunction*>(Field);
-		}
-	}
 
-	return nullptr;
-}
 
 void BotEnterAircraft(AFortAthenaAIBotController* Controller, AFortAthenaAircraft* InAircraft)
 {
@@ -372,7 +360,7 @@ void AFortGameModeAthena::StartAircraftPhase()
 			for (auto& ScriptDelegate : Pawn->OnEnteredAircraft.InvocationList)
 			{
 				auto Object = ScriptDelegate.Object;
-				Object->ProcessEvent(FindFunctionByFName(Object->Class, ScriptDelegate.FunctionName), nullptr);
+				//Object->ProcessEvent(FindFunctionByFName(Object->Class, ScriptDelegate.FunctionName), nullptr);
 			}
 		}
 		static void* (*Reset)(AFortPlayerControllerAthena*) = decltype(Reset)(ImageBase + 0x6DD1E84);
