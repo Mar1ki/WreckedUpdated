@@ -10,6 +10,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Movement/FortMovementMode_BaseExtLogic.h"
 #include "SDK/SDK/VaultingCodeRuntime_classes.hpp"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
 
 void VHook3(void* Base, uintptr_t Index, void* Detour, void** Original = nullptr) {
     auto VTable = (*(void***)Base);
@@ -532,6 +533,11 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
                 }
             }
         }
+        if (Command == "randomass")
+        {
+          auto idk = GetRandomObjectOfClass<UAthenaCharacterItemDefinition>();
+            std::cout << idk->Name.ToString().c_str() << std::endl;
+        }
         if (Command == "testvolumes") {
             TArray<AActor*> Actors;
             UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFortPoiVolume::StaticClass(), &Actors);
@@ -582,6 +588,7 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
 
             auto idkclass = StaticLoadObject<UClass>("/WeaponModStation/Gameplay/Actors/BP_WeaponModStation_v2.BP_WeaponModStation_v2_C");
             GetWorld()->SpawnActor(idkclass, newloc, {} );
+            FortAthenaLivingWorldEvent::GetAllWorldEvents((UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass()));
         }
         if (Command == "vehicleinfo")
         {

@@ -72,7 +72,6 @@ void FortAthenaAISpawnerData::AIBotCosmeticLoadoutOnSpawned(UFortAthenaAISpawner
 	if (!Casted) return;
 	
 	// ^^ yes we need all these checks bc it crashed randomly for me so it will not crash randomly
-	
 	FFortAthenaLoadout Loadout;
 	Component->GetLoadout(&Loadout);
 	
@@ -85,6 +84,7 @@ void FortAthenaAISpawnerData::AIBotCosmeticLoadoutOnSpawned(UFortAthenaAISpawner
 		ApplyCharacterCustomization(BotState, Casted);
 		UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(BotState);
 	}
+	
 }
 
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
@@ -106,6 +106,7 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		Pawn->Inventory = Object;
 		Pawn->bHasInventory = true;
 	}
+	AIBotController->StartupInventory->Items = Component->Items;
 	if (AIBotController->StartupInventory)
 	{
 		auto Inventory = Pawn->Inventory;
