@@ -94,7 +94,8 @@ void ServerReturnToMainMenu(UObject* Context, FFrame& Stack) {
     if (!PlayerController) return;
     PlayerController->ServerSuicide();
     PlayerController->ClientReturnToMainMenuWithTextReason(UKismetTextLibrary::Conv_StringToText(L""));
-    PlayerController->MyFortPawn->KillDisconnectedPawn();
+    if (PlayerController->MyFortPawn)
+        PlayerController->MyFortPawn->KillDisconnectedPawn();
 }
 
 void FortPlayerControllerAthena::ClientIsReadyToRespawn(AFortPlayerControllerAthena* PlayerController) {
