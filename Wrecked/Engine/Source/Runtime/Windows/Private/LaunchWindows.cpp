@@ -302,6 +302,7 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNiagara none", nullptr); // we hate niagara
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogVehicleWeapon VeryVerbose", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogWeaponModStation VeryVerbose", nullptr);
+    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAnalytics none", nullptr); // we hate the api server
 
 #endif
 #ifdef Client
