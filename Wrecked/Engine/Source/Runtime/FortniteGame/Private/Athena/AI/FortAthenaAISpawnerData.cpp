@@ -58,23 +58,39 @@ void FortAthenaAISpawnerData::AIBotBehaviourOnSpawned(UFortAthenaAISpawnerDataCo
 	AIBotController->RunBehaviorTree(Component->GetBehaviorTree());//this would prob never work)
 }
 
-void FortAthenaAISpawnerData::AIBotCosmeticLibraryOnSpawned(UFortAthenaAISpawnerDataComponent_AIBotCosmeticBase* Component, AFortAIPawn* Pawn) {
-	auto Controller = (AFortAthenaAIBotController*)Pawn->Controller;
-	auto BotState = (AFortPlayerStateAthena*)Controller->PlayerState;
+void FortAthenaAISpawnerData::AIBotCosmeticLoadoutOnSpawned(UFortAthenaAISpawnerDataComponent_CosmeticLoadout* Component, AFortAIPawn* Pawn) {
+	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
+	if (!Component || !Pawn) return;
 
-	// we need to check if 
-	if (Pawn->Controller->IsA(ABP_PhoebePlayerController_C::StaticClass())) 
+	auto Controller = (AFortAthenaAIBotController*)Pawn->Controller;
+	if (!Controller) return;
+
+	auto BotState = (AFortPlayerStateAthena*)Controller->PlayerState;
+	if (!BotState) return;
+
+	auto Casted = (AFortPlayerPawn*)Pawn;
+	if (!Casted) return;
+	
+	// ^^ yes we need all these checks bc it crashed randomly for me so it will not crash randomly
+	
+	FFortAthenaLoadout Loadout;
+	Component->GetLoadout(&Loadout);
+	
+	AIBotController->CosmeticLoadoutBC.GetTyped() = Loadout;
+	Casted->CosmeticLoadout = Loadout;
+	BotState->OnRep_CharacterData(); 
+
+	if (Loadout.Character)
 	{
-		std::cout << "thats a phoebe" << std::endl;
-	} else
-	{
-		std::cout << "its not a phoebe" << std::endl;
+		ApplyCharacterCustomization(BotState, Casted);
+		UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(BotState);
 	}
 }
 
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
-
+	if (!Component || !Pawn || !AIBotController) return;
+	
 	if (!AIBotController->Inventory.ObjectPointer)
 	{
 		FActorSpawnParameters SpawnParams{};
@@ -109,7 +125,8 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 
 void FortAthenaAISpawnerData::AIBotConversationOnSpawned(UFortAthenaAISpawnerDataComponent_AIBotConversation* Component, AFortAIPawn* Pawn) {
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
-	std::cout << "fuck this conversation" << std::endl;
+	if (!Component || !Pawn || !AIBotController) return;
+	
 	auto ConversationParticipantComponent = (UFortNPCConversationParticipantComponent*)Pawn->GetComponentByClass(UFortNPCConversationParticipantComponent::StaticClass());
 	
 	if (!ConversationParticipantComponent)
@@ -154,6 +171,13 @@ void FortAthenaAISpawnerData::AIBotConversationOnSpawned(UFortAthenaAISpawnerDat
 }
 
 
+// todo make it better bc setting that cached one to the gamemode one is making npcs be dumb as hell
+void FortAthenaAISpawnerData::sub_9A1E264(UFortNearbyActorsPerceptionComponent* Component, float DeltaTime)
+{
+	Component->CachedAIDirector = GetGameMode()->AIDirector;
+	sub_9A1E264OG(Component, DeltaTime);
+}
+
 void FortAthenaAISpawnerData::Init() {
 	UHook* Hook = new UHook();
 	
@@ -163,8 +187,8 @@ void FortAthenaAISpawnerData::Init() {
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 	
 	Hook->Address = 0x59;
-	Hook->Class = UFortAthenaAISpawnerDataComponent_AIBotCosmeticBase::StaticClass();
-	Hook->Detour = AIBotCosmeticLibraryOnSpawned;
+	Hook->Class = UFortAthenaAISpawnerDataComponent_CosmeticLoadout::StaticClass();
+	Hook->Detour = AIBotCosmeticLoadoutOnSpawned;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	Hook->Address = ImageBase + 0xA8F9D74;
@@ -183,6 +207,12 @@ void FortAthenaAISpawnerData::Init() {
 	Hook->Detour = AIBotConversationOnSpawned;
 	Hook->Original = (void**)&AIBotConversationOnSpawnedOG;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+
+	Hook->Address = ImageBase + 0x9A1E264;
+	Hook->Detour = sub_9A1E264;
+	Hook->Original = (void**)&sub_9A1E264OG;
+	UKismetHookingLibrary::Hook(Hook, Address);
 	
 	delete Hook;
 }
