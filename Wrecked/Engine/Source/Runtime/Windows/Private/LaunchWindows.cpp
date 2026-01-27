@@ -24,6 +24,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/InventoryManagementLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortInventoryOwnerInterface.h"
 #include "SDK/SDK/InfernoRuntime_classes.hpp"
+#include "Engine/Source/Runtime/FortniteGame/Public/Conversation/ConversationLibrary.h"
 #endif
 //#define Client
 inline __int64 (*SendRequestNowOG)(UMcpProfileGroup* Group, void* HttpRequest, int a3);
@@ -196,6 +197,7 @@ void Main()
     FortWorldItem::Init();
     InventoryManagementLibrary::Init();
     FortInventoryOwnerInterface::Init();
+    ConversationLibrary::Init();
     
     UHook* Hook = new UHook();
 
