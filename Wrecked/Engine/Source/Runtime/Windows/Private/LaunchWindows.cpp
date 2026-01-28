@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 #ifndef Client
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/Engine/Classes/Engine//NetDriver.h"
@@ -198,6 +199,7 @@ void Main()
     InventoryManagementLibrary::Init();
     FortInventoryOwnerInterface::Init();
     ConversationLibrary::Init();
+    FortAthenaLivingWorldStaticPointProvider::Init();
     
     UHook* Hook = new UHook();
 
@@ -261,11 +263,10 @@ void Main()
     //*(int*)(__int64(ImageBase) + 0x12BCB068) = 7;
     //*(int*)(ImageBase + 0x12BCB280) = 7; //mme
     *(int*)(ImageBase + 0x12BCB180) = 7;
-    *(int*)(ImageBase + 0x12BD3B70) = 7; // something with lwm
+    *(int*)(ImageBase + 0x12BD3B70) = 7; // lwm log of some sort
     *(int*)(ImageBase + 0x12BCB0A8) = 7;
     *(int*)(ImageBase + 0x12CEABC0) = 7; // recharge weapon log
     *(bool*)(ImageBase + 0x12D84D92) = false; 
-
 
     if (CurrentGamemode == EGameModeType::Papaya)
     {

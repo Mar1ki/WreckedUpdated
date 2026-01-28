@@ -1,26 +1,5 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
-void RegisterToLivingWorldManager(IFortAthenaLivingWorldPointProviderInterface* Interface, AFortAthenaLivingWorldStaticPointProvider* PointProvider)
-{
-    auto GameState = GetGameState();
-    auto LWM = (UFortAthenaLivingWorldManager*)GameState->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-
-    // i think this has more sense  or idk
-    PointProvider->bStartEnabled = true; // sets up some shit
-    TScriptInterface<IFortAthenaLivingWorldPointProviderInterface> NewPoint{};
-    NewPoint.ObjectPointer = PointProvider;
-    NewPoint.InterfacePointer = Interface;
-
-    for (auto& Enabler : GetObjectsOfClass<AFortAthenaLivingWorldPointProvidersEnabler>())
-    {
-        Enabler->LinkedPointProviders.Add(NewPoint);
-    }
-    
-    LWM->PointProviders.Add(NewPoint);
-    LWM->RegisteredPointProvidersCount++;
-    UE_LOG(LogLivingWorldManager, Log, "Registered a new Point Provider %s (%s)", PointProvider->GetName().c_str(), PointProvider->Class->GetName().c_str());
-}
-
 // lot of if statements and for so yh refactor that shit later
 void FortAthenaLivingWorldManager::PerformPointProviderSpawn()
 {
@@ -79,17 +58,6 @@ inline void logtofile2(const std::string& message) {
     }
 }
 
-void (*testog)();
-void testhook()
-{
-    throw std::runtime_error("Crash!");
-}
-void (*broog)();
-void ComputeActiveRuntimeSpawnData()
-{
-    logtofile2("funny2");
-}
-
 char (*DensityGridAddActorOG)(FFortAthenaLivingWorldDensityGrid*, AActor*, double, double);
 char DensityGridAddActor(FFortAthenaLivingWorldDensityGrid *DensityGrid, AActor *InActor, double DensityValue, double DensityRange)
 {
@@ -106,32 +74,10 @@ static bool NeedsLoadForClient() {
     return true;
 }
 
-
-
-void __fastcall sub_B68AEB8()
-{
-   std::cout << "InitializeEventFromTable" << std::endl;
-}
-
-__int64 __fastcall sub_B686074(__int64 a1, __int64 a2)
-{
-    std::cout << "noieda" << std::endl;
-
-    return 1;
-}
-
 void FortAthenaLivingWorldManager::Hook()
 {
     // og might be needed
     UHook* Hook = new UHook();
-    Hook->Address = ImageBase + 0xB6B7E64;
-    Hook->Detour = RegisterToLivingWorldManager;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
-    
-    Hook->Address = ImageBase + 0xB686074; // thats compute
-    Hook->Detour = testhook;
-    UKismetHookingLibrary::Hook(Hook, Address);
     
     Hook->Detour = DensityGridAddActor;
     Hook->Address = ImageBase + 0xB680704; 
@@ -149,25 +95,6 @@ void FortAthenaLivingWorldManager::Hook()
     Hook->Detour = NeedsLoadForClient;
     Hook->Address = 0x108 / 8;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-    
-    Hook->Address = ImageBase + 0xB68AEB8;
-    Hook->Detour = sub_B68AEB8;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
-    
-    Hook->Address = ImageBase + 0xB686074;
-    Hook->Detour = sub_B686074;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
-    Hook->Address = ImageBase + 0xB69296C;
-    Hook->Detour = sub_B686074;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
-
-    Hook->Address = ImageBase + 0xB68EA28;
-    Hook->Detour = sub_B686074;
-    UKismetHookingLibrary::Hook(Hook, Address);
     
 }
 

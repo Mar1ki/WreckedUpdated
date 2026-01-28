@@ -186,6 +186,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldEvent.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldStaticPointProvider.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementComp_Character.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementMode_BaseExtLogic.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModFunctionLibrary.h" />
@@ -375,6 +376,7 @@
       <AdditionalIncludeDirectories>;include;D:\repos\WreckedUpdated\Wrecked\;D:\repos\WreckedUpdated\</AdditionalIncludeDirectories>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldStaticPointProvider.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementComp_Character.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementMode_BaseExtLogic.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerController.cpp" />
@@ -470,6 +472,7 @@
     <ClCompile Include="SDK\SDK\AIModule_functions.cpp" />
     <ClCompile Include="SDK\SDK\AscenderCodeRuntime_functions.cpp" />
     <ClCompile Include="SDK\SDK\Basic.cpp" />
+    <ClCompile Include="SDK\SDK\CommonConversationRuntime_functions.cpp" />
     <ClCompile Include="SDK\SDK\CoreUObject_functions.cpp" />
     <ClCompile Include="SDK\SDK\Engine_functions.cpp" />
     <ClCompile Include="SDK\SDK\FortniteAI_functions.cpp" />
