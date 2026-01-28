@@ -29,6 +29,19 @@ void FortAthenaLivingWorldStaticPointProvider::RegisterToLivingWorldManager(IFor
 
 
 
+// i should move these to lwm prob
+void FortAthenaLivingWorldStaticPointProvider::LivingWorldManagerDisablePointProvider(AActor* PointProvider)
+{
+    auto CastedPointProvider = (AFortAthenaLivingWorldStaticPointProvider*)PointProvider;
+    CastedPointProvider->bStartEnabled = false;
+}
+
+void FortAthenaLivingWorldStaticPointProvider::LivingWorldManagerEnablePointProvider(AActor* PointProvider)
+{
+    auto CastedPointProvider = (AFortAthenaLivingWorldStaticPointProvider*)PointProvider;
+    CastedPointProvider->bStartEnabled = true;
+}
+
 
 void FortAthenaLivingWorldStaticPointProvider::Init()
 {
