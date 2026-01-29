@@ -616,23 +616,9 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             }
         }
 
-        if (Command == "getcurrentconfig")
+        if (Command == "bruh")
         {
-            auto Vehicle =  (AFortAthenaVehicle*)Pawn->CurrentVehicle;
-            auto VehicleCfgClass =  Vehicle->VehicleConfigsClass_BR.Get();
-            auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleCfgClass->DefaultObject;
-            
-            std::cout << Vehicle->Name.ToString().c_str() << std::endl;
-            // i think we get the current config through the interface
-           if (VehicleConfig)
-           {
-
-               for (auto Part : VehicleConfig->DamageableParts)
-               {
-                  std::cout << Part.ShapeName.ToString().c_str() << std::endl;
-               }
-           }
-            
+            FortAthenaLivingWorldEvent::TrySpawnEvents();
         }
         if (Command == "testmme") {
             auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
@@ -646,6 +632,25 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
                     Controller->ClientMessage(std::to_wstring(Num).c_str(), FName(), 1);
                 }
             }
+        }
+        if (Command == "teleport")
+        {
+            if (!Pawn) return;
+            float X = 0, Y = 0, Z = 0;
+    
+            for (size_t i = 1; i <= 3; i++)
+            {
+                std::string arg = Arguments[i].c_str();
+        
+                if (arg.find("X=") != std::string::npos)
+                    X = std::stof(arg.substr(2));
+                else if (arg.find("Y=") != std::string::npos)
+                    Y = std::stof(arg.substr(2));
+                else if (arg.find("Z=") != std::string::npos)
+                    Z = std::stof(arg.substr(2));
+            }
+
+            Pawn->K2_SetActorLocation(FVector(X, Y, Z), false, nullptr, true);
         }
         if (Command == "spawnbot")
         {
@@ -669,7 +674,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Comp->NewlyAddedMovementModeExtensionRuntimeData.Clear();
             Comp->ActiveLayeredMovementModeRuntimeData.Clear();
         }
-
         if (Command == "modmod") {
             auto TurretClass = StaticLoadObject<UClass>("/VehicleMods/Mods/SocketPropDestructor/Tire/VMConfig_SocketPropDestructor_Tire.VMConfig_SocketPropDestructor_Tire_C", UBlueprintGeneratedClass::StaticClass());
             auto ModConfig = (UFortVehicleModConfig*)TurretClass->DefaultObject;
@@ -685,28 +689,10 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
                 }
             }
         }
-        if (Command == "cacheconfig")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-
-            LWM->CachedConfig = const_cast<UFortAthenaLivingWorldConfigData*>(LWM->GetConfig());
-        }
-        if (Command == "initcategories")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-            LWM->InitializeCategories();
-        }
         if (Command == "spawnnpc")
         {
             static auto SpawnerClass = StaticLoadObject<UClass>("/NPCLibrary/NPCs/BaoBros/BaoBros/BP_AIBotSpawnerData_NPC_BaoBros.BP_AIBotSpawnerData_NPC_BaoBros_C");
             auto ComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(SpawnerClass, UWorld::GetWorld());
-            
-           auto List =  ComponentList->GetList();
-            for (auto Component : List)
-            {
-                std::cout << Component->Class->Name.ToString().c_str() << std::endl;
-                std::cout << Component->Name.ToString().c_str() << std::endl;
-            }
             // that loc is aids
             auto Transform = FTransform();
             Transform.Translation = Controller->Pawn->K2_GetActorLocation();
