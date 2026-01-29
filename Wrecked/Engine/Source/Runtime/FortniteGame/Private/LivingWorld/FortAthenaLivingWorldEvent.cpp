@@ -39,20 +39,6 @@ TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEven
     return AllEvents;
 }
 
-TArray<AFortAthenaLivingWorldStaticPointProvider*> GetPointProvidersFromTagQuery(const FGameplayTag& SearchTag)
-{
-    TArray<AFortAthenaLivingWorldStaticPointProvider*> FoundPoints;
-    auto LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass()); // ig we can use cached lwm
-    for (auto Point : LivingWorldManager->PointProviders)
-    {
-        auto PointProvider = (AFortAthenaLivingWorldStaticPointProvider*)Point.ObjectPointer;
-        if (PointProvider->FiltersTags.HasTag(SearchTag))
-        {
-            FoundPoints.Add(PointProvider);
-        }
-    }
-    return FoundPoints;
-}
 FGameplayTag FixTandemTag(const FGameplayTag& Tag)
 {
     auto TagFStr = Tag.TagName.ToString();
@@ -105,7 +91,7 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
 
     // we will store each event types for now bc i have no better idea to handle them
     // i will try to find a good way to store events better 
-    TArray<FFortAthenaLivingWorldEvent*> NpcEvents;
+    TArray<FFortAthenaLivingWorldEvent*> NpcEvents; // handled rn not good but works
     TArray<FFortAthenaLivingWorldEvent*> ValetEvents;
     TArray<FFortAthenaLivingWorldEvent*> OtherEvents; // ig we can handle random shit here like bosses and more prob wildlife too
 
@@ -116,7 +102,7 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
        {
            for (auto ActorDesc : EventData.EventData->ActorDescriptions)
            {
-              auto SpawnerTag =  ActorDesc.SpawnerDataTagQuery.TagDictionary[0].TagName.ToString();
+              auto SpawnerTag =  ActorDesc.SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // these events have multiple tags for example valet
 
                if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is normal npcs and specialists are specialist npcs
                {
@@ -141,23 +127,23 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
         {
            for (auto ActorDesc : EventData.EventData->ActorDescriptions)
            {
+               // if u have a better way for making this whole ass path then do it
                auto SpawnerTagFull = ActorDesc.SpawnerDataTagQuery.TagDictionary[0].TagName.ToString();
                size_t lastDot = SpawnerTagFull.find_last_of('.');
                UEAllocatedString npcName = (lastDot != UEAllocatedString::npos) ? SpawnerTagFull.substr(lastDot + 1) : SpawnerTagFull;
 
                UEAllocatedString result = "/NPCLibrary/NPCs/" + npcName + "/BP_AIBotSpawnerData_NPC_" + npcName + ".BP_AIBotSpawnerData_NPC_" + npcName + "_C";
-               auto Class = StaticLoadObject<UClass>(result);
+               auto SpawnerClass = StaticLoadObject<UClass>(result);
 
-               if (Class)
+               if (SpawnerClass)
                {
-                   auto ComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(Class, UWorld::GetWorld());
-                   auto PatrolPaths =  GetPatrolPathsFromTagQuery(ActorDesc.SpawnerDataTagQuery.TagDictionary[0]); // not proper as hell bc some shit has multiple tags
-
+                   auto ComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(SpawnerClass, UWorld::GetWorld());
+                   auto PatrolPaths =  GetPatrolPathsFromTagQuery(ActorDesc.SpawnerDataTagQuery.TagDictionary[0]); // some npcs have more paths we will need to test it
                    auto RandomPath = PatrolPaths[rand() % PatrolPaths.Num()];
-
                    auto RandomPatrolPoint = RandomPath->PatrolPoints[rand() % RandomPath->PatrolPoints.Num()];
                    ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, RandomPatrolPoint->GetTransform(), true);
-                  // auto Loc = RandomPatrolPoint->K2_GetActorLocation();
+                   
+                   // auto Loc = RandomPatrolPoint->K2_GetActorLocation();
                    //std::cout << "Spawned at: X=" << Loc.X << " Y=" << Loc.Y << " Z=" << Loc.Z << std::endl;
                }
            }

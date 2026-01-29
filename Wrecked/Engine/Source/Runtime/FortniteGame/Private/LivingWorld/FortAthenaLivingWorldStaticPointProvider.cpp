@@ -43,6 +43,21 @@ void FortAthenaLivingWorldStaticPointProvider::LivingWorldManagerEnablePointProv
 }
 
 
+TArray<AFortAthenaLivingWorldStaticPointProvider*> FortAthenaLivingWorldStaticPointProvider::GetPointProvidersFromTagQuery(const FGameplayTag& SearchTag)
+{
+    TArray<AFortAthenaLivingWorldStaticPointProvider*> FoundPoints;
+    auto LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
+    for (auto Point : LivingWorldManager->PointProviders)
+    {
+        auto PointProvider = (AFortAthenaLivingWorldStaticPointProvider*)Point.ObjectPointer;
+        if (PointProvider->FiltersTags.HasTag(SearchTag))
+        {
+            FoundPoints.Add(PointProvider);
+        }
+    }
+    return FoundPoints;
+}
+
 void FortAthenaLivingWorldStaticPointProvider::Init()
 {
     UHook* Hook = new UHook();

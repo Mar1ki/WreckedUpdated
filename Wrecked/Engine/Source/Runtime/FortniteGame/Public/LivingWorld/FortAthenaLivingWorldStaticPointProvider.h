@@ -10,6 +10,7 @@ namespace FortAthenaLivingWorldStaticPointProvider
     void RegisterToLivingWorldManager(IFortAthenaLivingWorldPointProviderInterface* PointProviderInterface, AFortAthenaLivingWorldStaticPointProvider* PointProvider);
     void LivingWorldManagerEnablePointProvider(AActor* PointProvider);
     void LivingWorldManagerDisablePointProvider(AActor* PointProvider);
+    TArray<AFortAthenaLivingWorldStaticPointProvider*> GetPointProvidersFromTagQuery(const FGameplayTag& SearchTag);
 
 
     void Init();
