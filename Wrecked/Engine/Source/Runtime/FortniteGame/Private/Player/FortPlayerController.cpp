@@ -478,15 +478,21 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         }
         Arguments.push_back(Message);
     }
+    
     auto NumArgs = Arguments.size() == 0 ? 0 : Arguments.size() - 1;
     if (Arguments.size() >= 1)
     {
         auto& Command = Arguments[0];
         std::transform(Command.begin(), Command.end(), Command.begin(), ::tolower);
 
+        if (Command == "getsafezonecnt") {
+            FFortSafeZoneDefinition Definition = GetGameState()->MapInfo->SafeZoneDefinition;
+            float ZoneCount = Definition.Count.Evaluate();
+            std::cout << ZoneCount << "\n";
+        }
         if (Command == "startaircraft")
         {
-            GetGameMode()->StartAircraftPhase();
+            //GetGameMode()->StartAircraftPhase();
         }
         if (Command == "testcar")
         {

@@ -38,8 +38,6 @@ void NetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
     auto ReplicationSystem = *(UReplicationSystem**)(__int64(NetDriver) + 0x7c0);
 	if (NetDriver->ClientConnections.Num() > 0 && ReplicationSystem)
 	{
-        if (CurrentGamemode == EGameModeType::Athena)
-		    GetLogic()->Tick();
 		static void(*UpdateReplicationViews)(UNetDriver*) = decltype(UpdateReplicationViews)(ImageBase + 0x6CE5844);
 		static void(*PreSendUpdate)(UReplicationSystem*, FSendUpdateParams&) = decltype(PreSendUpdate)(ImageBase + 0x5F8FD5C);
 

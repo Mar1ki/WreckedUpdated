@@ -23,6 +23,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortWorldItem.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/InventoryManagementLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortInventoryOwnerInterface.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/GameStateComponents/FortGameStateComponent_BattleRoyaleGamePhaseLogic.h"
 #endif
 //#define Client
 inline __int64 (*SendRequestNowOG)(UMcpProfileGroup* Group, void* HttpRequest, int a3);
@@ -131,8 +132,11 @@ int CheckCheckpoint() {
 void ProcessEventHook(UObject* Object, UFunction* Function, void* Parameters) {
     if (!Function)
         return;
-    if (false/**/) {
-        logtofile(Function->GetFullName().c_str());
+    if (Object->IsA(UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StaticClass())) {
+        //logtofile(Function->GetFullName().c_str());
+        auto Name = Function->GetFullName();
+        if (!Name.find("Tick"))
+            std::cout << Name << "\n";
     }
     //logtofile(Function->GetFullName().c_str());
     return UObject::ProcessEventOG(Object, Function, Parameters);
@@ -195,6 +199,7 @@ void Main()
     FortWorldItem::Init();
     InventoryManagementLibrary::Init();
     FortInventoryOwnerInterface::Init();
+    FortGameStateComponent_BattleRoyaleGamePhaseLogic::Init();
     
     UHook* Hook = new UHook();
 

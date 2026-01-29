@@ -31353,7 +31353,6 @@ public:
 
 public:
 	static class UFortGameStateComponent_BattleRoyaleGamePhaseLogic* Get(const class UObject* WorldContextObject);
-    void Tick();
 	void DrawDebugSafeZoneHUD(class AHUD* HUD, class UCanvas* Canvas);
 	void FinishCurrentStormCircle(float TimeToShrink);
 	void FireServerPerformanceEvent();
@@ -31400,13 +31399,15 @@ public:
 	float GetWarmupCountdownEndTime() const;
 	float GetWarmupCountdownStartTime() const;
 	bool IsInCurrentSafeZone(const struct FVector& TestLocation, bool bClassicSafeZoneOnly) const;
+
 	bool StartAircraftPhase();
 	bool StartWarmupPhase();
 	bool StartSafeZones(bool bAllowRestart, bool bStartPhase);
 	bool StartSafeZonesPhase(bool bAllowRestart);
 	void SpawnInitialSafeZone();
 	void UpdateSafeZonePhase();
-	void UpdateWarmupPhase();
+	void UpdateWarmupPhase(float Time);
+	void UpdateAircraftPhase(float Time);
 public:
 	static class UClass* StaticClass()
 	{

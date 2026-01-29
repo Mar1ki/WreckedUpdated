@@ -3,6 +3,9 @@
 #include "Engine/Plugins/TaskLibrary/Public/TaskLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortGameModeAthena.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/GameStateComponents/FortGameStateComponent_BattleRoyaleGamePhaseLogic.h"
+#include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
+#include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 
 class UFunction* FindFunctionByFName(UClass* Class, FName FuncName)
 {
@@ -26,7 +29,6 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
     {
         return false;
     }
-    //StartSafeZones
     if (GamePhase > EAthenaGamePhase::Warmup)
     {
         return false;
@@ -80,7 +82,7 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
             }
         }
     }
-
+    this->SetGamePhase(EAthenaGamePhase::Aircraft);
     int32 AircraftReadyPlayerCount = 0;
 
     for (auto Player: GetGameMode()->AlivePlayers)
@@ -215,7 +217,7 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartSafeZonesPhase(boo
 }
 
 void AFortSafeZoneIndicator::StartPhase(int32 InPhaseIndex) {
-
+    auto CurentTIme = GetWorld()->GetTimeSeconds();
 }
 
 void AFortSafeZoneIndicator::InitializeWithMapDefaultPhases() {
@@ -229,9 +231,6 @@ void AFortSafeZoneIndicator::InitializeWithMapDefaultPhases() {
 
     if (this->SafeZonePhases.IsValid())
         this->SafeZonePhases.Free();
-
-    const float Time = (float)UGameplayStatics::GetTimeSeconds(GameState);
-    const float ServerTime = GameState->ServerWorldTimeSecondsDelta + Time;
 
     for (float i = 0; i < ZoneCount; i++)
     {
@@ -256,6 +255,7 @@ void AFortSafeZoneIndicator::InitializeWithMapDefaultPhases() {
         this->SafeZonePhases.Add(Phase);
         this->PhaseCount++;
     }
+    this->OnRep_PhaseCount();
 }
 
 void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::SpawnInitialSafeZone() {
@@ -275,6 +275,7 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::SpawnInitialSafeZone() 
         if (SafeZoneIndicatorClass)
         {
             SafeZoneIndicator = (AFortSafeZoneIndicator*)GetWorld()->SpawnActor(SafeZoneIndicatorClass, {});
+            OnRep_SafeZoneIndicator();
         }
         if (SafeZoneIndicator)
         {
@@ -283,7 +284,18 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::SpawnInitialSafeZone() 
             Delegate.FunctionName = UKismetStringLibrary::Conv_StringToName(L"OnSafeZonePhaseChanged");
             SafeZoneIndicator->OnSafeZonePhaseChanged.InvocationList.Add(Delegate);
             SafeZoneIndicator->InitializeWithMapDefaultPhases();
-            SafeZoneIndicator->StartPhase(0);
+            //SafeZoneIndicator->StartPhase(0);
+        }
+    }
+}
+
+void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateWarmupPhase(float Time) {
+    if (this->WarmupCountdownEndTime < Time) {
+        if (!this->StartAircraftPhase()) {
+            if (GetGameState()->CurrentPlaylistInfo.BasePlaylist->SafeZoneStartUp == ESafeZoneStartUp::StartsWithNoAirCraft) {
+                if (!this->StartSafeZones(true, true) && GetGameState()->MapInfo)
+                    this->SetGamePhase(EAthenaGamePhase::None);
+            }
         }
     }
 }
@@ -353,51 +365,60 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateSafeZonePhase() {
         SpawnInitialSafeZone();
         SafeZone = this->SafeZoneIndicator;
     }
-    float CurrentServerTime = GameState->GetServerWorldTimeSeconds();
-    int32 CurrentPhase = SafeZone ? SafeZone->CurrentPhase : 0;
+}
 
+void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateAircraftPhase(float Time) {
+    AFortGameStateAthena* GameState = GetGameState();
 
-    if (!SafeZone->bPaused)
-    {
-        if (SafeZone)
-        {
-            bool bIsEventDriven = SafeZone->bSafezoneEventDriven;
-            bool bIsShrinkingFinished = CurrentServerTime >= SafeZone->GetSafeZoneFinishShrinkTime();
+    if (!GameState) {
+        return;
+    }
 
-            bool bShouldUpdatePhase = bIsShrinkingFinished || bIsEventDriven;
+    for (auto AircraftWeak : this->Aircrafts_GameMode) {
+        auto Aircraft = AircraftWeak.Get();
+        
+        this->bAircraftIsLocked = Aircraft->DropStartTime > Time;
+        bool ShouldEjectPlayers = Aircraft->DropEndTime < Time;
 
-            if (bShouldUpdatePhase)
+        if (ShouldEjectPlayers) {
+            for (auto Player : GetGameMode()->AlivePlayers)
             {
-                FString ResolutionMessage = TEXT("unknown");
-
-                if (SafeZone->bPausedForPreview)
+                if (Player->IsInAircraft())
                 {
-                    SafeZone->bPausedForPreview = false;
-                }
-
-                if (CurrentPhase >= SafeZone->PhaseCount - 1)
-                {
-                    SetGamePhase(EAthenaGamePhase::EndGame);
-                }
-                else if (CurrentPhase == SafeZone->PlaylistMaxSafeZoneIndex)
-                {
-                    SetGamePhase(EAthenaGamePhase::EndGame);
-                }
-                else
-                {
-                    SafeZone->StartPhase(CurrentPhase++);
+                    Player->GetAircraftComponent()->ServerAttemptAircraftJump(FRotator());
                 }
             }
+            if (GameState->CurrentPlaylistInfo.BasePlaylist && GameState->CurrentPlaylistInfo.BasePlaylist->SafeZoneStartUp == ESafeZoneStartUp::UseDefaultGameBehavior)
+                StartSafeZones(0, 1);
         }
     }
 }
 
-
-void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::Tick()
+void FortGameStateComponent_BattleRoyaleGamePhaseLogic::GamePhaseTickComponent(UFortGameStateComponent_BattleRoyaleGamePhaseLogic* Logic, float Delta)
 {
     UWorld* World = GetWorld();
-    if (!World) return;
+    if (!World) return GamePhaseTickComponentOG(Logic, Delta);
 
     auto CurrentTime = World->GetTimeSeconds();
 
+    if (Logic->GamePhase == EAthenaGamePhase::Warmup) {
+        Logic->UpdateWarmupPhase(CurrentTime);
+    }
+    if (Logic->GamePhase == EAthenaGamePhase::Aircraft) {
+        Logic->UpdateAircraftPhase(CurrentTime);
+    }
+
+    return GamePhaseTickComponentOG(Logic, Delta);
+}
+
+void FortGameStateComponent_BattleRoyaleGamePhaseLogic::Init() {
+    UHook* Hook = new UHook();
+
+    Hook->Address = 0x79;
+    Hook->Class = UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StaticClass();
+    Hook->Detour = GamePhaseTickComponent;
+    Hook->Original = (void**)&GamePhaseTickComponentOG;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+    delete Hook;
 }

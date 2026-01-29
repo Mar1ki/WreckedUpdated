@@ -177,6 +177,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortGameModeAthena.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortPoiVolume.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortVehicleMod.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\GameStateComponents\FortGameStateComponent_BattleRoyaleGamePhaseLogic.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerControllerAthena.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerPawn.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingContainer.h" />
