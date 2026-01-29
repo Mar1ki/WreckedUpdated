@@ -53,37 +53,39 @@ TArray<AFortAthenaLivingWorldStaticPointProvider*> GetPointProvidersFromTagQuery
     }
     return FoundPoints;
 }
-FGameplayTag FixAssString(const FGameplayTag& Tag)
+FGameplayTag FixTandemTag(const FGameplayTag& Tag)
 {
-    UEAllocatedString TagStr = Tag.TagName.ToString();
-    size_t lastDot = TagStr.rfind('.');
-    if (lastDot != UEAllocatedString::npos)
+    auto TagFStr = Tag.TagName.ToString();
+    
+    int32 LastDot = UKismetStringLibrary::FindSubstring(TagFStr, L".", false, true, 0);
+    
+    if (LastDot != -1)
     {
-        UEAllocatedString temp = TagStr.substr(0, lastDot);
-        size_t secondLastDot = temp.rfind('.');
+        FString Temp = UKismetStringLibrary::Left(TagFStr, LastDot);
         
-        if (secondLastDot != UEAllocatedString::npos)
+        int32 SecondLastDot = UKismetStringLibrary::FindSubstring(Temp, L".", false, true, 0);
+        
+        if (SecondLastDot != -1)
         {
+            FString NewTagString = UKismetStringLibrary::RightChop(TagFStr, SecondLastDot + 1);
             FGameplayTag Result;
-            Result.TagName = UKismetStringLibrary::Conv_StringToName(TagStr.substr(secondLastDot + 1));
+            Result.TagName = UKismetStringLibrary::Conv_StringToName(NewTagString);
             return Result;
         }
     }
     return Tag;
 }
 
-// yes we will create a diff func for finding tandem spawners bc im a lazy ass to make one good func
 TArray<AFortAthenaPatrolPath*> FortAthenaLivingWorldEvent::GetPatrolPathsFromTagQuery(const FGameplayTag& SearchTag)
 {
-
-    auto SearchTagFixed = FixAssString(SearchTag);
+    auto SearchTagFixed = FixTandemTag(SearchTag);
     TArray<AFortAthenaPatrolPath*> FoundPoints;
     
     for (auto PatrolPath : GetObjectsOfClass<AFortAthenaPatrolPath>())
     {
         for (auto tag : PatrolPath->GameplayTags.GameplayTags)
         {
-            auto PatrolTagFixed = FixAssString(FGameplayTag{tag.TagName});
+            auto PatrolTagFixed = FixTandemTag(FGameplayTag{tag.TagName});
             
             if (PatrolTagFixed == SearchTagFixed)
             {
