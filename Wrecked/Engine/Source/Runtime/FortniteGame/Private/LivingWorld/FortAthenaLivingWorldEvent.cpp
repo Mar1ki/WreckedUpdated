@@ -5,15 +5,11 @@
 TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager)
 {
     std::cout << "GetAllWorldEvents" << std::endl;
-    auto WorldConfig = LivingWorldManager->GetConfig(); // ik we can get the default config by just lwm->DefaultLagerConfig but it doesnt load the cfg sometimes idk why
+    auto WorldConfig = LivingWorldManager->GetConfig();
     TArray<FFortAthenaLivingWorldEvent*> AllEvents;
     for (auto& LivingWorldCategory : WorldConfig->CategoryTableDatas)
     {
-         //UE_LOG(LogLivingWorldManager, Log, "CategoryTableName: %s", LivingWorldCategory.Name.ToString().c_str());
-       //  UE_LOG(LogLivingWorldManager, Log, "IsEnabled: %s", std::to_string(LivingWorldCategory.IsEnabled.Value).c_str());
-        
         auto* CategoryDataTable = LivingWorldCategory.CategoryTable.Get();
-        // idk it works but for me it feels like its unproper
         if (CategoryDataTable)
         {
             auto& RowMap = CategoryDataTable->RowMap;
@@ -35,7 +31,7 @@ TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEven
             }
         }
     }
-    UE_LOG(LogLivingWorldManager, Warning, "Total Events Found: %d", AllEvents.Num()); // disable that if u want but rn i need it bc config loves to be sometimes empty when calling early
+    UE_LOG(LogLivingWorldManager, Warning, "Total Events Found: %d", AllEvents.Num());
     return AllEvents;
 }
 
