@@ -37,21 +37,17 @@ TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEven
 
 FGameplayTag FixTandemTag(const FGameplayTag& Tag)
 {
-    auto TagFStr = Tag.TagName.ToString();
-    
-    int32 LastDot = UKismetStringLibrary::FindSubstring(TagFStr, L".", false, true, 0);
-    
-    if (LastDot != -1)
+    UEAllocatedString TagStr = Tag.TagName.ToString();
+    size_t lastDot = TagStr.rfind('.');
+    if (lastDot != UEAllocatedString::npos)
     {
-        FString Temp = UKismetStringLibrary::Left(TagFStr, LastDot);
+        UEAllocatedString temp = TagStr.substr(0, lastDot);
+        size_t secondLastDot = temp.rfind('.');
         
-        int32 SecondLastDot = UKismetStringLibrary::FindSubstring(Temp, L".", false, true, 0);
-        
-        if (SecondLastDot != -1)
+        if (secondLastDot != UEAllocatedString::npos)
         {
-            FString NewTagString = UKismetStringLibrary::RightChop(TagFStr, SecondLastDot + 1);
             FGameplayTag Result;
-            Result.TagName = UKismetStringLibrary::Conv_StringToName(NewTagString);
+            Result.TagName = UKismetStringLibrary::Conv_StringToName(TagStr.substr(secondLastDot + 1));
             return Result;
         }
     }
