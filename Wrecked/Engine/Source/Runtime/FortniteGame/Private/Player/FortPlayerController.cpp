@@ -269,28 +269,22 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
 }
 bool FortPlayerController::RemoveInventoryItem(IFortInventoryOwnerInterface* Interface, FGuid* ItemGuid, int Count)
 {
-    // alr this whole func is not proper prob and its ass asf so 
-        
-    // this shit calls const getforpawn
     const AFortPawn* Pawn = ((const AFortPawn* (*)(IFortInventoryOwnerInterface*))(*(void***)Interface)[9])(Interface);
     if (!Pawn) return false;
     auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
     auto Inventory = (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
-    
-    for (const auto& Item : Inventory->Inventory.ItemInstances)
-    {
-        if (Item->ItemEntry.ItemGuid == *ItemGuid)
-        {
-            auto ItemClass = Item->ItemEntry.ItemDefinition->Class;
-            if (ItemClass->IsA(UFortAmmoItemDefinition::StaticClass()) && PlayerController->bInfiniteAmmo)
-                return false;
-            if (ItemClass->IsA(UFortResourceItemDefinition::StaticClass()) && PlayerController->bBuildFree)
-                return false;
 
-            Item->ItemEntry.Count -= Count;
-            Inventory->ReplaceEntry(Item->ItemEntry);
-            return true;
-        }
+    if (auto ItemEntry = Inventory->GetItemEntryByGuid(*ItemGuid))
+    {
+        auto ItemClass = ItemEntry->ItemDefinition->Class;
+        if (ItemClass->IsA(UFortAmmoItemDefinition::StaticClass()) && PlayerController->bInfiniteAmmo)
+            return false;
+        if (ItemClass->IsA(UFortResourceItemDefinition::StaticClass()) && PlayerController->bBuildFree)
+            return false;
+
+        ItemEntry->Count -= Count;
+        Inventory->ReplaceEntry(*ItemEntry);
+        return true;
     }
     return false;
 }
@@ -533,11 +527,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
                 }
             }
         }
-        if (Command == "randomass")
-        {
-          auto idk = GetRandomObjectOfClass<UAthenaCharacterItemDefinition>();
-            std::cout << idk->Name.ToString().c_str() << std::endl;
-        }
         if (Command == "testvolumes") {
             TArray<AActor*> Actors;
             UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFortPoiVolume::StaticClass(), &Actors);
@@ -587,8 +576,7 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
 
 
             auto idkclass = StaticLoadObject<UClass>("/WeaponModStation/Gameplay/Actors/BP_WeaponModStation_v2.BP_WeaponModStation_v2_C");
-            GetWorld()->SpawnActor(idkclass, newloc, {} );
-            FortAthenaLivingWorldEvent::GetAllWorldEvents((UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass()));
+            GetWorld()->SpawnActor(idkclass, newloc, Pawn->K2_GetActorRotation());
         }
         if (Command == "vehicleinfo")
         {
