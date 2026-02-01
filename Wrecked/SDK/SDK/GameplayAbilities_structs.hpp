@@ -566,7 +566,8 @@ public:
 struct alignas(0x08) FGameplayEffectContextHandle final
 {
 public:
-	uint8                                         Pad_0[0x18];                                       // 0x0000(0x0018)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	TSharedPtr<struct FGameplayEffectContext> Data;
+	uint8 Pad_10[0x08];
 };
 
 // ScriptStruct GameplayAbilities.GameplayEffectSpec

@@ -73,72 +73,7 @@ struct FJsonValue
 	EJson Type;
 	char pad_C[0x4];
 };
-	
-
-template<typename T>
-class TSharedPtr
-{
-public:
-TSharedPtr() : Ptr(nullptr), RefCount(nullptr) {}
-
-explicit TSharedPtr(T* InPtr)
-		: Ptr(InPtr), RefCount(new std::atomic<int>(1)) {}
-
-TSharedPtr(const TSharedPtr& Other)
-{
-	Ptr = Other.Ptr;
-	RefCount = Other.RefCount;
-	if (RefCount)
-		++(*RefCount);
-}
-
-TSharedPtr& operator=(const TSharedPtr& Other)
-{
-	if (this != &Other)
-	{
-		Release();
-
-		Ptr = Other.Ptr;
-		RefCount = Other.RefCount;
-		if (RefCount)
-			++(*RefCount);
-	}
-	return *this;
-}
-
-~TSharedPtr()
-{
-	Release();
-}
-
-T* Get() const { return Ptr; }
-T* operator->() const { return Ptr; }
-T& operator*() const { return *Ptr; }
-
-bool IsValid() const { return Ptr != nullptr; }
-
-private:
-	void Release()
-	{
-		if (RefCount)
-		{
-			if (--(*RefCount) == 0)
-			{
-				delete Ptr;
-				delete RefCount;
-			}
-		}
-		Ptr = nullptr;
-		RefCount = nullptr;
-	}
-
-private:
-	T* Ptr;
-	std::atomic<int>* RefCount;
-};
-
-
-	// no idea if raw pointer will work for these
+// no idea if raw pointer will work for these
 class FJsonObject
 {
 public:
@@ -175,8 +110,7 @@ public:
 	TMap<FString, FMcpItem*> Items;
 	TMap<FString, TArray<FMcpItem*>> ItemsByType;
 };
-
-
+	
 struct FMcpProfileRevision
 {
 	int ActualRvn;
