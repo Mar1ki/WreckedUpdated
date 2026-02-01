@@ -244,34 +244,28 @@ __int64* FortPlayerPawn::OnAboutToEnterBackpack(AFortPickup* Pickup)
 
 void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pickup)
 {
-    auto ItemDefinition = (UFortItemDefinition*)Pickup->PrimaryPickupItemEntry.ItemDefinition;
+    if (!Pickup || !Pawn) return;
     
-
-    // we will not do the bot logic right now bc bot has no inv and im too lazy to add the inv 
-    //if (Pawn->Controller->IsA(AFortPlayerControllerAthena::StaticClass()))
-   // {
-        auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
-        auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
-
-
-        if (Pickup->PawnWhoDroppedPickup != Pawn)
+    auto ItemDefinition = (UFortItemDefinition*)Pickup->PrimaryPickupItemEntry.ItemDefinition;
+    auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
+    auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
+    
+    if (Pickup->PawnWhoDroppedPickup != Pawn)
+    {
+        // here we check if the item is a consumable and we have it in the inv already so it will just stack
+        if (ItemDefinition->ItemType == EFortItemType::Consumable)
         {
-
-            // here we check if the item is a consumable and we have it in the inv already so it will just stack
-            if (ItemDefinition->ItemType == EFortItemType::Consumable)
-            {
-                auto ItemToStack = Inventory->GetItemEntryByDef(ItemDefinition);
-                if (ItemToStack)
-                {
-                    Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
-                }
-            }
-            if (Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortAmmoItemDefinition::StaticClass()) || Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortResourceItemDefinition::StaticClass())) 
+            auto ItemToStack = Inventory->GetItemEntryByDef(ItemDefinition);
+            if (ItemToStack)
             {
                 Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
             }
         }
-    //} 
+        if (Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortAmmoItemDefinition::StaticClass()) || Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortResourceItemDefinition::StaticClass())) 
+        {
+            Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
+        }
+    }
 }
 void FortPlayerPawn::Init() {
 
