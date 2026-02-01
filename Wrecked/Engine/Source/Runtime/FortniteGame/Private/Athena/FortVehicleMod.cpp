@@ -140,6 +140,28 @@ void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* Player
     }
 }
 
+
+
+void FortVehicleMod::BreakDamagablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName)
+{
+    auto OldToggledParts = Vehicle->ToggledParts;
+    auto OldDamageableParts = Vehicle->DamageableParts;
+    for (auto& Part : Vehicle->DamageableParts)
+    {
+        if (Part.ShapeName == *ShapeName)
+        {
+            FVehicleToggleablePart DamagedPart;
+            DamagedPart.ShapeName = *ShapeName;
+            DamagedPart.bEnabled = true;
+            Vehicle->ToggledParts.Add(DamagedPart);
+            Part.Health = 0;
+            
+            Vehicle->OnRep_DamageableParts(OldDamageableParts);
+            Vehicle->OnRep_ToggleableParts(OldToggledParts);
+            break;
+        }
+    }
+}
 void FortVehicleMod::Init()
 {
     
@@ -164,7 +186,7 @@ void FortVehicleMod::Init()
     // break damagablepart
     Hook->Address = 0x1160 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
-    Hook->Detour = Dummy;
+    Hook->Detour = BreakDamagablePart;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 
