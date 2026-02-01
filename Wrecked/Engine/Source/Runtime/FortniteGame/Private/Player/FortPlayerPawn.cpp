@@ -4,6 +4,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
+#include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 
 void FortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, AFortPickup* Pickup, FFortPickupRequestInfo& Params)
 {
@@ -37,9 +38,7 @@ void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
     Params.IncrementCode();
 
     auto Pawn = (AFortPlayerPawn*)Context;
-
-    if (!Pawn)
-        return;
+    if (!Pawn) return;
 
     auto Zipline = Pawn->GetActiveZipline();
 
@@ -48,27 +47,29 @@ void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
     static void (*HandleZiplineStateChanged)(AFortPlayerPawn*) = decltype(HandleZiplineStateChanged)(ImageBase + 0xA12F5D8);
     HandleZiplineStateChanged(Pawn);
 
-    if (State.bJumped)
+    if (State.bIsZiplining && Zipline)
     {
-        auto Velocity = Pawn->CharacterMovement->Velocity;
-        auto VelocityX = Velocity.X * -0.5;
-        auto VelocityY = Velocity.Y * -0.5;
-        Pawn->LaunchCharacterJump({ VelocityX >= -750 ? min(VelocityX, 750) : -750, VelocityY >= -750 ? min(VelocityY, 750) : -750, 1200 }, false, false, true, true);
-    }
-    auto NewZipline = Pawn->GetActiveZipline();
-
-    if (auto Ascender = Cast<AFortAscenderZipline>(Zipline))
-    {
-        Ascender->PawnUsingHandle = nullptr;
-        Ascender->PreviousPawnUsingHandle = Pawn;
-        Ascender->OnRep_PawnUsingHandle();
+        if (auto Ascender = Cast<AFortAscenderZipline>(Zipline))
+        {
+            Ascender->BP_HandlePlayerStoppedUsingHandle(Pawn); // same as below its prob stripped
+            
+            Ascender->PawnUsingHandle = Pawn;
+            Ascender->OnRep_PawnUsingHandle();
+        }
     }
     
-    else if (auto Ascender = Cast<AFortAscenderZipline>(NewZipline))
+    else if (!State.bIsZiplining && Zipline)
     {
-        Ascender->PawnUsingHandle = Pawn;
-        Ascender->PreviousPawnUsingHandle = nullptr;
-        Ascender->OnRep_PawnUsingHandle();
+        if (auto Ascender = Cast<AFortAscenderZipline>(Zipline))
+        {
+            Ascender->BP_HandlePlayerStoppedUsingHandle(Pawn); // i bet its stripped
+            
+            TWeakObjectPtr<AFortPlayerPawn> EmptyPtr{};
+            EmptyPtr.ObjectIndex = -1;
+            Ascender->PawnUsingHandle = EmptyPtr;
+            Ascender->PreviousPawnUsingHandle = Pawn;
+            Ascender->OnRep_PawnUsingHandle();
+        }
     }
 }
 
@@ -289,7 +290,6 @@ void FortPlayerPawn::Init() {
     Hook->Address = ImageBase + 0xA149FB8;
     Hook->Detour = TryAutoPickup;
     UKismetHookingLibrary::Hook(Hook, Address); 
-    
     
     delete Hook;
 }
