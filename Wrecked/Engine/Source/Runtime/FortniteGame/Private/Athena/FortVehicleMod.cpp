@@ -44,6 +44,12 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
         Tag.TagName = ModConfig->ModTag.TagName;
         Vehicle->AppliedVehicleModTags.GameplayTags.Add(Tag);
         FortVehicleMod::ApplyModConfigToVehicleInternal(ModConfig, VehicleInterface);
+        
+        auto idk = (AFortDagwoodVehicle*)Vehicle;
+        idk->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
+        auto old = idk->DagwoodRuntimeModifiedProperties;
+        idk->OnRep_DagwoodRuntimeModifiers(old);
+        idk->ApplyRuntimeModifiers(); //we love it
     } else
     {
         UE_LOG(LogVehicles, Warning, "This vehicle has no interface or modconfig that should not happen");
@@ -82,14 +88,18 @@ bool CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTa
     return true;
 }
 
-void Dummy()
+void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, const FGameplayEffectContextHandle *EffectContext)
 {
+    std::cout << "InOutDamage: " << InOutDamage << std::endl;
+    for (auto tag : InTags->GameplayTags)
+    {
+        std::cout << "Tag: "<< tag.TagName.ToString().c_str() << std::endl;
+    }
+    
     std::cout << "dummy called" << std::endl;
+    
+
 }
-
-
-
-
 void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* PlayerController, const FGameplayTag& RequestType, UFortVehicleModComponent* ModInstance, int32 SeatIndex) {
     std::cout << "Vehicle Mod Rpc Called" << std::endl;
     ServerVehicleModSeatRPCOG(PlayerController, RequestType, ModInstance, SeatIndex);
@@ -180,9 +190,7 @@ void FortVehicleMod::Init()
     Hook->Address = 0x1A0 / 8;
     Hook->Detour = CanApplyMod;
     UKismetHookingLibrary::Hook(Hook, Interface);
-
-
-
+    
     // break damagablepart
     Hook->Address = 0x1160 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
@@ -196,6 +204,10 @@ void FortVehicleMod::Init()
     Hook->Detour = ServerVehicleModSeatRPC;
     Hook->Original =(void**)&ServerVehicleModSeatRPCOG;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
     
+    // AFortAthenaVehicle::AbsorbDamageIntoDamagablePart that has no impl
+    Hook->Address = 0x11A8/8;
+    Hook->Class = AFortAthenaVehicle::StaticClass();
+    Hook->Detour = Dummy;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
 }
