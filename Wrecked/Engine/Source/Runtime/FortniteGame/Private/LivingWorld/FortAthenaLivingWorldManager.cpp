@@ -5,22 +5,22 @@ void FortAthenaLivingWorldManager::PerformPointProviderSpawn()
 {
     auto GameState = GetGameState();
     auto LWM = (UFortAthenaLivingWorldManager*)GameState->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-    
+
     for (auto Point : LWM->PointProviders)
     {
         auto PointProvider = (AFortAthenaLivingWorldStaticPointProvider*)Point.ObjectPointer;
-    
+
         if (PointProvider)
         {
             bool hasVehicleTag = false;
-            
+
             for (auto& GTag : PointProvider->FiltersTags.GameplayTags)
             {
                 // Most bitchy way to find vehicles but works 
                 if (GTag.TagName.GetRawString().contains("Athena.Vehicle"))
                 {
                     hasVehicleTag = true;
-                    break; 
+                    break;
                 }
             }
             if (hasVehicleTag)
@@ -44,7 +44,7 @@ void FortAthenaLivingWorldManager::PerformPointProviderSpawn()
                 static auto BGAClass = StaticFindObject<UClass>("/Script/Engine.BlueprintGeneratedClass");
                 static auto VehicleClass = StaticLoadObject<UClass>("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_Bounty.BP_StationProp_JobBoard_Experimental_Bounty_C", BGAClass);
                 auto Location = PointProvider->K2_GetActorLocation();
-                auto Rotation =  PointProvider->K2_GetActorRotation();
+                auto Rotation = PointProvider->K2_GetActorRotation();
                 auto SpawnedVehicle = GetWorld()->SpawnActor(VehicleClass, Location, Rotation);
             }
         }
@@ -59,15 +59,15 @@ inline void logtofile2(const std::string& message) {
 }
 
 char (*DensityGridAddActorOG)(FFortAthenaLivingWorldDensityGrid*, AActor*, double, double);
-char DensityGridAddActor(FFortAthenaLivingWorldDensityGrid *DensityGrid, AActor *InActor, double DensityValue, double DensityRange)
+char DensityGridAddActor(FFortAthenaLivingWorldDensityGrid* DensityGrid, AActor* InActor, double DensityValue, double DensityRange)
 {
 
-   std::cout <<  InActor->Name.ToString().c_str() << std::endl;
+    std::cout << InActor->Name.ToString().c_str() << std::endl;
 
-    
 
-    
-  return DensityGridAddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
+
+
+    return DensityGridAddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
 }
 
 static bool NeedsLoadForClient() {
@@ -78,13 +78,13 @@ void FortAthenaLivingWorldManager::Hook()
 {
     // og might be needed
     UHook* Hook = new UHook();
-    
+
     Hook->Detour = DensityGridAddActor;
-    Hook->Address = ImageBase + 0xB680704; 
+    Hook->Address = ImageBase + 0xB680704;
     Hook->Original = (void**)&DensityGridAddActorOG;
     UKismetHookingLibrary::Hook(Hook, Address);
 
-    
+
     Hook->Class = AFortAthenaLivingWorldPointProvidersEnabler::StaticClass();
     Hook->Detour = NeedsLoadForClient;
     Hook->Address = 0x108 / 8;
@@ -95,7 +95,7 @@ void FortAthenaLivingWorldManager::Hook()
     Hook->Detour = NeedsLoadForClient;
     Hook->Address = 0x108 / 8;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
-    
+
 }
 
 
