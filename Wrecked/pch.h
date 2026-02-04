@@ -71,7 +71,8 @@ enum EGameModeType
         Juno, // lego
         Creative, // creative
         STW, // Save the world
-        Delmar
+        Delmar,
+        Valkyrie
 };
 
 struct FActorSpawnParameters
