@@ -118,19 +118,19 @@ void FortAthenaCreativePortal::TestProfile(AFortPlayerControllerAthena* PlayerCo
         	
             for (auto& Attribute : Item->Attributes.Attrs)
             {
-                if (!Attribute.Second.IsValid())
+                if (!Attribute.Second.Ptr)
                     continue;
                 
-                void** vtable = *(void***)Attribute.Second.Get();
+                void** vtable = *(void***)Attribute.Second.Ptr;
                 FString AttributeName = Attribute.First;
                 
-                switch (Attribute.Second->Type)
+                switch (Attribute.Second.Ptr->Type)
                 {
                 case EJson::String:
                 {
                     auto TryGetString = (bool (__fastcall *)(FJsonValue*, FString*))vtable[11];
                     FString Value;
-                    if (TryGetString(Attribute.Second.Get(), &Value))
+                    if (TryGetString(Attribute.Second.Ptr, &Value))
                     {
                         std::string attrName = AttributeName.ToStr().c_str();
                     	
@@ -174,13 +174,15 @@ void FortAthenaCreativePortal::TestProfile(AFortPlayerControllerAthena* PlayerCo
 	// fallback if no stat for max plot count and last used plot
 	for (auto& Stat: State->StatsContainer.Attrs)
 	{
+		if (!Stat.Second.Ptr) continue;
+
 		std::string attrName = Stat.First.ToStr().c_str();
-		void** vtable = *(void***)Stat.Second.Get();
+		void** vtable = *(void***)Stat.Second.Ptr;
 		if (attrName == "max_plot_count")
 		{
 			auto TryGetNumber = (bool (__fastcall *)(FJsonValue*, double*))vtable[10];
 			double NumberValue;
-			if (TryGetNumber(Stat.Second.Get(), &NumberValue))
+			if (TryGetNumber(Stat.Second.Ptr, &NumberValue))
 			{
 				int32 IntValue = (int32)NumberValue;
 				PlayerController->MaxPlotCount = IntValue;
@@ -192,7 +194,7 @@ void FortAthenaCreativePortal::TestProfile(AFortPlayerControllerAthena* PlayerCo
 			FString Value;
 
 			UE_LOG(LogCreative, Log, L"Last Used Plot Found");
-			if (TryGetString(Stat.Second.Get(), &Value))
+			if (TryGetString(Stat.Second.Ptr, &Value))
 			{
 			auto lastisland = PlayerController->CreativeIslands.Search([Value](FCreativeIslandData& IslandData)
 			{

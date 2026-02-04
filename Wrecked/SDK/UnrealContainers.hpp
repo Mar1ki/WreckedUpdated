@@ -929,66 +929,15 @@ ValueElementType* Search(PT Predicate)
 	static_assert(sizeof(TArray<int32>) == 0x10, "TArray has a wrong size!");
 	static_assert(sizeof(TSet<int32>) == 0x50, "TSet has a wrong size!");
 	static_assert(sizeof(TMap<int32, int32>) == 0x50, "TMap has a wrong size!");
+	class FSharedReferencer {
+		void* Idk;
+	};
 	template<typename T>
-	
-class TSharedPtr
+	class TSharedPtr
 	{
 	public:
-		TSharedPtr() : Ptr(nullptr), RefCount(nullptr) {}
-
-		explicit TSharedPtr(T* InPtr)
-				: Ptr(InPtr), RefCount(new std::atomic<int>(1)) {}
-
-		TSharedPtr(const TSharedPtr& Other)
-		{
-			Ptr = Other.Ptr;
-			RefCount = Other.RefCount;
-			if (RefCount)
-				++(*RefCount);
-		}
-
-		TSharedPtr& operator=(const TSharedPtr& Other)
-		{
-			if (this != &Other)
-			{
-				Release();
-
-				Ptr = Other.Ptr;
-				RefCount = Other.RefCount;
-				if (RefCount)
-					++(*RefCount);
-			}
-			return *this;
-		}
-
-		~TSharedPtr()
-		{
-			Release();
-		}
-
-		T* Get() const { return Ptr; }
-		T* operator->() const { return Ptr; }
-		T& operator*() const { return *Ptr; }
-
-		bool IsValid() const { return Ptr != nullptr; }
-
-	private:
-		void Release()
-		{
-			if (RefCount)
-			{
-				if (--(*RefCount) == 0)
-				{
-					delete Ptr;
-					delete RefCount;
-				}
-			}
-			Ptr = nullptr;
-			RefCount = nullptr;
-		}
-
-	private:
 		T* Ptr;
-		std::atomic<int>* RefCount;
+		FSharedReferencer Referencer;
 	};
 }
+
