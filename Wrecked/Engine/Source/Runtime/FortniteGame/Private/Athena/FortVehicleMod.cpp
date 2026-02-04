@@ -88,11 +88,15 @@ bool CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTa
     return true;
 }
 
-void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, const FGameplayEffectContextHandle *EffectContext)
+void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, FGameplayEffectContextHandle *EffectContextHandle)
 {
     std::cout << "InOutDamage: " << InOutDamage << std::endl;
     for (auto tag : InTags->GameplayTags)
     {
+        if (EffectContextHandle && EffectContextHandle->Data.Ptr) {
+            auto EffectContext = EffectContextHandle->Data.Ptr;
+            std::cout << EffectContext->AbilityLevel << "\n";
+        }
         std::cout << "Tag: "<< tag.TagName.ToString().c_str() << std::endl;
     }
     
