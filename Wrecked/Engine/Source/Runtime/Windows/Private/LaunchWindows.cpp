@@ -282,11 +282,16 @@ void Main()
     }
     else if (CurrentGamemode == EGameModeType::Delmar)
     {
-        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open DelMar_RootLevel", nullptr);
-    } else
+        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open DelMar_Tutorials_SeamlessTutorialRun", nullptr);
+    } 
+    else if (CurrentGamemode == EGameModeType::Valkyrie) {
+        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"open /Game/TestMap/TestMap.TestMap", nullptr);
+    }
+    else
     {
         UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open Helios_Terrain", nullptr);
     }
+    
     //UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), CurrentGamemode == EGameModeType::Juno ? L"open 1_WWWG_0": L"open Helios_Terrain", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogFortUIDirector", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"net.allowencryption 0", nullptr);

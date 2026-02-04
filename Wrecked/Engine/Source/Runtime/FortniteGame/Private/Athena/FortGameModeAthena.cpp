@@ -108,6 +108,10 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		    case Delmar:
 			Playlist = UObject::FindObject<UFortPlaylistAthena>("FortPlaylistAthena Playlist_DelMar_Tutorial.Playlist_DelMar_Tutorial");
 			break;
+
+			case Valkyrie:
+			Playlist = UObject::FindObject<UFortPlaylistAthena>("FortPlaylistAthena Playlist_VK_Play.Playlist_VK_Play");
+			break;
 		}
 		GameState->CurrentPlaylistInfo.BasePlaylist = Playlist;
 		GameState->CurrentPlaylistInfo.OverridePlaylist = Playlist;
