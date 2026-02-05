@@ -105,7 +105,7 @@ FTireInfo* GetAppliedTireMod(AFortDagwoodVehicle* Vehicle) {
 }*/
 
 void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
-    auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
+    auto VehicleConfigClass = Vehicle->VehicleConfigsClass_BR.Get();
     TArray<FVehicleDamageablePart> Old;
     for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
         Old.Add(Vehicle->DamageableParts[i]);
@@ -118,7 +118,7 @@ void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
             New.ShapeName = Config.ShapeName;
             New.ConfigIndex = i;
             New.BoneName = Config.BoneName;
-            New.Health = Config.MaxHealth.Evaluate();
+            New.Health = 100;
             New.bConsideredCriticalHit = Config.bConsideredCriticalHit;
             Vehicle->DamageableParts.Add(New);
         }
@@ -160,6 +160,12 @@ AFortAthenaVehicle* SpawnBossVehicle1(FVector Location, FRotator Rotation) {
     return SpawnedVehicle;
 }
 
+void FortAthenaVehicle::PostInitializeComponents(AFortAthenaVehicle* Vehicle) {
+    PostInitializeComponentsOG(Vehicle);
+
+    UE_LOG(LogVehicles, Log, "Initializeing Vehicle Damagable Parts!");
+    ApplyDamagableParts(Vehicle);
+}
 void FortAthenaVehicle::SpawnVehicles()
 {
     static bool Spawned = false;
@@ -371,9 +377,15 @@ void FortAthenaVehicle::Hook()
     //Hook->Detour = GetAppliedTireMod;
     //UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
-
+    //PostInitializeComponents
     Hook->Address = ImageBase + 0x23CDE30; // um its AFortDagwoodVehicle::HandleTireStateChange
     Hook->Detour = Dummy;
     UKismetHookingLibrary::Hook(Hook, Address);
+
+    Hook->Address = 0x520 / 8;
+    Hook->Class = AFortAthenaVehicle::StaticClass();
+    Hook->Detour = PostInitializeComponents;
+    Hook->Original = (void**)&PostInitializeComponentsOG;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
     
 }
