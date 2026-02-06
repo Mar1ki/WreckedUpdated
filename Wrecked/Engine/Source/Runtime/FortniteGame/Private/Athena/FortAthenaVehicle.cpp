@@ -126,9 +126,9 @@ void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
     for (auto Part : Vehicle->DamageableParts) {
         FVehicleToggleablePart New;
         New.ShapeName = Part.ShapeName;
-        New.bEnabled = true;
-        Vehicle->ToggledParts.Add(New);
-    }
+        New.bEnabled = false;
+        //Vehicle->ToggledParts.Add(New);
+    } 
     Vehicle->OnRep_DamageableParts(Old);
 }
 
@@ -378,9 +378,9 @@ void FortAthenaVehicle::Hook()
     //UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
     //PostInitializeComponents
-    Hook->Address = ImageBase + 0x23CDE30; // um its AFortDagwoodVehicle::HandleTireStateChange
+   /* Hook->Address = ImageBase + 0x23CDE30; // um its AFortDagwoodVehicle::HandleTireStateChange
     Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, Address);
+    UKismetHookingLibrary::Hook(Hook, Address); */
 
     Hook->Address = 0x520 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
