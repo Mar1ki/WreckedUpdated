@@ -44,12 +44,26 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
         Tag.TagName = ModConfig->ModTag.TagName;
         Vehicle->AppliedVehicleModTags.GameplayTags.Add(Tag);
         FortVehicleMod::ApplyModConfigToVehicleInternal(ModConfig, VehicleInterface);
+
+        if (ModTag->TagName.ToString().contains("Vehicle.Mod.Tire"))
+        {
+            auto VehicleConfigClass = Vehicle->VehicleConfigsClass_BR.Get();
+            auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
+            auto DagwoodVehicle = (AFortDagwoodVehicle*)Vehicle;
+            if (auto* TireInfo = VehicleConfig->TireModDataMapping.Search([&](auto& Key, auto&) { return Key == *ModTag; }))
+            {
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.SpringsInfo = TireInfo->SpringTuning;
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.bTireModAdjustsPosition = true;
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.ServerTireModVersion++;
+
+                auto OldModifiedProperties = DagwoodVehicle->DagwoodRuntimeModifiedProperties;
+                DagwoodVehicle->OnRep_DagwoodRuntimeModifiers(OldModifiedProperties);
+                DagwoodVehicle->ApplyRuntimeModifiers();
+            }
+            
+        }
         
-        auto idk = (AFortDagwoodVehicle*)Vehicle;
-        idk->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
-        auto old = idk->DagwoodRuntimeModifiedProperties;
-        idk->OnRep_DagwoodRuntimeModifiers(old);
-        idk->ApplyRuntimeModifiers(); //we love it
     } else
     {
         UE_LOG(LogVehicles, Warning, "This vehicle has no interface or modconfig that should not happen");
@@ -80,6 +94,18 @@ bool CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTa
             if (ExistingTag.TagName.ToString().contains("Mortar") ||  ExistingTag.TagName.ToString().contains("MachineGun"))
             {
                 UE_LOG(LogVehicles, Log, "Cannot apply %s: Vehicle already has a weapon mod equipped.", NewModTag.TagName.ToString().c_str());
+                return false;
+            }
+        }
+    }
+    
+    if (NewModTag.TagName.ToString().contains("Bulletproof") ||NewModTag.TagName.ToString().contains("Offroad") )
+    {
+        for (const FGameplayTag& ExistingTag : Vehicle->AppliedVehicleModTags.GameplayTags)
+        {
+            if (ExistingTag.TagName.ToString().contains("Bulletproof") ||  ExistingTag.TagName.ToString().contains("Offroad"))
+            {
+                UE_LOG(LogVehicles, Log, "Cannot apply %s: Vehicle already has a tire mod equipped.", NewModTag.TagName.ToString().c_str());
                 return false;
             }
         }
