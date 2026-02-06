@@ -228,7 +228,7 @@ void ServerMove(AFortPhysicsPawn* Pawn, FReplicatedPhysicsPawnState InState)
     RootComp->K2_SetWorldLocationAndRotation(InState.Translation, Rotation, false, nullptr, true);
     RootComp->SetPhysicsLinearVelocity(InState.LinearVelocity, 0, FName(0));
     RootComp->SetPhysicsAngularVelocityInDegrees(InState.AngularVelocity, 0, FName(0));
-}
+}   
 
 void RepairAllDamageableParts(AFortAthenaVehicle* Vehicle, float NewHealthPrecent) {
     UE_LOG(LogTemp, Log, "Repairing All DamagableParts.............");

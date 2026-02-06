@@ -70,7 +70,7 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
     }
 }
 
-bool CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTag)
+bool FortVehicleMod::CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTag)
 {
     auto Vehicle = (AFortAthenaVehicle*)(__int64(VehicleInterface) - 0x510);
     

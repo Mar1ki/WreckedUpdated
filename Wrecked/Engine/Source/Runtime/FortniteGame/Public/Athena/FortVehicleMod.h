@@ -8,5 +8,6 @@ namespace FortVehicleMod {
     static UFortVehicleModConfig* (__fastcall* GetVehicleModConfigFromTagInternal)(IFortVehicleInterface* Vehicle, FGameplayTag* ModTag) = (decltype(GetVehicleModConfigFromTagInternal))(ImageBase + 0x9AAF080);
     DefineOriginal(void, ServerVehicleModSeatRPC,AFortPlayerControllerAthena* PlayerController,const FGameplayTag& RequestType, UFortVehicleModComponent* ModInstance, int32 SeatIndex);
     DefineOriginal(void, BreakDamagablePart, AFortAthenaVehicle* Vehicle, const FName* ShapeName);
+    bool CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTag);
 };
 
