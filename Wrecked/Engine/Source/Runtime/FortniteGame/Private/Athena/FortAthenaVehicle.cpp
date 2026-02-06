@@ -281,23 +281,27 @@ void RepairDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName, c
     }
 }
 
-void BreakDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName) {
-    UE_LOG(LogTemp, Log, "Breaking DamagablePart.............");
-    if (Vehicle && ShapeName) {
-        TArray<FVehicleDamageablePart> Old;
-        for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
-            Old.Add(Vehicle->DamageableParts[i]);
+void FortAthenaVehicle::BreakDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName)
+{
+    auto OldToggledParts = Vehicle->ToggledParts;
+    auto OldDamageableParts = Vehicle->DamageableParts;
+    for (auto& Part : Vehicle->DamageableParts)
+    {
+        if (Part.ShapeName == *ShapeName)
+        {
+            FVehicleToggleablePart DamagedPart;
+            DamagedPart.ShapeName = *ShapeName;
+            DamagedPart.bEnabled = true;
+            Vehicle->ToggledParts.Add(DamagedPart);
+            Part.Health = 0;
+            
+            Vehicle->OnRep_DamageableParts(OldDamageableParts);
+            Vehicle->OnRep_ToggleableParts(OldToggledParts);
+            break;
         }
-        for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
-            if (Vehicle->DamageableParts[i].ShapeName == *ShapeName) {
-                Vehicle->DamageableParts[i].Health = 0;
-                break;
-
-            }
-        }
-        Vehicle->OnRep_DamageableParts(Old);
     }
 }
+
 void FortAthenaVehicle::Hook()
 {
     UHook* Hook = new UHook();
@@ -313,7 +317,13 @@ void FortAthenaVehicle::Hook()
     Hook->Detour = ServerMove;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
-/*    Hook->Address = 0x1170 / 8;
+    // break damagablepart
+    Hook->Address = 0x1160 / 8;
+    Hook->Class = AFortAthenaVehicle::StaticClass();
+    Hook->Detour = BreakDamageablePart;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+    
+/*  Hook->Address = 0x1170 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = RepairAllDamageableParts;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
@@ -325,7 +335,7 @@ void FortAthenaVehicle::Hook()
 
     Hook->Address = 0x1168 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
-    Hook->Detour =RepairDamageablePart;
+    Hook->Detour = RepairDamageablePart;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
     */
     
