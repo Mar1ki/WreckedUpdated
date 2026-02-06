@@ -298,37 +298,8 @@ void BreakDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName) {
         Vehicle->OnRep_DamageableParts(Old);
     }
 }
-
-bool Dummy() {
-    std::cout << "Dummy Called!\n";
-    return true;
-}
-
-void dummy()
-{
-    std::cout << "dummy Called!" <<  std::endl;
-
-    
-}
-
 void FortAthenaVehicle::Hook()
 {
-
-    // wtf even is it
-    /*for (auto i = 0; i < UObject::GObjects->Num(); i++) {
-        auto Object = UObject::GObjects->GetByIndex(i);
-
-        if (!Object || !Object->IsDefaultObject() || !Object->IsA(AFortAthenaVehicle::StaticClass()))
-            continue;
-
-        auto InterfaceAddress = Object->GetInterface<IFortVehicleInterface>(IFortVehicleInterface::StaticClass());
-        if (InterfaceAddress) {
-            VHook(InterfaceAddress, 0x1A8 / 8, ApplyModToVehicleHK);
-            VHook(InterfaceAddress, 0x1D0 / 8, HasTireMod);
-            VHook(InterfaceAddress, 0x1B8 / 8, HasVehicleModApplied);
-            VHook(InterfaceAddress, 0x428 / 8, TryConstructWithModServer);
-        }
-    }*/
     UHook* Hook = new UHook();
     
    // ServerMove Reliable or smth like that
@@ -356,32 +327,8 @@ void FortAthenaVehicle::Hook()
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour =RepairDamageablePart;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-    Hook->Address = 0xD18 / 8;
-    Hook->Class = AFortAthenaVehicle::StaticClass();
-    Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-    Hook->Address = 0xDF8 / 8;
-    Hook->Class = AFortAthenaVehicle::StaticClass();
-    Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-    Hook->Address = 0xCD0 / 8;
-    Hook->Class = AFortAthenaVehicle::StaticClass();
-    Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT); */
+    */
     
-    //Hook->Address = 0x11C0 / 8;
-    //Hook->Class = AFortAthenaVehicle::StaticClass();
-    //Hook->Detour = GetAppliedTireMod;
-    //UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-    //PostInitializeComponents
-   /* Hook->Address = ImageBase + 0x23CDE30; // um its AFortDagwoodVehicle::HandleTireStateChange
-    Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, Address); */
-
     Hook->Address = 0x520 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = PostInitializeComponents;
