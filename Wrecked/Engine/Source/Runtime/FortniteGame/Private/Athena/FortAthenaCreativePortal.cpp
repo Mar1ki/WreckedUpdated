@@ -388,27 +388,17 @@ void ServerLoadPlotForPortal(UObject* Context, FFrame& Stack)
 
 	std::cout << "ServerLoadPlotForPortal" << std::endl;
 }
-
-// HandleProfileUpdate
-__int64 FortAthenaCreativePortal::test(UMcpProfile* a1, FProfileUpdateSingle* a2, __int64 a3, void *a4, char a5)
-{
-	std::cout << "WTF EVEN IS THIS" << std::endl;
-	
-	
-	std::cout << a1->ProfileId.ToStr().c_str() << std::endl;
-	return testOG(a1, a2,  a3, a4,  a5);
-}
-
 // maybe theres a func to update them automaticly but idc
 // + its not proper bc it doesnt see some shit so refactor that later
 void FortAthenaCreativePortal::UpdateAllPortals(AFortCreativePortalManager* PortalManager)
 {
 	TArray<AFortPlayerController*> Controllers = UFortKismetLibrary::GetAllFortPlayerControllers(GetWorld(),true, true );
-	for (auto Portal : PortalManager->AllPortals)
+
+	for (auto PlayerPortal : PortalManager->AllPortals)
 	{
-		if (Portal->OwningPlayer.ReplicationBytes.Num() != 0)
+		if (!PlayerPortal->Owner)
 		{
-			Portal->MaxAvailablePopulation = Controllers.Num();
+			PlayerPortal->MaxAvailablePopulation = Controllers.Num();
 		}
 	}
 }
@@ -443,11 +433,6 @@ void FortAthenaCreativePortal::Init() {
 	Hook->Path = "/Script/FortniteGame.FortPlayerControllerAthena.ServerUpdateCreativePlotName";
 	Hook->Detour = ServerUpdateCreativePlotName;
 	UKismetHookingLibrary::Hook(Hook, Exec);
-	
-	//Hook->Address = ImageBase + 0x7BFBC68;
-	//Hook->Detour = test;
-	//Hook->Original = (void**)&testOG;
-	//UKismetHookingLibrary::Hook(Hook, Address);
 	
 	Hook->Path = "/Script/FortniteGame.FortPlayerControllerAthena.ServerLoadPlotForPortal";
 	Hook->Detour = ServerLoadPlotForPortal;
