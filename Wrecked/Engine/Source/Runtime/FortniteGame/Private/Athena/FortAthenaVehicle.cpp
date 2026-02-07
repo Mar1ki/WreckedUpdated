@@ -230,8 +230,11 @@ void ServerMove(AFortPhysicsPawn* Pawn, FReplicatedPhysicsPawnState InState)
     RootComp->SetPhysicsAngularVelocityInDegrees(InState.AngularVelocity, 0, FName(0));
 }   
 
-void RepairAllDamageableParts(AFortAthenaVehicle* Vehicle, float NewHealthPrecent) {
-    UE_LOG(LogTemp, Log, "Repairing All DamagableParts.............");
+void RepairAllDamageableParts(AFortAthenaVehicle* Vehicle, float NewHealthPercent) {
+
+    if (!Vehicle) return;
+    UE_LOG(LogVehicles, Warning, "NewHealthPercent: %f", NewHealthPercent);
+    
     auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
     if (VehicleConfigClass) {
         auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
@@ -254,12 +257,13 @@ void RepairAllDamageableParts(AFortAthenaVehicle* Vehicle, float NewHealthPrecen
 }
 
 void RepairDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName, const float NewHealthPercent) {
-    UE_LOG(LogTemp, Log, "Repairing DamagableParts.............");
-    auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
+
+    if (!Vehicle) return;
+    UE_LOG(LogVehicles, Warning, "NewHealthPercent: %f", NewHealthPercent);
     
+    auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
     if (VehicleConfigClass) {
         auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
-
         if (Vehicle && ShapeName) {
             TArray<FVehicleDamageablePart> Old;
             for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
@@ -279,10 +283,11 @@ void RepairDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName, c
             Vehicle->OnRep_DamageableParts(Old);
         }
     }
-}
+} 
 
 void FortAthenaVehicle::BreakDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName)
 {
+    if (!Vehicle) return;
     auto OldToggledParts = Vehicle->ToggledParts;
     auto OldDamageableParts = Vehicle->DamageableParts;
     for (auto& Part : Vehicle->DamageableParts)
@@ -323,21 +328,15 @@ void FortAthenaVehicle::Hook()
     Hook->Detour = BreakDamageablePart;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
     
-/*  Hook->Address = 0x1170 / 8;
+    Hook->Address = 0x1170 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = RepairAllDamageableParts;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-    Hook->Address = 0x1160 / 8;
-    Hook->Class = AFortAthenaVehicle::StaticClass();
-    Hook->Detour = BreakDamageablePart;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
     Hook->Address = 0x1168 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = RepairDamageablePart;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
-    */
+    UKismetHookingLibrary::Hook(Hook, EveryVFT); 
     
     Hook->Address = 0x520 / 8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
