@@ -97,30 +97,24 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		SpawnParams.NameMode = Required_Fatal;
 		SpawnParams.ObjectFlags = EObjectFlags::Transactional;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.bNoFail = true;
-		
-		AFortInventory* Object = ((AFortInventory * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(ImageBase + 0x1A8087C))(GetWorld(), AFortInventory::StaticClass(), new FTransform(FVector(), {}), &SpawnParams);
+		SpawnParams.bNoFail = true;	
+
+		FTransform PawnTransform = Pawn->GetTransform();
+		AFortInventory* Object = ((AFortInventory * (*)(UWorld*, UClass*, FTransform const*, FActorSpawnParameters*))(ImageBase + 0x1A8087C))(GetWorld(), AFortInventory::StaticClass(), &PawnTransform, &SpawnParams);
+		if (!Object) return;
 		Object->SetOwner(Pawn);
 		AIBotController->Inventory.ObjectPointer = Object;
 		AIBotController->Inventory.InterfacePointer = Object->GetInterfaceAddress<IFortInventoryInterface>();
 		Pawn->Inventory = Object;
 		Pawn->bHasInventory = true;
 	}
-	AIBotController->StartupInventory->Items = Component->Items;
-	if (AIBotController->StartupInventory)
+	
+	for (auto Item : Component->Items)
 	{
 		auto Inventory = Pawn->Inventory;
-		
-		for (auto ItemAndCount : AIBotController->StartupInventory->Items)
-		{
-			int32 Ammo = 0;
-			if (auto* WeaponDef = Cast<UFortWeaponItemDefinition>(ItemAndCount.Item))
-				if (WeaponDef->GetStats())
-					Ammo = WeaponDef->GetStats()->ClipSize;
-			
-			Inventory->AddItem((UFortItemDefinition*)ItemAndCount.Item, ItemAndCount.Count, Ammo);
-		}
+		Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, 1);
 	}
+	
 	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
 }
 
