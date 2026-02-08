@@ -83,6 +83,8 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
         }
     }
     this->SetGamePhase(EAthenaGamePhase::Aircraft);
+    GamePhaseStep = EAthenaGamePhaseStep::BusLocked;
+    HandleGamePhaseStepChanged(GamePhaseStep);
     int32 AircraftReadyPlayerCount = 0;
 
     for (auto Player: GetGameMode()->AlivePlayers)
@@ -157,42 +159,24 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartSafeZones(bool bAl
         {
             return true;
         }
-
-        if (PlaylistData)
-        {
-            ESafeZoneStartUp StartUpType = PlaylistData->SafeZoneStartUp;
-
-            switch (this->GamePhase)
-            {
-            case EAthenaGamePhase::Warmup:
-                if (StartUpType == ESafeZoneStartUp::StartsWithWarmUp) return true;
-                break;
-
-            case EAthenaGamePhase::Aircraft:
-                if (StartUpType == ESafeZoneStartUp::StartsWithAirCraft) return true;
-                break;
-
-            case EAthenaGamePhase::SafeZones:
-                return true;
-            }
-        }
     }
 
     float CurrentServerTime = GS->GetServerWorldTimeSeconds();
     float StartDelay = MapInfo->SafeZoneStartDelay.Evaluate();
 
     this->SafeZonesStartTime = CurrentServerTime + StartDelay;
-
     if (bStartPhase)
     {
         return StartSafeZonesPhase(bAllowRestart);
     }
+
 
     return true;
 }
 
 bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartSafeZonesPhase(bool bAllowRestart) {
     AFortGameStateAthena* GS = GetGameState();
+    auto Time = UGameplayStatics::GetTimeSeconds(UWorld::GetWorld());
     if (!GS)
     {
         return false;
@@ -206,18 +190,41 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartSafeZonesPhase(boo
 
     if (this->GamePhase != EAthenaGamePhase::SafeZones || bAllowRestart)
     {
+        this->SafeZonesStartTime = Time + GS->MapInfo->SafeZoneStartDelay.Evaluate();
         this->SetGamePhase(EAthenaGamePhase::SafeZones);
-
-        if (!GS->IsCreativeOrPlaygroundModePlaylist())
-        {
-            FPlayersLeft PlayersLeft = GS->GetPlayersLeft();
-        }
+        this->GamePhaseStep = EAthenaGamePhaseStep::StormForming;
+        this->HandleGamePhaseStepChanged(GamePhaseStep);
+        UE_LOG(LogGamePhases, Log, "Starting Safezones!");
     }
     return true;
 }
 
 void AFortSafeZoneIndicator::StartPhase(int32 InPhaseIndex) {
-    auto CurentTIme = GetWorld()->GetTimeSeconds();
+    auto CurrentTime = GetWorld()->GetTimeSeconds();
+    auto GamePhaseLogic = GetLogic();
+
+    if (!GamePhaseLogic) return;
+
+    FFortSafeZonePhaseInfo Info = SafeZonePhases[InPhaseIndex];
+    if (InPhaseIndex != 0)
+    {
+        PreviousCenter = NextCenter;
+        PreviousRadius = NextRadius;
+    }
+    NextCenter = (FVector_NetQuantize100)Info.Center;
+    NextRadius = Info.Radius;
+    CurrentDamageInfo = Info.DamageInfo;
+    CurrentPhase = InPhaseIndex;
+    SafeZoneStartShrinkTime = CurrentTime + Info.WaitTime;
+    SafeZoneFinishShrinkTime = SafeZoneStartShrinkTime + Info.ShrinkTime;
+
+    *(EFortSafeZoneState*)(__int64(this) + 0x60C) = EFortSafeZoneState::Holding;
+    OnSafeZoneStateChange(EFortSafeZoneState::Holding, InPhaseIndex == 0);
+
+    GamePhaseLogic->GamePhaseStep = EAthenaGamePhaseStep::StormHolding;
+    GamePhaseLogic->HandleGamePhaseStepChanged(GamePhaseLogic->GamePhaseStep);
+    OnRep_CurrentPhase();
+    UE_LOG(LogGamePhases, Log, "Starting new SafeZone (Index: %i): ShrinkTime: %f WaitTime %f Radius %f", InPhaseIndex, Info.ShrinkTime, Info.WaitTime, Info.Radius);
 }
 
 void AFortSafeZoneIndicator::InitializeWithMapDefaultPhases() {
@@ -255,16 +262,32 @@ void AFortSafeZoneIndicator::InitializeWithMapDefaultPhases() {
         this->SafeZonePhases.Add(Phase);
         this->PhaseCount++;
     }
-    this->OnRep_PhaseCount();
+    OnRep_PhaseCount();
+    this->SafeZoneHeight = 100000;
+    this->PreviousCenter = (FVector_NetQuantize100)GameState->MapInfo->GetMapCenter();
+    this->NextCenter = (FVector_NetQuantize100)GameState->MapInfo->GetMapCenter();
+    this->PreviousRadius = GameState->MapInfo->SafeZoneStartingRadius.Evaluate();
+    this->NextRadius = PreviousRadius;
+    this->CurrentPhase = 0;
+    OnRep_CurrentPhase();
 }
 
 void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::SpawnInitialSafeZone() {
     AFortGameStateAthena* AthenaGameState = GetGameState();
+    AFortGameModeAthena* GameMode = GetGameMode();
 
-    if (!AthenaGameState || !AthenaGameState->MapInfo)
+    if (!AthenaGameState || !AthenaGameState->MapInfo || !GameMode)
     {
         return;
     }
+
+    bool ShouldSpawnSafeZoneIndicator = true;
+    for (auto Mutator : GameMode->MutatorListComponent->Mutators) {
+        EFortMutatorReturnValue(*ShouldSpawnSafeZoneIndicatorOG)(AFortGameplayMutator*, bool*) = decltype(ShouldSpawnSafeZoneIndicatorOG)(Mutator->VTable[0xA60 / 8]);
+        if (ShouldSpawnSafeZoneIndicatorOG(Mutator, &ShouldSpawnSafeZoneIndicator) == EFortMutatorReturnValue::Ignore)
+            break;
+    }
+    if (!ShouldSpawnSafeZoneIndicator) return;
 
     auto SafeZoneLocations = *(TArray<FVector>*)(__int64(this) + 0x468);
     check(SafeZoneLocations.Num() > 0);
@@ -284,7 +307,7 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::SpawnInitialSafeZone() 
             Delegate.FunctionName = UKismetStringLibrary::Conv_StringToName(L"OnSafeZonePhaseChanged");
             SafeZoneIndicator->OnSafeZonePhaseChanged.InvocationList.Add(Delegate);
             SafeZoneIndicator->InitializeWithMapDefaultPhases();
-            //SafeZoneIndicator->StartPhase(0);
+            SafeZoneIndicator->StartPhase(1);
         }
     }
 }
@@ -341,6 +364,8 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartWarmupPhase() {
         }
 
         this->SetGamePhase(EAthenaGamePhase::Warmup);
+        GamePhaseStep = EAthenaGamePhaseStep::Warmup;
+        HandleGamePhaseStepChanged(GamePhaseStep);
         if (CurrentPlaylist)
         {
             this->WarmupCountdownDuration = WarmupDuration;
@@ -352,18 +377,39 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartWarmupPhase() {
     return false;
 }
 
-void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateSafeZonePhase() {
+void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateSafeZonePhase(float Time) {
     AFortGameStateAthena* GameState = GetGameState();
-
-    if (!GameState)
+    AFortGameModeAthena* GameMode = GetGameMode();
+    if (!GameState || !GameState->MapInfo)
     {
         return;
     }
-
-    AFortSafeZoneIndicator* SafeZone = this->SafeZoneIndicator;
-    if (!SafeZone) {
+    
+    if (SafeZonesStartTime > Time || SafeZonesStartTime<=0)
+        return;
+    
+    if (!SafeZoneIndicator) {
         SpawnInitialSafeZone();
-        SafeZone = this->SafeZoneIndicator;
+    }
+    if (SafeZoneIndicator) {
+        bool bFinishedHolding = SafeZoneIndicator->SafeZoneStartShrinkTime < Time;
+        bool bFinishedShrinking = SafeZoneIndicator->SafeZoneFinishShrinkTime < Time;
+
+        if (bFinishedHolding && bFinishedShrinking) {
+            if (SafeZoneIndicator->CurrentPhase + 1 == 13) {
+                SetGamePhase(EAthenaGamePhase::EndGame);
+                GamePhaseStep = EAthenaGamePhaseStep::EndGame;
+                HandleGamePhaseStepChanged(GamePhaseStep);
+            }
+            SafeZoneIndicator->StartPhase(SafeZoneIndicator->CurrentPhase+1);
+        }
+        else if (!bFinishedHolding && !bFinishedShrinking && GamePhaseStep == EAthenaGamePhaseStep::StormHolding) {
+            GamePhaseStep = EAthenaGamePhaseStep::StormShrinking;
+            HandleGamePhaseStepChanged(GamePhaseStep);
+
+            *(EFortSafeZoneState*)(__int64(SafeZoneIndicator) + 0x60C) = EFortSafeZoneState::Shrinking;
+            SafeZoneIndicator->OnSafeZoneStateChange(EFortSafeZoneState::Holding, SafeZoneIndicator->CurrentPhase == 0);
+        }
     }
 }
 
@@ -376,8 +422,14 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateAircraftPhase(flo
 
     for (auto AircraftWeak : this->Aircrafts_GameMode) {
         auto Aircraft = AircraftWeak.Get();
-        
+        if (!Aircraft) continue;
         this->bAircraftIsLocked = Aircraft->DropStartTime > Time;
+
+        if (!bAircraftIsLocked && GamePhaseStep != EAthenaGamePhaseStep::BusFlying) {
+            GamePhaseStep = EAthenaGamePhaseStep::BusFlying;
+            HandleGamePhaseStepChanged(GamePhaseStep);
+        }
+        
         bool ShouldEjectPlayers = Aircraft->DropEndTime < Time;
 
         if (ShouldEjectPlayers) {
@@ -390,6 +442,8 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateAircraftPhase(flo
             }
             if (GameState->CurrentPlaylistInfo.BasePlaylist && GameState->CurrentPlaylistInfo.BasePlaylist->SafeZoneStartUp == ESafeZoneStartUp::UseDefaultGameBehavior)
                 StartSafeZones(0, 1);
+
+            Aircraft->K2_DestroyActor();
         }
     }
 }
@@ -407,7 +461,28 @@ void FortGameStateComponent_BattleRoyaleGamePhaseLogic::GamePhaseTickComponent(U
     if (Logic->GamePhase == EAthenaGamePhase::Aircraft) {
         Logic->UpdateAircraftPhase(CurrentTime);
     }
+    if (Logic->GamePhase == EAthenaGamePhase::SafeZones) {
+        Logic->UpdateSafeZonePhase(CurrentTime);
+    }
 
+    if (Logic->SafeZoneIndicator) {
+        auto GameMode = GetGameMode();
+        for (auto Player : GameMode->AlivePlayers)
+        {
+            if (Player->MyFortPawn)
+            {
+                bool bIsInSafeZone = Logic->IsInCurrentSafeZone(Player->MyFortPawn->K2_GetActorLocation(), true);
+                auto Pawn = Player->MyFortPawn;
+                if (Pawn->bIsInsideSafeZone != bIsInSafeZone && Pawn->bIsInAnyStorm != !bIsInSafeZone)
+                {
+                    Pawn->bIsInAnyStorm = !bIsInSafeZone;
+                    Pawn->OnRep_IsInAnyStorm();
+                    Pawn->bIsInsideSafeZone = bIsInSafeZone;
+                    Pawn->OnRep_IsInsideSafeZone();
+                }
+            }
+        }
+    }
     return GamePhaseTickComponentOG(Logic, Delta);
 }
 

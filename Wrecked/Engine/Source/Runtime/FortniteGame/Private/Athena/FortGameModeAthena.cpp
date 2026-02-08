@@ -195,6 +195,7 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
 		if (!GameMode->AIGoalManager)
 			GameMode->AIGoalManager = (AFortAIGoalManager*)GetWorld()->SpawnActor(AFortAIGoalManager::StaticClass(), {});
+
 	}
 
 	if (CurrentGamemode == Athena && GameState->Teams.Num() == 0) return false;
@@ -206,8 +207,9 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		GetWorld()->Listen(Url);
 		GameMode->bWorldIsReady = true;
 		if (CurrentGamemode == Athena) {
-			TArray<FVector4> Dummy;
-			GameState->MapInfo->GenerateSafeZoneLocations(*(TArray<FVector>*)(__int64(GetLogic()) + 0x468), /*GameState->CurrentPlaylistInfo.BasePlaylist->SafeZoneLocationBlacklist*/Dummy, 0, false);
+			TArray<FVector4> Blacklist = {};
+			auto MapCenter = GameState->MapInfo->GetMapCenter();
+			GameState->MapInfo->GenerateSafeZoneLocations(*(TArray<FVector>*)(__int64(GetLogic()) + 0x468), Blacklist, &MapCenter, 0, false);
 			static void* (*InitializeFlightPath)(AFortAthenaMapInfo*, AFortGameStateAthena*, UFortGameStateComponent_BattleRoyaleGamePhaseLogic*, bool, double, float, float) = decltype(InitializeFlightPath)(ImageBase + 0x8F454DC);
 			InitializeFlightPath(GameState->MapInfo, GameState, UFortGameStateComponent_BattleRoyaleGamePhaseLogic::Get(GetWorld()), false, 0.f, 0.f, 0.f);
 		}

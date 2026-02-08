@@ -100,6 +100,15 @@ public:
 		void* DebugPtr;
 	};
 };
+struct FSharedReferencer {
+public:
+	void* ReferenceController;
+};
+struct FSharedPtr {
+public:
+	UObject* Object;
+	FSharedReferencer SharedReferenceCount;
+};
 
 // ScriptStruct StructUtils.InstancedStruct
 // 0x0010 (0x0010 - 0x0000)

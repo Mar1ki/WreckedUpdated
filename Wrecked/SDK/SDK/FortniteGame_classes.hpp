@@ -31405,7 +31405,7 @@ public:
 	bool StartSafeZones(bool bAllowRestart, bool bStartPhase);
 	bool StartSafeZonesPhase(bool bAllowRestart);
 	void SpawnInitialSafeZone();
-	void UpdateSafeZonePhase();
+	void UpdateSafeZonePhase(float Time);
 	void UpdateWarmupPhase(float Time);
 	void UpdateAircraftPhase(float Time);
 public:

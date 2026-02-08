@@ -492,7 +492,7 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         }
         if (Command == "startaircraft")
         {
-            //GetGameMode()->StartAircraftPhase();
+            GetLogic()->StartAircraftPhase();
         }
         if (Command == "testcar")
         {
