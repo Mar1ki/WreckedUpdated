@@ -79,6 +79,10 @@ void FortPlayerController::ServerPlayEmoteItem(AFortPlayerController* PlayerCont
     PlayerController->MyFortPawn->EmoteWalkSpeed = EmoteDef->WalkForwardSpeed;
     PlayerController->MyFortPawn->bMovingEmoteForwardOnly = EmoteDef->bMoveForwardOnly;
     PlayerController->MyFortPawn->EmoteWalkSpeed = EmoteDef->WalkForwardSpeed;
+    
+    PlayerController->MyFortPawn->LastEmoteItemDef = EmoteDef;
+    PlayerController->MyFortPawn->LastReplicatedEmoteExecuted = EmoteDef;
+    PlayerController->MyFortPawn->OnRep_LastReplicatedEmoteExecuted(nullptr);
 
     FGameplayAbilitySpec Spec{};
     UGameplayAbility* Ability = nullptr;
@@ -116,15 +120,14 @@ void FortPlayerController::ServerAttemptInventoryDrop(AFortPlayerController* Con
     auto Inventory = (AFortInventory*)Controller->WorldInventory.ObjectPointer;
     if (!Inventory)
         return;
-    auto Entry = Inventory->Inventory.ReplicatedEntries.Search([&](FFortItemEntry& entry) {
-        return entry.ItemGuid == ItemGuid;
-        });
+
+    auto Entry = Inventory->GetItemEntryByGuid(ItemGuid);
     if (!Entry)
         return;
     if (Entry->Count < Count)
         return;
     
-    FortKismetLibrary::SpawnPickup(Controller->Pawn->K2_GetActorLocation(), *Entry, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::TossedByPlayer, Controller->MyFortPawn, 1, true, false, false);
+    FortKismetLibrary::SpawnPickup(Controller->Pawn->K2_GetActorLocation(), *Entry, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::TossedByPlayer, Controller->MyFortPawn, Count, true, false, false);
     Entry->Count -= Count;
     Inventory->ReplaceEntry(*Entry);
 }
