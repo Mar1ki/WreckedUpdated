@@ -19,6 +19,18 @@ static EFortQuickBars GetQuickbar(UItemDefinitionBase* ItemDefinition)
 	return EFortQuickBars::Secondary;
 }
 
+static bool IsModSetEmpty(const UFortWeaponModSetData* ModSetData)
+{
+	if (!ModSetData)
+		return true;
+    
+	return ModSetData->CommonRarityMods.Num() == 0 &&
+		   ModSetData->UncommonRarityMods.Num() == 0 &&
+		   ModSetData->RareRarityMods.Num() == 0 &&
+		   ModSetData->EpicRarityMods.Num() == 0 &&
+		   ModSetData->LengdaryRarityMods.Num() == 0;
+}
+
 namespace FortKismetLibrary
 {
 	FFortItemEntry ConstructItemEntry(UFortItemDefinition* ItemDefinition, int32 Count, int32 Level);

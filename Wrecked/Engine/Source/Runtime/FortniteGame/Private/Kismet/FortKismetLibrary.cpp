@@ -497,12 +497,15 @@ AFortPickupAthena* FortKismetLibrary::SpawnPickup(FVector Loc, FFortItemEntry En
 				}
 			}
 		}
-		FFortItemEntryStateValueConstObject NewState;
-		NewState.ObjectData = Modset;
-		FGameplayTag ModsetTag = *(FGameplayTag*)(ImageBase + 0x12BCBA54);
-		UE_LOG(LogWeaponMods, Log, ModsetTag.TagName.ToString().c_str());
-		NewState.StateType = ModsetTag;
-		NewPickup->PrimaryPickupItemEntry.StateValuesConstObject.Add(NewState);
+		if (!IsModSetEmpty(Modset))
+		{
+			FFortItemEntryStateValueConstObject NewState;
+	        NewState.ObjectData = Modset;
+	        FGameplayTag ModsetTag = *(FGameplayTag*)(ImageBase + 0x12BCBA54);
+			UE_LOG(LogWeaponMods, Log, ModsetTag.TagName.ToString().c_str());
+			NewState.StateType = ModsetTag;
+			NewPickup->PrimaryPickupItemEntry.StateValuesConstObject.Add(NewState);
+		}
 	}
 	NewPickup->OnRep_PrimaryPickupItemEntry();
 
