@@ -929,4 +929,15 @@ ValueElementType* Search(PT Predicate)
 	static_assert(sizeof(TArray<int32>) == 0x10, "TArray has a wrong size!");
 	static_assert(sizeof(TSet<int32>) == 0x50, "TSet has a wrong size!");
 	static_assert(sizeof(TMap<int32, int32>) == 0x50, "TMap has a wrong size!");
+	class FSharedReferencer {
+		void* Idk;
+	};
+	template<typename T>
+	class TSharedPtr
+	{
+	public:
+		T* Ptr;
+		FSharedReferencer Referencer;
+	};
 }
+

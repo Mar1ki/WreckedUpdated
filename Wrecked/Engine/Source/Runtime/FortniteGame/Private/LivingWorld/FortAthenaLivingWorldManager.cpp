@@ -1,51 +1,26 @@
 #include "pch.h"
-#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaLivingWorldManager.h"
-#include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
-#include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
-#include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
-
-void RegisterToLivingWorldManager(IFortAthenaLivingWorldPointProviderInterface* Interface, AFortAthenaLivingWorldStaticPointProvider* PointProvider)
-{
-    auto GameState = GetGameState();
-    auto LWM = (UFortAthenaLivingWorldManager*)GameState->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-
-    // i think this has more sense  or idk
-    PointProvider->bStartEnabled = true; // sets up some shit
-    TScriptInterface<IFortAthenaLivingWorldPointProviderInterface> NewPoint{};
-    NewPoint.ObjectPointer = PointProvider;
-    NewPoint.InterfacePointer = Interface;
-
-    for (auto& Enabler : GetObjectsOfClass<AFortAthenaLivingWorldPointProvidersEnabler>())
-    {
-        Enabler->LinkedPointProviders.Add(NewPoint);
-    }
-    
-    LWM->PointProviders.Add(NewPoint);
-    LWM->RegisteredPointProvidersCount++;
-    UE_LOG(LogLivingWorldManager, Log, "Registered a new Point Provider %s (%s)", PointProvider->GetName().c_str(), PointProvider->Class->GetName().c_str());
-}
-
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
 // lot of if statements and for so yh refactor that shit later
 void FortAthenaLivingWorldManager::PerformPointProviderSpawn()
 {
     auto GameState = GetGameState();
     auto LWM = (UFortAthenaLivingWorldManager*)GameState->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-    
+
     for (auto Point : LWM->PointProviders)
     {
         auto PointProvider = (AFortAthenaLivingWorldStaticPointProvider*)Point.ObjectPointer;
-    
+
         if (PointProvider)
         {
             bool hasVehicleTag = false;
-            
+
             for (auto& GTag : PointProvider->FiltersTags.GameplayTags)
             {
                 // Most bitchy way to find vehicles but works 
                 if (GTag.TagName.GetRawString().contains("Athena.Vehicle"))
                 {
                     hasVehicleTag = true;
-                    break; 
+                    break;
                 }
             }
             if (hasVehicleTag)
@@ -69,7 +44,7 @@ void FortAthenaLivingWorldManager::PerformPointProviderSpawn()
                 static auto BGAClass = StaticFindObject<UClass>("/Script/Engine.BlueprintGeneratedClass");
                 static auto VehicleClass = StaticLoadObject<UClass>("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_Bounty.BP_StationProp_JobBoard_Experimental_Bounty_C", BGAClass);
                 auto Location = PointProvider->K2_GetActorLocation();
-                auto Rotation =  PointProvider->K2_GetActorRotation();
+                auto Rotation = PointProvider->K2_GetActorRotation();
                 auto SpawnedVehicle = GetWorld()->SpawnActor(VehicleClass, Location, Rotation);
             }
         }
@@ -83,63 +58,33 @@ inline void logtofile2(const std::string& message) {
     }
 }
 
-void (*testog)();
-void testhook()
-{
-    throw std::runtime_error("Crash!");
-}
-void (*broog)();
-void ComputeActiveRuntimeSpawnData()
-{
-    logtofile2("funny2");
-}
-
 char (*DensityGridAddActorOG)(FFortAthenaLivingWorldDensityGrid*, AActor*, double, double);
-char DensityGridAddActor(FFortAthenaLivingWorldDensityGrid *DensityGrid, AActor *InActor, double DensityValue, double DensityRange)
+char DensityGridAddActor(FFortAthenaLivingWorldDensityGrid* DensityGrid, AActor* InActor, double DensityValue, double DensityRange)
 {
-   std::cout <<  InActor->Name.ToString().c_str() << std::endl;
-    DensityGrid->bIsInitialized = true;
 
-    
-  return DensityGridAddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
+    std::cout << InActor->Name.ToString().c_str() << std::endl;
+
+
+
+
+    return DensityGridAddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
 }
 
 static bool NeedsLoadForClient() {
     return true;
 }
 
-
-
-void __fastcall sub_B68AEB8()
-{
-   std::cout << "InitializeEventFromTable" << std::endl;
-}
-__int64 __fastcall sub_B686074(__int64 a1, __int64 a2)
-{
-    std::cout << "noieda" << std::endl;
-
-    return 1;
-}
-
 void FortAthenaLivingWorldManager::Hook()
 {
     // og might be needed
     UHook* Hook = new UHook();
-    Hook->Address = ImageBase + 0xB6B7E64;
-    Hook->Detour = RegisterToLivingWorldManager;
-    UKismetHookingLibrary::Hook(Hook, Address);
 
-    
-    Hook->Address = ImageBase + 0xB686074; // thats compute
-    Hook->Detour = testhook;
-    UKismetHookingLibrary::Hook(Hook, Address);
-    
     Hook->Detour = DensityGridAddActor;
-    Hook->Address = ImageBase + 0xB680704; 
+    Hook->Address = ImageBase + 0xB680704;
     Hook->Original = (void**)&DensityGridAddActorOG;
     UKismetHookingLibrary::Hook(Hook, Address);
 
-    
+
     Hook->Class = AFortAthenaLivingWorldPointProvidersEnabler::StaticClass();
     Hook->Detour = NeedsLoadForClient;
     Hook->Address = 0x108 / 8;
@@ -151,25 +96,6 @@ void FortAthenaLivingWorldManager::Hook()
     Hook->Address = 0x108 / 8;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
-    
-    Hook->Address = ImageBase + 0xB68AEB8;
-    Hook->Detour = sub_B68AEB8;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
-    
-    Hook->Address = ImageBase + 0xB686074;
-    Hook->Detour = sub_B686074;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
-    Hook->Address = ImageBase + 0xB69296C;
-    Hook->Detour = sub_B686074;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
-
-    Hook->Address = ImageBase + 0xB68EA28;
-    Hook->Detour = sub_B686074;
-    UKismetHookingLibrary::Hook(Hook, Address);
-    
 }
 
 

@@ -71,7 +71,8 @@ enum EGameModeType
         Juno, // lego
         Creative, // creative
         STW, // Save the world
-        Delmar
+        Delmar,
+        Valkyrie
 };
 
 struct FActorSpawnParameters
@@ -536,6 +537,29 @@ inline std::string to_hex(__int64 Address)
     stream
         << std::hex << Address;
     return stream.str();
+}
+template<typename T>
+__forceinline T* GetRandomObjectOfClass()
+{
+        std::vector<T*> Objects;
+        for (int i = 0; i < UObject::GObjects->Num(); i++)
+        {
+                T* Object = reinterpret_cast<T*>(UObject::GObjects->GetByIndex(i));
+                if (!Object) continue;
+                if (Object->IsA(T::StaticClass()))
+                {
+                        Objects.push_back(Object);
+                }
+        }
+    
+        if (Objects.empty())
+                return nullptr;
+    
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, Objects.size() - 1);
+    
+        return Objects[dis(gen)];
 }
 // here we need to check max ammo so it spawns with the full mag not the default full mag
 inline void ApplyWeaponModset(AFortPickupAthena* Pickup, UFortWeaponModSetData* Modset) {

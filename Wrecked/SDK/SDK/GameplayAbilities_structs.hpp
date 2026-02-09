@@ -566,7 +566,8 @@ public:
 struct alignas(0x08) FGameplayEffectContextHandle final
 {
 public:
-	uint8                                         Pad_0[0x18];                                       // 0x0000(0x0018)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	TSharedPtr<struct FGameplayEffectContext> Data;
+	uint8 Pad_10[0x08];
 };
 
 // ScriptStruct GameplayAbilities.GameplayEffectSpec
@@ -1639,7 +1640,8 @@ public:
 	TWeakObjectPtr<class UAbilitySystemComponent> InstigatorAbilitySystemComponent;                  // 0x0034(0x0008)(ExportObject, ZeroConstructor, InstancedReference, IsPlainOldData, RepSkip, NoDestructor, Protected, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierProtected)
 	uint8                                         Pad_3C[0x4];                                       // 0x003C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
 	TArray<TWeakObjectPtr<class AActor>>          Actors;                                            // 0x0040(0x0010)(ZeroConstructor, Protected, UObjectWrapper, NativeAccessSpecifierProtected)
-	uint8                                         Pad_50[0x10];                                      // 0x0050(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
+	//uint8                                       Pad_50[0x10];                                      // 0x0050(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
+	TSharedPtr<FHitResult>						  HitResult;
 	struct FVector                                WorldOrigin;                                       // 0x0060(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
 	uint8                                         bHasWorldOrigin : 1;                               // 0x0078(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected))
 	uint8                                         bReplicateSourceObject : 1;                        // 0x0078(0x0001)(BitIndex: 0x01, PropSize: 0x0001 (RepSkip, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected))

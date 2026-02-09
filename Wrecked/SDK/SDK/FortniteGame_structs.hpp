@@ -17228,7 +17228,6 @@ struct alignas(0x08) FFortSpatialGrid
 {
 public:
 	uint8                                         Pad_0[0xC0];                                       // 0x0000(0x00C0)(Fixing Struct Size After Last Property [ Dumper-7 ])
-    unsigned __int8 bIsInitialized : 1; // 21.40 dump its prob the same
 };
 
 // ScriptStruct FortniteGame.FortHLODTemplatedISMComponentDescriptor

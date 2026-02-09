@@ -61,6 +61,26 @@ bool NeedsLoadForClient() {
 	return true;
 }
 
+void AthenaAIServicePlayerBots::InitializeForWorld(UNavigationSystemV1* Nav,UWorld* World, EFNavigationSystemRunMode Mode)
+{
+	Nav->bAutoCreateNavigationData = true;
+	Nav->bAutoCreateNavigationData = true;
+	Nav->SupportedAgentsMask.bSupportsAgent3 = 1;
+	Nav->bSpawnNavDataInNavBoundsLevel = true;
+	
+	return InitializeForWorldOG(Nav, World, Mode);
+}
+
+void AthenaAIServicePlayerBots::CreateAndConfigureNavigationSystem(UAthenaNavSystemConfig* ModuleConfig, UWorld* World)
+{
+	ModuleConfig->bPrioritizeNavigationAroundSpawners = true;
+	ModuleConfig->bAutoSpawnMissingNavData = true;
+	ModuleConfig->bAllowAutoRebuild = true;
+	ModuleConfig->bSupportRuntimeNavmeshDisabling = false;
+	ModuleConfig->bUsesStreamedInNavLevel = true;
+
+	return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
+}
 void AthenaAIServicePlayerBots::Init() {
 
 	UHook* Hook = new UHook();
@@ -93,7 +113,24 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Class = AAthenaNavMesh::StaticClass();
 	Hook->Address = 0x108 / 8;
 	Hook->Detour = NeedsLoadForClient;
-	UKismetHookingLibrary::Hook(Hook, EveryVFT);	
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	
+	Hook->Class = UNavigationSystemV1::StaticClass();
+	Hook->Address = 0x108 / 8;
+	Hook->Detour = NeedsLoadForClient;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	
+	Hook->Class = UNavigationSystemConfig::StaticClass();
+	Hook->Address = 0x2B8 / 8;
+	Hook->Detour = CreateAndConfigureNavigationSystem;
+	Hook->Original = (void**)&CreateAndConfigureNavigationSystemOG;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+	Hook->Class = UNavigationSystemV1::StaticClass();
+	Hook->Address = 0x2F0 / 8;
+	Hook->Detour = InitializeForWorld;
+	Hook->Original = (void**)&InitializeForWorldOG;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	delete Hook;
 }

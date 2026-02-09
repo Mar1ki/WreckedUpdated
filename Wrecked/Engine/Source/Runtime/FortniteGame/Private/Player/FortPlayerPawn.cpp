@@ -4,6 +4,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
+#include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 
 void FortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, AFortPickup* Pickup, FFortPickupRequestInfo& Params)
 {
@@ -37,9 +38,7 @@ void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
     Params.IncrementCode();
 
     auto Pawn = (AFortPlayerPawn*)Context;
-
-    if (!Pawn)
-        return;
+    if (!Pawn) return;
 
     auto Zipline = Pawn->GetActiveZipline();
 
@@ -48,27 +47,29 @@ void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
     static void (*HandleZiplineStateChanged)(AFortPlayerPawn*) = decltype(HandleZiplineStateChanged)(ImageBase + 0xA12F5D8);
     HandleZiplineStateChanged(Pawn);
 
-    if (State.bJumped)
+    if (State.bIsZiplining && Zipline)
     {
-        auto Velocity = Pawn->CharacterMovement->Velocity;
-        auto VelocityX = Velocity.X * -0.5;
-        auto VelocityY = Velocity.Y * -0.5;
-        Pawn->LaunchCharacterJump({ VelocityX >= -750 ? min(VelocityX, 750) : -750, VelocityY >= -750 ? min(VelocityY, 750) : -750, 1200 }, false, false, true, true);
-    }
-    auto NewZipline = Pawn->GetActiveZipline();
-
-    if (auto Ascender = Cast<AFortAscenderZipline>(Zipline))
-    {
-        Ascender->PawnUsingHandle = nullptr;
-        Ascender->PreviousPawnUsingHandle = Pawn;
-        Ascender->OnRep_PawnUsingHandle();
+        if (auto Ascender = Cast<AFortAscenderZipline>(Zipline))
+        {
+            Ascender->BP_HandlePlayerStoppedUsingHandle(Pawn); // same as below its prob stripped
+            
+            Ascender->PawnUsingHandle = Pawn;
+            Ascender->OnRep_PawnUsingHandle();
+        }
     }
     
-    else if (auto Ascender = Cast<AFortAscenderZipline>(NewZipline))
+    else if (!State.bIsZiplining && Zipline)
     {
-        Ascender->PawnUsingHandle = Pawn;
-        Ascender->PreviousPawnUsingHandle = nullptr;
-        Ascender->OnRep_PawnUsingHandle();
+        if (auto Ascender = Cast<AFortAscenderZipline>(Zipline))
+        {
+            Ascender->BP_HandlePlayerStoppedUsingHandle(Pawn); // i bet its stripped
+            
+            TWeakObjectPtr<AFortPlayerPawn> EmptyPtr{};
+            EmptyPtr.ObjectIndex = -1;
+            Ascender->PawnUsingHandle = EmptyPtr;
+            Ascender->PreviousPawnUsingHandle = Pawn;
+            Ascender->OnRep_PawnUsingHandle();
+        }
     }
 }
 
@@ -242,42 +243,31 @@ __int64* FortPlayerPawn::OnAboutToEnterBackpack(AFortPickup* Pickup)
     return OnAboutToEnterBackpackOG(Pickup);
 }
 
-void __fastcall sub_A149FB8(AFortPlayerPawn* Pawn, AFortPickupAthena* Pickup)
+void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pickup)
 {
-    auto ItemDefinition = (UFortItemDefinition*)Pickup->PrimaryPickupItemEntry.ItemDefinition;
+    if (!Pickup || !Pawn) return;
     
-
-    // we will not do the bot logic right now bc bot has no inv and im too lazy to add the inv 
-    if (Pawn->Controller->IsA(AFortPlayerControllerAthena::StaticClass()))
+    auto ItemDefinition = (UFortItemDefinition*)Pickup->PrimaryPickupItemEntry.ItemDefinition;
+    auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
+    auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
+    
+    if (Pickup->PawnWhoDroppedPickup != Pawn)
     {
-        auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
-        auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
-
-
-        if (Pickup->PawnWhoDroppedPickup != Pawn)
+        // here we check if the item is a consumable and we have it in the inv already so it will just stack
+        if (ItemDefinition->ItemType == EFortItemType::Consumable)
         {
-
-            // here we check if the item is a consumable and we have it in the inv already so it will just stack
-            if (ItemDefinition->ItemType == EFortItemType::Consumable)
-            {
-                auto ItemToStack = Inventory->GetItemEntryByDef(ItemDefinition);
-                if (ItemToStack)
-                {
-                    Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
-                }
-            }
-            if (Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortAmmoItemDefinition::StaticClass()) || Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortResourceItemDefinition::StaticClass())) 
+            auto ItemToStack = Inventory->GetItemEntryByDef(ItemDefinition);
+            if (ItemToStack)
             {
                 Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
             }
         }
+        if (Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortAmmoItemDefinition::StaticClass()) || Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortResourceItemDefinition::StaticClass())) 
+        {
+            Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
+        }
     }
 }
-void execdummy(UObject* Context, FFrame& Params)
-{
-    std::cout << "recharge called" << std::endl;
-}
-
 void FortPlayerPawn::Init() {
 
     UHook* Hook = new UHook();
@@ -296,17 +286,10 @@ void FortPlayerPawn::Init() {
     Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerSendZiplineState";
     Hook->Detour = ServerSendZiplineState;
     UKismetHookingLibrary::Hook(Hook, Exec);
-
-    Hook->Path = "/Script/FortniteGame.FortControllerComponent_RechargeWeapons.ClientItemStartedRecharging";
-    Hook->Detour = execdummy;
-    UKismetHookingLibrary::Hook(Hook, Exec);
     
-
-   // um TryAutoPickupFunc
     Hook->Address = ImageBase + 0xA149FB8;
-    Hook->Detour = sub_A149FB8;
+    Hook->Detour = TryAutoPickup;
     UKismetHookingLibrary::Hook(Hook, Address); 
-    
     
     delete Hook;
 }

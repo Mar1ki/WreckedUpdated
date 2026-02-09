@@ -44,13 +44,33 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
         Tag.TagName = ModConfig->ModTag.TagName;
         Vehicle->AppliedVehicleModTags.GameplayTags.Add(Tag);
         FortVehicleMod::ApplyModConfigToVehicleInternal(ModConfig, VehicleInterface);
+
+        if (ModTag->TagName.ToString().contains("Vehicle.Mod.Tire"))
+        {
+            auto VehicleConfigClass = Vehicle->VehicleConfigsClass_BR.Get();
+            auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
+            auto DagwoodVehicle = (AFortDagwoodVehicle*)Vehicle;
+            if (auto* TireInfo = VehicleConfig->TireModDataMapping.Search([&](auto& Key, auto&) { return Key == *ModTag; }))
+            {
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.SpringsInfo = TireInfo->SpringTuning;
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.bTireModAdjustsPosition = true;
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
+                DagwoodVehicle->DagwoodRuntimeModifiedProperties.ServerTireModVersion++;
+
+                auto OldModifiedProperties = DagwoodVehicle->DagwoodRuntimeModifiedProperties;
+                DagwoodVehicle->OnRep_DagwoodRuntimeModifiers(OldModifiedProperties);
+                DagwoodVehicle->ApplyRuntimeModifiers();
+            }
+            
+        }
+        
     } else
     {
         UE_LOG(LogVehicles, Warning, "This vehicle has no interface or modconfig that should not happen");
     }
 }
 
-bool CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTag)
+bool FortVehicleMod::CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTag)
 {
     auto Vehicle = (AFortAthenaVehicle*)(__int64(VehicleInterface) - 0x510);
     
@@ -79,17 +99,37 @@ bool CanApplyMod(IFortVehicleInterface* VehicleInterface, FGameplayTag& NewModTa
         }
     }
     
+    if (NewModTag.TagName.ToString().contains("Bulletproof") ||NewModTag.TagName.ToString().contains("Offroad") )
+    {
+        for (const FGameplayTag& ExistingTag : Vehicle->AppliedVehicleModTags.GameplayTags)
+        {
+            if (ExistingTag.TagName.ToString().contains("Bulletproof") ||  ExistingTag.TagName.ToString().contains("Offroad"))
+            {
+                UE_LOG(LogVehicles, Log, "Cannot apply %s: Vehicle already has a tire mod equipped.", NewModTag.TagName.ToString().c_str());
+                return false;
+            }
+        }
+    }
+    
     return true;
 }
 
-void Dummy()
+void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, FGameplayEffectContextHandle *EffectContextHandle)
 {
+    std::cout << "InOutDamage: " << InOutDamage << std::endl;
+    for (auto tag : InTags->GameplayTags)
+    {
+        if (EffectContextHandle && EffectContextHandle->Data.Ptr) {
+            auto EffectContext = EffectContextHandle->Data.Ptr;
+            std::cout << EffectContext->AbilityLevel << "\n";
+        }
+        std::cout << "Tag: "<< tag.TagName.ToString().c_str() << std::endl;
+    }
+    
     std::cout << "dummy called" << std::endl;
+    
+
 }
-
-
-
-
 void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* PlayerController, const FGameplayTag& RequestType, UFortVehicleModComponent* ModInstance, int32 SeatIndex) {
     std::cout << "Vehicle Mod Rpc Called" << std::endl;
     ServerVehicleModSeatRPCOG(PlayerController, RequestType, ModInstance, SeatIndex);
@@ -158,22 +198,17 @@ void FortVehicleMod::Init()
     Hook->Address = 0x1A0 / 8;
     Hook->Detour = CanApplyMod;
     UKismetHookingLibrary::Hook(Hook, Interface);
-
-
-
-    // break damagablepart
-    Hook->Address = 0x1160 / 8;
-    Hook->Class = AFortAthenaVehicle::StaticClass();
-    Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-
+    
     // vehicle mod rpc used for turrets
     Hook->Address = 0x2110 / 8;
     Hook->Class = AFortPlayerControllerAthena::StaticClass();
     Hook->Detour = ServerVehicleModSeatRPC;
     Hook->Original =(void**)&ServerVehicleModSeatRPCOG;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
     
+    // AFortAthenaVehicle::AbsorbDamageIntoDamagablePart that has no impl
+    Hook->Address = 0x11A8/8;
+    Hook->Class = AFortAthenaVehicle::StaticClass();
+    Hook->Detour = Dummy;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
 }

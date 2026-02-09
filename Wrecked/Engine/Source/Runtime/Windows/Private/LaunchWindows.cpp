@@ -1,9 +1,10 @@
 #include "pch.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 #ifndef Client
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/Engine/Classes/Engine//NetDriver.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
-#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaLivingWorldManager.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaVehicle.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortGameModeAthena.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Player/FortPlayerControllerAthena.h"
@@ -24,6 +25,8 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/InventoryManagementLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortInventoryOwnerInterface.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/GameStateComponents/FortGameStateComponent_BattleRoyaleGamePhaseLogic.h"
+#include "SDK/SDK/InfernoRuntime_classes.hpp"
+#include "Engine/Source/Runtime/FortniteGame/Public/Conversation/ConversationLibrary.h"
 #endif
 //#define Client
 inline __int64 (*SendRequestNowOG)(UMcpProfileGroup* Group, void* HttpRequest, int a3);
@@ -200,6 +203,8 @@ void Main()
     InventoryManagementLibrary::Init();
     FortInventoryOwnerInterface::Init();
     FortGameStateComponent_BattleRoyaleGamePhaseLogic::Init();
+    ConversationLibrary::Init();
+    FortAthenaLivingWorldStaticPointProvider::Init();
     
     UHook* Hook = new UHook();
 
@@ -263,9 +268,10 @@ void Main()
     //*(int*)(__int64(ImageBase) + 0x12BCB068) = 7;
     //*(int*)(ImageBase + 0x12BCB280) = 7; //mme
     *(int*)(ImageBase + 0x12BCB180) = 7;
-    *(int*)(ImageBase + 0x12BD3B70) = 7; // something with lwm
+    *(int*)(ImageBase + 0x12BD3B70) = 7; // lwm log of some sort
     *(int*)(ImageBase + 0x12BCB0A8) = 7;
-    *(int*)(ImageBase + 0x12CEABC0) = 7; // recharge weapon thing
+    *(int*)(ImageBase + 0x12CEABC0) = 7; // recharge weapon log
+    *(bool*)(ImageBase + 0x12D84D92) = false; 
 
     if (CurrentGamemode == EGameModeType::Papaya)
     {
@@ -282,10 +288,15 @@ void Main()
     else if (CurrentGamemode == EGameModeType::Delmar)
     {
         UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open DelMar_Tutorials_SeamlessTutorialRun", nullptr);
-    } else
+    } 
+    else if (CurrentGamemode == EGameModeType::Valkyrie) {
+        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"open /Game/TestMap/TestMap.TestMap", nullptr);
+    }
+    else
     {
         UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open Helios_Terrain", nullptr);
     }
+    
     //UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), CurrentGamemode == EGameModeType::Juno ? L"open 1_WWWG_0": L"open Helios_Terrain", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogFortUIDirector", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"net.allowencryption 0", nullptr);
@@ -304,6 +315,8 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogNiagara none", nullptr); // we hate niagara
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogVehicleWeapon VeryVerbose", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogWeaponModStation VeryVerbose", nullptr);
+    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAnalytics none", nullptr); // we hate the api server
+    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogCreativePlots VeryVerbose", nullptr); // somehow portals are not stripped fully
 
 #endif
 #ifdef Client

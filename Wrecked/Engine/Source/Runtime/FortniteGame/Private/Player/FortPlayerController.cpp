@@ -4,12 +4,13 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Plugins/PapayaManagerLibrary/Private/PapayaManager.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
-#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaLivingWorldManager.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaVehicle.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Movement/FortMovementMode_BaseExtLogic.h"
 #include "SDK/SDK/VaultingCodeRuntime_classes.hpp"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
 
 void VHook3(void* Base, uintptr_t Index, void* Detour, void** Original = nullptr) {
     auto VTable = (*(void***)Base);
@@ -268,28 +269,22 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
 }
 bool FortPlayerController::RemoveInventoryItem(IFortInventoryOwnerInterface* Interface, FGuid* ItemGuid, int Count)
 {
-    // alr this whole func is not proper prob and its ass asf so 
-        
-    // this shit calls const getforpawn
     const AFortPawn* Pawn = ((const AFortPawn* (*)(IFortInventoryOwnerInterface*))(*(void***)Interface)[9])(Interface);
     if (!Pawn) return false;
     auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
     auto Inventory = (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
-    
-    for (const auto& Item : Inventory->Inventory.ItemInstances)
-    {
-        if (Item->ItemEntry.ItemGuid == *ItemGuid)
-        {
-            auto ItemClass = Item->ItemEntry.ItemDefinition->Class;
-            if (ItemClass->IsA(UFortAmmoItemDefinition::StaticClass()) && PlayerController->bInfiniteAmmo)
-                return false;
-            if (ItemClass->IsA(UFortResourceItemDefinition::StaticClass()) && PlayerController->bBuildFree)
-                return false;
 
-            Item->ItemEntry.Count -= Count;
-            Inventory->ReplaceEntry(Item->ItemEntry);
-            return true;
-        }
+    if (auto ItemEntry = Inventory->GetItemEntryByGuid(*ItemGuid))
+    {
+        auto ItemClass = ItemEntry->ItemDefinition->Class;
+        if (ItemClass->IsA(UFortAmmoItemDefinition::StaticClass()) && PlayerController->bInfiniteAmmo)
+            return false;
+        if (ItemClass->IsA(UFortResourceItemDefinition::StaticClass()) && PlayerController->bBuildFree)
+            return false;
+
+        ItemEntry->Count -= Count;
+        Inventory->ReplaceEntry(*ItemEntry);
+        return true;
     }
     return false;
 }
@@ -590,7 +585,7 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
 
 
             auto idkclass = StaticLoadObject<UClass>("/WeaponModStation/Gameplay/Actors/BP_WeaponModStation_v2.BP_WeaponModStation_v2_C");
-            GetWorld()->SpawnActor(idkclass, newloc, {} );
+            GetWorld()->SpawnActor(idkclass, newloc, Pawn->K2_GetActorRotation());
         }
         if (Command == "vehicleinfo")
         {
@@ -618,23 +613,9 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             }
         }
 
-        if (Command == "getcurrentconfig")
+        if (Command == "bruh")
         {
-            auto Vehicle =  (AFortAthenaVehicle*)Pawn->CurrentVehicle;
-            auto VehicleCfgClass =  Vehicle->VehicleConfigsClass_BR.Get();
-            auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleCfgClass->DefaultObject;
-            
-            std::cout << Vehicle->Name.ToString().c_str() << std::endl;
-            // i think we get the current config through the interface
-           if (VehicleConfig)
-           {
-
-               for (auto Part : VehicleConfig->DamageableParts)
-               {
-                  std::cout << Part.ShapeName.ToString().c_str() << std::endl;
-               }
-           }
-            
+            FortAthenaLivingWorldEvent::TrySpawnEvents();
         }
         if (Command == "testmme") {
             auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
@@ -648,6 +629,25 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
                     Controller->ClientMessage(std::to_wstring(Num).c_str(), FName(), 1);
                 }
             }
+        }
+        if (Command == "teleport")
+        {
+            if (!Pawn) return;
+            float X = 0, Y = 0, Z = 0;
+    
+            for (size_t i = 1; i <= 3; i++)
+            {
+                std::string arg = Arguments[i].c_str();
+        
+                if (arg.find("X=") != std::string::npos)
+                    X = std::stof(arg.substr(2));
+                else if (arg.find("Y=") != std::string::npos)
+                    Y = std::stof(arg.substr(2));
+                else if (arg.find("Z=") != std::string::npos)
+                    Z = std::stof(arg.substr(2));
+            }
+
+            Pawn->K2_SetActorLocation(FVector(X, Y, Z), false, nullptr, true);
         }
         if (Command == "spawnbot")
         {
@@ -671,7 +671,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Comp->NewlyAddedMovementModeExtensionRuntimeData.Clear();
             Comp->ActiveLayeredMovementModeRuntimeData.Clear();
         }
-
         if (Command == "modmod") {
             auto TurretClass = StaticLoadObject<UClass>("/VehicleMods/Mods/SocketPropDestructor/Tire/VMConfig_SocketPropDestructor_Tire.VMConfig_SocketPropDestructor_Tire_C", UBlueprintGeneratedClass::StaticClass());
             auto ModConfig = (UFortVehicleModConfig*)TurretClass->DefaultObject;
@@ -687,28 +686,10 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
                 }
             }
         }
-        if (Command == "cacheconfig")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-
-            LWM->CachedConfig = const_cast<UFortAthenaLivingWorldConfigData*>(LWM->GetConfig());
-        }
-        if (Command == "initcategories")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-            LWM->InitializeCategories();
-        }
         if (Command == "spawnnpc")
         {
             static auto SpawnerClass = StaticLoadObject<UClass>("/NPCLibrary/NPCs/BaoBros/BaoBros/BP_AIBotSpawnerData_NPC_BaoBros.BP_AIBotSpawnerData_NPC_BaoBros_C");
             auto ComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(SpawnerClass, UWorld::GetWorld());
-            
-           auto List =  ComponentList->GetList();
-            for (auto Component : List)
-            {
-                std::cout << Component->Class->Name.ToString().c_str() << std::endl;
-                std::cout << Component->Name.ToString().c_str() << std::endl;
-            }
             // that loc is aids
             auto Transform = FTransform();
             Transform.Translation = Controller->Pawn->K2_GetActorLocation();
@@ -720,19 +701,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Transform.Scale3D = One;
             
             ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, Transform, false);
-        }
-        if (Command == "init")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-            void (*Initialize)(UFortAthenaLivingWorldManager *LWM) = decltype(Initialize)(ImageBase + 0xB689864);
-            Initialize(LWM);
-        }
-        if (Command == "getcategories")
-        {
-            auto LWM = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-            TArray<FFortAthenaLivingWorldCategory*> Categories;
-            LWM->GetAllCategories(Categories, L"UFortAthenaLivingWorldManager::InitializeCategories");
-            std::cout << Categories.Num() << std::endl;
         }
         if (Command == "giveitem")
         {

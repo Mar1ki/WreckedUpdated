@@ -171,7 +171,6 @@
     <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\NetDriver.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\AI\FortAthenaAISpawnerData.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaCreativePortal.h" />
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaLivingWorldManager.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaMapInfo.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaVehicle.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortGameModeAthena.h" />
@@ -181,10 +180,14 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerControllerAthena.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerPawn.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingContainer.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Conversation\ConversationLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\AthenaAIServicePlayerBots.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortInventoryOwnerInterface.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\InventoryManagementLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldEvent.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldStaticPointProvider.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementComp_Character.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementMode_BaseExtLogic.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModFunctionLibrary.h" />
@@ -204,7 +207,6 @@
     <ClCompile Include="Engine\Source\Runtime\Engine\Private\World.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\AI\FortAthenaAISpawnerData.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaCreativePortal.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaLivingWorldManager.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaMapInfo.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaVehicle.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortGameModeAthena.cpp" />
@@ -289,12 +291,16 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingContainer.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Conversation\ConversationLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\AthenaAIServicePlayerBots.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Inventory\FortInventory.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortInventoryOwnerInterface.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldEvent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldStaticPointProvider.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementComp_Character.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementMode_BaseExtLogic.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerController.cpp" />
@@ -390,6 +396,7 @@
     <ClCompile Include="SDK\SDK\AIModule_functions.cpp" />
     <ClCompile Include="SDK\SDK\AscenderCodeRuntime_functions.cpp" />
     <ClCompile Include="SDK\SDK\Basic.cpp" />
+    <ClCompile Include="SDK\SDK\CommonConversationRuntime_functions.cpp" />
     <ClCompile Include="SDK\SDK\CoreUObject_functions.cpp" />
     <ClCompile Include="SDK\SDK\Engine_functions.cpp" />
     <ClCompile Include="SDK\SDK\FortniteAI_functions.cpp" />
@@ -397,6 +404,7 @@
     <ClCompile Include="SDK\SDK\GameplayAbilities_functions.cpp" />
     <ClCompile Include="SDK\SDK\GameplayTags_functions.cpp" />
     <ClCompile Include="SDK\SDK\PlayspaceSystem_functions.cpp" />
+    <ClCompile Include="SDK\SDK\ValetRuntime_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Include\memcury.h" />
