@@ -212172,26 +212172,6 @@ float AFortSafeZoneIndicator::GetSafeZoneShrinkSpeedRelativeTo(float DistanceToT
 	return Parms.ReturnValue;
 }
 
-
-// Function FortniteGame.FortSafeZoneIndicator.InitializeWithMapDefaultPhases
-// (Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable)
-
-void AFortSafeZoneIndicator::InitializeWithMapDefaultPhases()
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("FortSafeZoneIndicator", "InitializeWithMapDefaultPhases");
-
-	auto Flgs = Func->FunctionFlags;
-	Func->FunctionFlags |= 0x400;
-
-	UObject::ProcessEvent(Func, nullptr);
-
-	Func->FunctionFlags = Flgs;
-}
-
-
 // Function FortniteGame.FortSafeZoneIndicator.MegaStormMinTimerExpired
 // (Final, Native, Public)
 
@@ -212597,32 +212577,6 @@ void AFortSafeZoneIndicator::SetShowWarmupPreview(const bool bNewPreviewDuringWa
 
 	Func->FunctionFlags = Flgs;
 }
-
-
-// Function FortniteGame.FortSafeZoneIndicator.StartPhase
-// (Final, RequiredAPI, BlueprintAuthorityOnly, Native, Public, BlueprintCallable)
-// Parameters:
-// const int32                             InPhaseIndex                                           (ConstParm, Parm, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-
-void AFortSafeZoneIndicator::StartPhase(const int32 InPhaseIndex)
-{
-	static class UFunction* Func = nullptr;
-
-	if (Func == nullptr)
-		Func = Class->GetFunction("FortSafeZoneIndicator", "StartPhase");
-
-	Params::FortSafeZoneIndicator_StartPhase Parms{};
-
-	Parms.InPhaseIndex = InPhaseIndex;
-
-	auto Flgs = Func->FunctionFlags;
-	Func->FunctionFlags |= 0x400;
-
-	UObject::ProcessEvent(Func, &Parms);
-
-	Func->FunctionFlags = Flgs;
-}
-
 
 // Function FortniteGame.FortSafeZoneIndicator.StopPreviewingPhase
 // (Final, BlueprintAuthorityOnly, Native, Public, BlueprintCallable)

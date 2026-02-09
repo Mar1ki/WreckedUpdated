@@ -199,6 +199,7 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
 		if (!GameMode->AIGoalManager)
 			GameMode->AIGoalManager = (AFortAIGoalManager*)GetWorld()->SpawnActor(AFortAIGoalManager::StaticClass(), {});
+
 	}
 
 	if (CurrentGamemode == Athena && GameState->Teams.Num() == 0) return false;
@@ -210,6 +211,9 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		GetWorld()->Listen(Url);
 		GameMode->bWorldIsReady = true;
 		if (CurrentGamemode == Athena) {
+			TArray<FVector4> Blacklist = {};
+			auto MapCenter = GameState->MapInfo->GetMapCenter();
+			GameState->MapInfo->GenerateSafeZoneLocations(*(TArray<FVector>*)(__int64(GetLogic()) + 0x468), Blacklist, &MapCenter, 0, false);
 			static void* (*InitializeFlightPath)(AFortAthenaMapInfo*, AFortGameStateAthena*, UFortGameStateComponent_BattleRoyaleGamePhaseLogic*, bool, double, float, float) = decltype(InitializeFlightPath)(ImageBase + 0x8F454DC);
 			InitializeFlightPath(GameState->MapInfo, GameState, UFortGameStateComponent_BattleRoyaleGamePhaseLogic::Get(GetWorld()), false, 0.f, 0.f, 0.f);
 		}
@@ -268,19 +272,7 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	return Pawn;
 }
 
-class UFunction* FindFunctionByFName(UClass *Class, FName FuncName)
-{
-	for (const UStruct* Clss = Class; Clss; Clss = Clss->Super)
-	{
-		for (UField* Field = Clss->Children; Field; Field = Field->Next)
-		{
-			if (Field->HasTypeFlag(EClassCastFlags::Function) && Field->Name == FuncName)
-				return static_cast<class UFunction*>(Field);
-		}
-	}
 
-	return nullptr;
-}
 
 void BotEnterAircraft(AFortAthenaAIBotController* Controller, AFortAthenaAircraft* InAircraft)
 {
@@ -329,111 +321,16 @@ void BotEnterAircraft(AFortAthenaAIBotController* Controller, AFortAthenaAircraf
 		BlackboardComp->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Global_IsInBus")), true);
 	}
 }
-void AFortGameModeAthena::StartAircraftPhase()
-{
-	UFortGameStateComponent_BattleRoyaleGamePhaseLogic* Logic = GetLogic();
 
-	auto Time = UGameplayStatics::GetTimeSeconds(GetWorld());
-	auto Aircraft = Logic->Aircrafts_GameState[0].Get();
-	auto GameState = (AFortGameStateAthena*)GetWorld()->GameState;
-	auto& FlightInfo = GameState->MapInfo->FlightInfos[0];
-	Aircraft->FlightElapsedTime = 0;
-	Aircraft->DropStartTime = Time + FlightInfo.TimeTillDropStart;
-	Aircraft->DropEndTime = Time + FlightInfo.TimeTillDropEnd;
-	Aircraft->FlightStartTime = Time;
-	Aircraft->FlightEndTime = Time + FlightInfo.TimeTillFlightEnd;
-	Aircraft->ReplicatedFlightTimestamp = Time;
-	Aircraft->StartFlightPath(Time);
-
-	for (auto& Player : AlivePlayers)
-	{
-		if (!Player)
-			continue;
-		
-		auto Pawn = Player->MyFortPawn;
-		Player->LastDamager = 0;
-		Player->LastFallInstigator = 0;
-		Pawn->ServerInternalEquipWeapon(0);
-		Pawn->bIsInsideSafeZone = true;
-		Player->GetAircraftComponent()->CurrentAircraft = Aircraft;
-		Player->GetAircraftComponent()->ClientEnterAircraft(Aircraft);
-		Player->GetAircraftComponent()->PlacePlayerInAircraft(Aircraft, false);
-		Pawn->OnRep_IsInsideSafeZone();
-		Player->ClientActivateSlot(EFortQuickBars::Primary, 0, 0.0, 1, 0);
-		Player->RemoveAllInventoryItems();
-		if (Player->Pawn)
-		{
-			if (Pawn->Role == ENetRole::ROLE_Authority)
-			{
-				if (Pawn->bIsInAnyStorm)
-				{
-					Pawn->bIsInAnyStorm = false;
-					Pawn->OnRep_IsInAnyStorm();
-				}
-			}
-			Pawn->bIsInsideSafeZone = true;
-			Pawn->OnRep_IsInsideSafeZone();
-			for (auto& ScriptDelegate : Pawn->OnEnteredAircraft.InvocationList)
-			{
-				auto Object = ScriptDelegate.Object;
-				Object->ProcessEvent(FindFunctionByFName(Object->Class, ScriptDelegate.FunctionName), nullptr);
-			}
-		}
-		static void* (*Reset)(AFortPlayerControllerAthena*) = decltype(Reset)(ImageBase + 0x6DD1E84);
-		Reset(Player);
-		Player->ClientGotoState(UKismetStringLibrary::Conv_StringToName(L"Spectating"));
-	}
-	for (auto& Player : AliveBots)
-	{
-		BotEnterAircraft(Player, Aircraft);
-	}
-
-	Logic->bAircraftIsLocked = true;
-	Logic->WarmupCountdownEndTime = Time;
-	Logic->OnRep_WarmupCountdownEndTime();
-	Logic->SetGamePhase(EAthenaGamePhase::Aircraft);
-}
 
 void FortGameModeAthena::HandleMatchHasStarted(AFortGameModeAthena* GameMode)
 {
 	UFortGameStateComponent_BattleRoyaleGamePhaseLogic* Logic = GetLogic();
-	static bool bWarmupSet = false;
-	if (CurrentGamemode != EGameModeType::Juno)
-	{
-		if (!bWarmupSet)
-		{
-			bWarmupSet = true;
-    	
-			auto Time = UGameplayStatics::GetTimeSeconds(GetWorld());
-			Logic->WarmupCountdownStartTime = Time;
-			Logic->WarmupCountdownEndTime = Time + WarmupDuration;
-			Logic->WarmupCountdownDuration = WarmupDuration;
-			Logic->WarmupEarlyCountdownDuration = 0.f;
-			Logic->OnRep_WarmupCountdownEndTime();
-    	
-			AFortGameStateAthena* GameState = Cast<AFortGameStateAthena>(GameMode->GameState);
-			if (CurrentGamemode == Athena)
-			{
-				int NumToSpawn = 1;
-				if (GameState->CurrentPlaylistInfo.BasePlaylist->AirCraftBehavior == EAirCraftBehavior::OpposingAirCraftForEachTeam)
-					NumToSpawn = GameState->TeamCount;
-
-				TArray<AFortAthenaAircraft*> Aircrafts;
-				for (int i = 0; i < NumToSpawn; i++)
-					Aircrafts.Add(AFortAthenaAircraft::SpawnAircraft(GetWorld(), GameState->MapInfo->AircraftClass, GameState->MapInfo->FlightInfos[i]));
-    	
-				Logic->SetAircrafts(Aircrafts);
-				Logic->SetGamePhase(EAthenaGamePhase::Warmup);
-				Logic->OnRep_Aircrafts();
-			}
-
-			if (CurrentGamemode == EGameModeType::Papaya)
-			{
-				Logic->SetGamePhase(EAthenaGamePhase::Setup); // ig bro
-			}
-			if (CurrentGamemode == Creative)
-			{
-				Logic->SetGamePhase(EAthenaGamePhase::Setup);
+	if (!Logic->StartWarmupPhase()) {
+		if (!Logic->StartAircraftPhase()) {
+			if (GetGameState()->CurrentPlaylistInfo.BasePlaylist->SafeZoneStartUp == ESafeZoneStartUp::StartsWithNoAirCraft) {
+				if (!Logic->StartSafeZones(true, true) && GetGameState()->MapInfo)
+					Logic->SetGamePhase(EAthenaGamePhase::None);
 			}
 		}
 	}
@@ -501,122 +398,6 @@ void FortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, 
 	return HandleStartingNewPlayerOG(GameMode, NewPlayer);
 }
 
-void FortGameModeAthena::StartNewSafeZonePhase(AFortGameModeAthena* GameMode)
-{
-	AFortGameStateAthena* GameState = (AFortGameStateAthena*)GameMode->GameState;
-	AFortSafeZoneIndicator* SafeZoneIndicator = GetLogic()->SafeZoneIndicator;
-	
-	int32 CurrentPhase = SafeZoneIndicator->CurrentPhase;
-	
-	const float Time = (float)UGameplayStatics::GetTimeSeconds(GameState);
-	const float ServerTime = GameState->ServerWorldTimeSecondsDelta + Time;
-	
-	FFortSafeZonePhaseInfo PrevPhase = SafeZoneIndicator->SafeZonePhases[CurrentPhase];
-	SafeZoneIndicator->PreviousCenter = FVector_NetQuantize100(PrevPhase.Center);
-	SafeZoneIndicator->PreviousRadius = PrevPhase.Radius;
-	
-	CurrentPhase++;
-	
-	FFortSafeZonePhaseInfo NextPhase = SafeZoneIndicator->SafeZonePhases[CurrentPhase];
-
-	SafeZoneIndicator->NextCenter = FVector_NetQuantize100(NextPhase.Center);
-	SafeZoneIndicator->NextRadius = NextPhase.Radius;
-	SafeZoneIndicator->NextMegaStormGridCellThickness = NextPhase.MegaStormGridCellThickness;
-
-	if (SafeZoneIndicator->SafeZonePhases.IsValidIndex(CurrentPhase + 1))
-	{
-		FFortSafeZonePhaseInfo& NextPhaseInfo = SafeZoneIndicator->SafeZonePhases[CurrentPhase + 1];
-
-		SafeZoneIndicator->NextNextCenter = FVector_NetQuantize100(NextPhaseInfo.Center);
-		SafeZoneIndicator->NextNextRadius = NextPhaseInfo.Radius;
-		SafeZoneIndicator->NextNextMegaStormGridCellThickness = NextPhaseInfo.MegaStormGridCellThickness;
-	}
-
-	SafeZoneIndicator->SafeZoneStartShrinkTime = ServerTime + NextPhase.WaitTime;
-	SafeZoneIndicator->SafeZoneFinishShrinkTime = SafeZoneIndicator->SafeZoneStartShrinkTime + NextPhase.ShrinkTime;
-
-	SafeZoneIndicator->CurrentDamageInfo = NextPhase.DamageInfo;
-	SafeZoneIndicator->OnRep_CurrentDamageInfo();
-
-	SafeZoneIndicator->CurrentPhase = CurrentPhase;
-	SafeZoneIndicator->OnRep_CurrentPhase();
-	
-	GetLogic()->GamePhaseStep = EAthenaGamePhaseStep::StormHolding;
-	GetLogic()->HandleGamePhaseStepChanged(EAthenaGamePhaseStep::StormHolding);
-}
-
-void FortGameModeAthena::InitialSafeZone(AFortGameModeAthena* GameMode)
-{
-    AFortGameStateAthena* GameState = (AFortGameStateAthena*)GameMode->GameState;
-    
-    auto Logic = GetLogic();
-    
-    if (Logic->SafeZoneIndicator)
-        return;
-
-	FFortSafeZoneDefinition Definition = GameState->MapInfo->SafeZoneDefinition;
-    float ZoneCount = Definition.Count.Evaluate();
-	auto SafeZoneLocations = *(TArray<FVector>*)(__int64(GetLogic()) + 0x468);
-	TArray<FVector4> Blacklist = {};
-	auto MapCenter = GameState->MapInfo->GetMapCenter();
-	GameState->MapInfo->GenerateSafeZoneLocations(SafeZoneLocations, Blacklist, &MapCenter, 0, false);
-    UClass* IndicatorClass = Logic->SafeZoneIndicatorClass;
-    AFortSafeZoneIndicator* Indicator = GetWorld()->SpawnActor<AFortSafeZoneIndicator>(IndicatorClass, FVector{});
-	
-    if (!Indicator)
-        return;
-    
-    if (Indicator->SafeZonePhases.IsValid())
-    	Indicator->SafeZonePhases.Free();
-    
-    const float Time = (float)UGameplayStatics::GetTimeSeconds(GameState);
-    const float ServerTime = GameState->ServerWorldTimeSecondsDelta + Time;
-    
-    for (float i = 0; i < ZoneCount; i++)
-    {
-        FFortSafeZonePhaseInfo Phase{};
-        
-        Phase.Radius = Definition.Radius.EvaluateIndex(i);
-        Phase.WaitTime = Definition.WaitTime.EvaluateIndex(i);
-        Phase.ShrinkTime = Definition.ShrinkTime.EvaluateIndex(i);
-        Phase.PlayerCap = (int)Definition.PlayerCapSolo.EvaluateIndex(i);
-        Phase.DamageInfo = FFortSafeZoneDamageInfo();
-    	UDataTableFunctionLibrary::EvaluateCurveTableRow(GameState->AthenaGameDataTable, UKismetStringLibrary::Conv_StringToName(L"Default.SafeZone.Damage"), i, nullptr, &Phase.DamageInfo.Damage, FString());
-    	if (i == 0.f)
-    		Phase.DamageInfo.Damage = 0.01f;
-    	Phase.DamageInfo.bPercentageBasedDamage = true;
-    	Phase.TimeBetweenStormCapDamage = Logic->TimeBetweenStormCapDamage.EvaluateIndex(i);
-    	Phase.StormCapDamagePerTick = Logic->StormCapDamagePerTick.EvaluateIndex(i);
-    	Phase.StormCampingIncrementTimeAfterDelay = Logic->StormCampingIncrementTimeAfterDelay.EvaluateIndex(i);
-    	Phase.StormCampingInitialDelayTime = Logic->StormCampingInitialDelayTime.EvaluateIndex(i);
-        Phase.MegaStormGridCellThickness = (int)Definition.MegaStormGridCellThickness.EvaluateIndex(i);
-        Phase.Center = SafeZoneLocations[(int)i];
-        
-        UE_LOG(LogStorm, Log, "Phase %.0f - Radius: %.2f, WaitTime: %.2f, ShrinkTime: %.2f, PlayerCap: %d, Center: (%.2f, %.2f, %.2f), MegaStormGridCellThickness: %d",
-               i, Phase.Radius, Phase.WaitTime, Phase.ShrinkTime, Phase.PlayerCap,
-               Phase.Center.X, Phase.Center.Y, Phase.Center.Z, Phase.MegaStormGridCellThickness);
-        
-        Indicator->SafeZonePhases.Add(Phase);
-        Indicator->PhaseCount++;
-    }
-	
-    Indicator->OnRep_PhaseCount();
-    Indicator->SetSafeZonePhases(Indicator->SafeZonePhases);
-    
-    Indicator->SafeZoneStartShrinkTime = ServerTime + Indicator->SafeZonePhases[0].WaitTime;
-    Indicator->SafeZoneFinishShrinkTime = Indicator->SafeZoneStartShrinkTime + Indicator->SafeZonePhases[0].ShrinkTime;
-    Indicator->CurrentPhase = 0;
-    Indicator->OnRep_CurrentPhase();
-	
-    Logic->SafeZoneIndicator = Indicator;
-    Logic->SafeZoneIndicator->OnSafeZoneStateChange(EFortSafeZoneState::Starting, true);
-    Logic->GamePhaseStep = EAthenaGamePhaseStep::StormHolding;
-    Logic->OnRep_SafeZoneIndicator();
-    Logic->HandleGamePhaseStepChanged(EAthenaGamePhaseStep::StormHolding);
-
-	StartNewSafeZonePhase(GameMode);
-}
-
 bool FortGameModeAthena::LoadMap(UEngine* Engine ,FWorldContext& WorldContext, FURL URL, class UPendingNetGame* Pending, FString& Error) {
 	auto res = LoadMapOG(Engine, WorldContext, URL, Pending, Error);
 	if (res) 
@@ -671,6 +452,6 @@ void FortGameModeAthena::Init()
 	Hook->Address = ImageBase + 0x8FD26F0;
 	Hook->Detour = PickTeam;
 	UKismetHookingLibrary::Hook(Hook, Address);
-	
+
 	delete Hook;
 }

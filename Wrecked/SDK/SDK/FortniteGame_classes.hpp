@@ -31353,7 +31353,6 @@ public:
 
 public:
 	static class UFortGameStateComponent_BattleRoyaleGamePhaseLogic* Get(const class UObject* WorldContextObject);
-    void Tick();
 	void DrawDebugSafeZoneHUD(class AHUD* HUD, class UCanvas* Canvas);
 	void FinishCurrentStormCircle(float TimeToShrink);
 	void FireServerPerformanceEvent();
@@ -31401,6 +31400,14 @@ public:
 	float GetWarmupCountdownStartTime() const;
 	bool IsInCurrentSafeZone(const struct FVector& TestLocation, bool bClassicSafeZoneOnly) const;
 
+	bool StartAircraftPhase();
+	bool StartWarmupPhase();
+	bool StartSafeZones(bool bAllowRestart, bool bStartPhase);
+	bool StartSafeZonesPhase(bool bAllowRestart);
+	void SpawnInitialSafeZone();
+	void UpdateSafeZonePhase(float Time);
+	void UpdateWarmupPhase(float Time);
+	void UpdateAircraftPhase(float Time);
 public:
 	static class UClass* StaticClass()
 	{
@@ -56297,9 +56304,9 @@ class AFortAthenaAircraft final : public AFortAircraft
 public:
 	struct FLinearColor                           MinimapIconColorTeammate;                          // 0x02D0(0x0010)(Edit, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 	struct FLinearColor                           MinimapIconColorEnemy;                             // 0x02E0(0x0010)(Edit, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         Pad_2F0[0x10];                                     // 0x02F0(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
+	TMulticastInlineDelegate<void(class AFortAthenaAircraft* FortAthenaAircraft)> OnDropZoneEntered;                                     // 0x02F0(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
 	TMulticastInlineDelegate<void(class AFortAthenaAircraft* FortAthenaAircraft)> OnDropZoneExited;  // 0x0300(0x0010)(BlueprintVisible, ZeroConstructor, InstancedReference, BlueprintAssignable, NativeAccessSpecifierPublic)
-	uint8                                         Pad_310[0x10];                                     // 0x0310(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
+	TMulticastInlineDelegate<void(class AFortAthenaAircraft* FortAthenaAircraft)> OnFlightEnded;                                     // 0x0310(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
 	int32                                         NumSpawnSlots;                                     // 0x0320(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
 	float                                         SpawnOffsetRadius;                                 // 0x0324(0x0004)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
 	uint8                                         Pad_328[0x10];                                     // 0x0328(0x0010)(Fixing Size After Last Property [ Dumper-7 ])

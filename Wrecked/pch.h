@@ -332,6 +332,7 @@ DEFINE_LOG_CATEGORY(LogTemp);
 DEFINE_LOG_CATEGORY(LogCheats);
 DEFINE_LOG_CATEGORY(LogKismet);
 DEFINE_LOG_CATEGORY(LogGameMode);
+DEFINE_LOG_CATEGORY(LogGamePhases);
 DEFINE_LOG_CATEGORY(LogGameState);
 DEFINE_LOG_CATEGORY(LogNet);
 DEFINE_LOG_CATEGORY(LogProjectileManager);
@@ -632,6 +633,6 @@ inline void ApplyWeaponModset(FFortItemEntry* Entry, UFortWeaponModSetData* Mods
         sub_9BA1D68(Entry, &v9);
     }
 }
-constexpr float WarmupDuration = 300.f;
+constexpr float WarmupDuration = 70.f;
 inline EGameModeType CurrentGamemode = EGameModeType::Athena;
 #endif //PCH_H

@@ -473,15 +473,21 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         }
         Arguments.push_back(Message);
     }
+    
     auto NumArgs = Arguments.size() == 0 ? 0 : Arguments.size() - 1;
     if (Arguments.size() >= 1)
     {
         auto& Command = Arguments[0];
         std::transform(Command.begin(), Command.end(), Command.begin(), ::tolower);
 
+        if (Command == "getsafezonecnt") {
+            FFortSafeZoneDefinition Definition = GetGameState()->MapInfo->SafeZoneDefinition;
+            float ZoneCount = Definition.Count.Evaluate();
+            std::cout << ZoneCount << "\n";
+        }
         if (Command == "startaircraft")
         {
-            GetGameMode()->StartAircraftPhase();
+            GetLogic()->StartAircraftPhase();
         }
         if (Command == "testcar")
         {
@@ -544,6 +550,9 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         if (Command == "getpos") {
             auto Location = Pawn->K2_GetActorLocation();
             std::cout << Location.X << " " << Location.Y << " " << Location.Z << "\n";
+        }
+        if (Command == "god") {
+            Controller->bCanBeDamaged = !(bool)Controller->bCanBeDamaged;
         }
         if (Command == "testdiscover") {
             auto Comp = (UFortControllerComponent_MapDiscoverability*)Controller->GetComponentByClass(UFortControllerComponent_MapDiscoverability::StaticClass());
