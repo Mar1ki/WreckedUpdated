@@ -6,6 +6,29 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Movement/FortMovementMode_BaseExtLogic.h"
 #include "SDK/SDK/NitroGameplayRuntime_classes.hpp"
 
+FMMERuntimeContext CreateRuntimeContext(UFortMovementMode_BaseExtRuntimeData* RuntimeData) {
+    static void (*ConstructRuntimeContext)(FMMERuntimeContext*, UFortMovementMode_BaseExtRuntimeData*) = decltype(ConstructRuntimeContext)(ImageBase + 0x1C105BC);
+    FMMERuntimeContext Temp;
+    ConstructRuntimeContext(&Temp, RuntimeData);
+    return Temp;
+}
+void CoolFuncion(UFortMovementComp_Character* Comp) {//139B788
+    static EFortMovementModeExt_UpdateResult(*UpdateBeforeCharacterMovement)(UFortMovementComp_Character*, FMMERuntimeContext) = decltype(UpdateBeforeCharacterMovement)(ImageBase + 0x9DADFB4);
+    auto Pawn = Cast<AFortPawn>(Comp->CharacterOwner);
+    if (!Pawn) return;
+
+    for (auto RuntimeData : Comp->PushedMovementModeExtensionRuntimeData) {
+        auto MME = FortMovementMode_BaseExtLogic::GetMovementModeExtById(Pawn, RuntimeData->LogicID);
+        if (!MME) continue;
+
+        auto RuntimeContext = CreateRuntimeContext(RuntimeData);
+        
+        auto UpdateResult = UpdateBeforeCharacterMovement(Comp, RuntimeContext);
+
+
+    }
+
+}
 struct FServerMoveTick 
 {
     UFortMovementComp_Character* Comp;

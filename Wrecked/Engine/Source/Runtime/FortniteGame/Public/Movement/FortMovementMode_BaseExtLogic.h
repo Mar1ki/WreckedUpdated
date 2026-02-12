@@ -2,7 +2,7 @@
 #include "pch.h"
 
 namespace FortMovementMode_BaseExtLogic {
-	UFortMovementMode_BaseExtLogic* GetMovementModeExtById(AFortPlayerPawn* Pawn, FMovementMode_ExtID Id);
-	UClass* GetMovementModeExtClassById(AFortPlayerPawn* Pawn, FMovementMode_ExtID Id);
+	UFortMovementMode_BaseExtLogic* GetMovementModeExtById(AFortPawn* Pawn, FMovementMode_ExtID Id);
+	UClass* GetMovementModeExtClassById(AFortPawn* Pawn, FMovementMode_ExtID Id);
 
 }
