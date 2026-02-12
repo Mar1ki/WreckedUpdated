@@ -8,6 +8,7 @@ __int64 FortWeaponModStation::ServerStopInteractWithWorkbenchActor(UFortWeaponMo
 {
     auto PlayerController = (AFortPlayerControllerAthena*)Component->GetOwner();
     auto Pawn = PlayerController->MyFortPawn;
+    if (!Pawn) return ServerStopInteractWithWorkbenchActorOG(Component, ModStation);
 
     FGameplayTag CameraTag;
     CameraTag.TagName = UKismetStringLibrary::Conv_StringToName(L"WeaponModStation.CameraAbility.Active"); 
@@ -23,8 +24,6 @@ __int64 FortWeaponModStation::ServerStopInteractWithWorkbenchActor(UFortWeaponMo
     
     return ServerStopInteractWithWorkbenchActorOG(Component, ModStation);
 }
-
-
 
 // we should name these // oh and prob i need to use them but later ok
 static unsigned __int64* (__fastcall* sub_13DC400)(__int64* noidea, UFortWeaponModItemDefinition* WeaponMod) = decltype(sub_13DC400)(ImageBase + 0x13DC400);
@@ -72,7 +71,8 @@ void ServerPurchaseWeaponModForWeaponImplementation(UFortWeaponModStationCompone
         }
     }
 
-    
+    auto ItemEntry = Inventory->GetItemEntryByGuid(Weapon->ItemEntryGuid);
+
     if (!Inventory->RemoveItem(PlayerController, GoldDef, ModCost))
        return;
     
@@ -80,11 +80,27 @@ void ServerPurchaseWeaponModForWeaponImplementation(UFortWeaponModStationCompone
     FFortWeaponModSlot NewSlot;
     NewSlot.WeaponMod = WeaponMod;
     NewSlot.bIsDynamic = true;
+
+    for (auto mod : ItemEntry->SavedWeaponModSlots)
+    {
+        std::cout << mod.WeaponModTemplateID.ToStr().c_str() << std::endl;
+    }
+
+    std::cout << WeaponMod->WeaponModTag.TagName.ToString().c_str() << std::endl;
+
+
+    FFortSavedWeaponModSlot GoofyMod;
+    GoofyMod.bIsDynamic = true;
+   // GoofyMod.WeaponModTemplateID = WeaponMod.
+
     
-    WorldItem->ItemEntry.WeaponModSlots.Add(NewSlot);
+    ItemEntry->WeaponModSlots.Add(NewSlot);
+    //ItemEntry->SavedWeaponModSlots.Add(NewSlot);
     Weapon->WeaponModSlots.Add(NewSlot);
     Weapon->OnRep_ReplicatedWeaponModSlots(PreviousModSlots);
-    Inventory->Update(&WorldItem->ItemEntry);
+    
+    Inventory->Update(ItemEntry);
+    
 }
 
 // fix needs to be found bc when u remove a mod and then try to drop it it crashes so we need to add the default mods i managed to just replicate the bug 2 times
