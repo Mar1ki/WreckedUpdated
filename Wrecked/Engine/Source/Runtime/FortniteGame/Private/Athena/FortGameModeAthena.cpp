@@ -193,12 +193,12 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		}
 		
 		if (!GameMode->AIDirector)
-			GameMode->AIDirector = (AFortAIDirector*)GetWorld()->SpawnActor(AFortAIDirector::StaticClass(), {});
+			GameMode->AIDirector = (AFortAIDirector*)GetWorld()->SpawnActor(AFortAIDirector::StaticClass(), {}, {}, GameMode);
 
 		GameMode->AIDirector->Activate();
 
 		if (!GameMode->AIGoalManager)
-			GameMode->AIGoalManager = (AFortAIGoalManager*)GetWorld()->SpawnActor(AFortAIGoalManager::StaticClass(), {});
+			GameMode->AIGoalManager = (AFortAIGoalManager*)GetWorld()->SpawnActor(AFortAIGoalManager::StaticClass(), {}, {}, GameMode);
 
 	}
 

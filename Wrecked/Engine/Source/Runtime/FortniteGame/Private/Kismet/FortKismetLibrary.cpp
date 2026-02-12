@@ -783,6 +783,26 @@ UFortWorldItem* FortKismetLibrary::GiveItemToInventoryOwner(UObject* Object, FFr
 			return nullptr;
 	}
 }
+bool TeleportPlayerPawn(UObject* Object, FFrame& Params)
+{
+	const UObject* WorldContextObject;
+	AFortPlayerPawn* PlayerPawn;
+	bool bIgnoreCollision;
+	bool bIgnoreSupplementalKillVolumeSweep;
+	Params.StepCompiledIn(&WorldContextObject);
+	Params.StepCompiledIn(&PlayerPawn);
+	FVector& DestLocation = Params.StepCompiledInRef<FVector>();
+	FRotator& DestRotation = Params.StepCompiledInRef<FRotator>();
+	Params.StepCompiledIn(&bIgnoreCollision);
+	Params.StepCompiledIn(&bIgnoreSupplementalKillVolumeSweep);
+	Params.IncrementCode();
+
+	if (!PlayerPawn) return false;
+	if (DestLocation.IsZero()) return false;
+
+	
+	return PlayerPawn->K2_TeleportTo(DestLocation, DestRotation);
+}
 
 void FortKismetLibrary::Init()
 {
@@ -825,12 +845,10 @@ void FortKismetLibrary::Init()
 	Hook->Path = "/Script/FortniteGame.FortKismetLibrary.GiveItemToInventoryOwner";
 	Hook->Detour = GiveItemToInventoryOwner;
 	UKismetHookingLibrary::Hook(Hook, Exec);
-	
 
-
-
-
-
+	Hook->Path = "/Script/FortniteGame.FortMissionLibrary.TeleportPlayerPawn";
+	Hook->Detour = TeleportPlayerPawn;
+	UKismetHookingLibrary::Hook(Hook, Exec);
 	
 	Hook->Address = ImageBase + 0x8C39A84;
 	Hook->Detour = OpenActorInternal;
