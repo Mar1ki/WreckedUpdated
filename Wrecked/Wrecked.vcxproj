@@ -183,6 +183,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Conversation\ConversationLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\AthenaAIServicePlayerBots.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortInventoryOwnerInterface.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortPlayerAugmentItemDefinition.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\InventoryManagementLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldEvent.h" />
@@ -295,6 +296,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\AthenaAIServicePlayerBots.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Inventory\FortInventory.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortInventoryOwnerInterface.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortPlayerAugmentItemDefinition.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp" />

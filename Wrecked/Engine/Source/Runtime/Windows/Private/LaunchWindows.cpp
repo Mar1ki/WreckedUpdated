@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 #ifndef Client
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
@@ -205,6 +206,7 @@ void Main()
     FortGameStateComponent_BattleRoyaleGamePhaseLogic::Init();
     ConversationLibrary::Init();
     FortAthenaLivingWorldStaticPointProvider::Init();
+    FortPlayerAugmentItemDefinition::Init();
     
     UHook* Hook = new UHook();
 
