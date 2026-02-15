@@ -671,16 +671,16 @@ TArray<AFortPickup*> K2_SpawnPickupInWorldWithLootTier(UObject* Context, FFrame&
 
 
 
-void (*SetIsDoorOpen)(ABuildingWall*, uint8_t, AFortPlayerPawnAthena*) = decltype(SetIsDoorOpen)(ImageBase + 0x93ECB58);
-bool FortKismetLibrary::OpenActorInternal(AActor* OpenableInterfaceActor, AFortPlayerControllerAthena* OptionalControllerInstigator,bool bRequestFastOpen)
+void (*SetIsDoorOpen)(ABuildingWall*, EDoorOpenStyle, AFortPlayerPawnAthena*) = decltype(SetIsDoorOpen)(ImageBase + 0x93ECB58);
+bool FortKismetLibrary::OpenActorInternal(AActor* Object, AFortPlayerControllerAthena* Controller,bool bRequestFastOpen)
 {
 
-	if (auto Wall = (ABuildingWall*)OpenableInterfaceActor)
+	if (auto Wall = (ABuildingWall*)Object)
 	{
-		auto pawn = (AFortPlayerPawnAthena*)OptionalControllerInstigator;
-		SetIsDoorOpen(Wall, bRequestFastOpen, pawn);
+		auto Pawn = (AFortPlayerPawnAthena*)Controller;
+		SetIsDoorOpen(Wall, Wall->DoorOpenStyle, Pawn);
 	}
-	return OpenActorInternalOG(OpenableInterfaceActor, OptionalControllerInstigator, bRequestFastOpen);
+	return OpenActorInternalOG(Object, Controller, bRequestFastOpen);
 }
 // int32 K2_RemoveItemFromPlayer(class AFortPlayerController* PlayerController, const class UFortWorldItemDefinition* ItemDefinition, const struct FGuid& ItemVariantGuid, int32 AmountToRemove, bool bForceRemoval)
 void FortKismetLibrary::K2_RemoveItemFromPlayer(UObject* Object, FFrame& Params, int32* Ret)
