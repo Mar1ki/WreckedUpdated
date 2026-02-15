@@ -25,6 +25,7 @@ void CoolFuncion(UFortMovementComp_Character* Comp) {//139B788
         
         auto UpdateResult = UpdateBeforeCharacterMovement(Comp, RuntimeContext);
 
+        UE_LOG(LogMME, Log, "Handling RuntimeData (%s): UpdateResult(%i)", RuntimeData->GetName().c_str(), UpdateResult);
 
     }
 
@@ -214,6 +215,10 @@ void FortMovementComp_Character::Init() {
     Hook->Address = ImageBase + 0x9D89CD8;
     Hook->Detour = ServerMove_PerformMovement;
     Hook->Original = (void**)&ServerMove_PerformMovementOG;
+    UKismetHookingLibrary::Hook(Hook, Address);
+
+    Hook->Address = 0x139B788 + ImageBase;
+    Hook->Detour = CoolFuncion;
     UKismetHookingLibrary::Hook(Hook, Address);
 
     delete Hook;
