@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 
+#include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
+
 void FortAthenaLivingWorldStaticPointProvider::RegisterToLivingWorldManager(IFortAthenaLivingWorldPointProviderInterface* PointProviderInterface, AFortAthenaLivingWorldStaticPointProvider* PointProvider)
 {
     auto GameState = GetGameState();
@@ -58,6 +60,16 @@ TArray<AFortAthenaLivingWorldStaticPointProvider*> FortAthenaLivingWorldStaticPo
     return FoundPoints;
 }
 
+
+
+
+void EnablePointProvider(UObject* Object, FFrame& Params)
+{
+    auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
+    PointProvider->bStartEnabled = true;
+    
+    std::cout << "EnablePointProvider" << std::endl;
+}
 void FortAthenaLivingWorldStaticPointProvider::Init()
 {
     UHook* Hook = new UHook();
@@ -66,5 +78,8 @@ void FortAthenaLivingWorldStaticPointProvider::Init()
     Hook->Detour = RegisterToLivingWorldManager;
     UKismetHookingLibrary::Hook(Hook, Address);
     
+    Hook->Path = "/Script/LagerRuntime.FortAthenaPatrolPathPointProvider.EnablePointProvider";
+    Hook->Detour = EnablePointProvider;
+    UKismetHookingLibrary::Hook(Hook, Exec);
     delete Hook;
 }
