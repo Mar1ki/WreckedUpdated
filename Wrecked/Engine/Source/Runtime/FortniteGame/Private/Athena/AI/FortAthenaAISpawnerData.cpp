@@ -169,7 +169,7 @@ void FortAthenaAISpawnerData::AIBotGameplayAbilityOnSpawned(UFortAthenaAISpawner
 	{
 		auto Interface = Pawn->PlayerState->GetInterfaceAddress<IAbilitySystemInterface>();
 		TScriptInterface<IAbilitySystemInterface> ScriptInterface;
-		ScriptInterface.ObjectPointer = Pawn->AbilitySystemComponent->GetOwner();
+		ScriptInterface.ObjectPointer = Pawn;
 		ScriptInterface.InterfacePointer = Interface;
 		
 		UFortKismetLibrary::EquipFortAbilitySet(ScriptInterface, AbilitySet, nullptr);
