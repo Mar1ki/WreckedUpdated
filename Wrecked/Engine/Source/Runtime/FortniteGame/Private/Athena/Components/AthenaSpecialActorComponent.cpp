@@ -66,7 +66,6 @@ void AthenaSpecialActorComponent::Activate(UAthenaSpecialActorComponent* Special
     NewRepData.FullScreenMapScaleIndex = Sclidx;
     NewRepData.CompassIconBrushIndex = BrushIdx;
     NewRepData.CompassScaleIndex = Sclidx;
-    NewRepData.DisplayName = UKismetTextLibrary::Conv_StringToText(L"Idk what should be done here");
 
     FSpecialActorTransform InitialTransform;
     InitialTransform.Location = (FVector_NetQuantize)SpecialActorComponent->GetOwner()->K2_GetActorLocation();

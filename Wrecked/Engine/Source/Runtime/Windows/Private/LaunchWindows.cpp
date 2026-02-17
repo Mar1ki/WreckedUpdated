@@ -138,12 +138,6 @@ int CheckCheckpoint() {
 void ProcessEventHook(UObject* Object, UFunction* Function, void* Parameters) {
     if (!Function)
         return;
-    if (Object->IsA(UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StaticClass())) {
-        //logtofile(Function->GetFullName().c_str());
-        auto Name = Function->GetFullName();
-        if (!Name.find("Tick"))
-            std::cout << Name << "\n";
-    }
     //logtofile(Function->GetFullName().c_str());
     return UObject::ProcessEventOG(Object, Function, Parameters);
 }
