@@ -9,6 +9,8 @@ namespace FortAthenaAISpawnerData {
 	DefineOriginal(void, AIBotInventoryBaseOnSpawned, UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn);
 	DefineOriginal(void, AIBotConversationOnSpawned, UFortAthenaAISpawnerDataComponent_AIBotConversation* Component, AFortAIPawn* Pawn);
 	DefineOriginal(void, sub_9A1E264,  UFortNearbyActorsPerceptionComponent* Component, float DeltaTime);
+	DefineOriginal(void, AIBotPhoebeCosmeticLibraryOnSpawned, UFortAthenaAISpawnerDataComponent_CosmeticLibrary* Component, AFortAIPawn* Pawn);
+	DefineOriginal(void, AIBotGameplayAbilityOnSpawned, UFortAthenaAISpawnerDataComponent_GameplayAbilityBase* Component, AFortAIPawn* Pawn);
 
 	static void* (*ApplyCharacterCustomization)(AFortPlayerStateAthena* PlayerState, APawn* Pawn) = decltype(ApplyCharacterCustomization)(ImageBase + 0xA28E8CC);
 	

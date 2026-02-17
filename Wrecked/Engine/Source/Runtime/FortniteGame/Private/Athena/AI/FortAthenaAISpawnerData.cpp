@@ -58,6 +58,23 @@ void FortAthenaAISpawnerData::AIBotBehaviourOnSpawned(UFortAthenaAISpawnerDataCo
 	AIBotController->RunBehaviorTree(Component->GetBehaviorTree());//this would prob never work)
 }
 
+int GetRandomCosmeticLibrary(UFortAthenaAISpawnerDataComponent_CosmeticLibrary* Component)
+{
+	float TotalWeight = 0.0f;
+	for (int i = 0; i < 5; i++)
+		TotalWeight += Component->DefaultCosmeticLibraryWeight.EvaluateIndex((float)i);
+    
+	float Random = FMath::FRand() * TotalWeight;
+	float Sum = 0.0f;
+    
+	for (int i = 0; i < 5; i++)
+	{
+		Sum += Component->DefaultCosmeticLibraryWeight.EvaluateIndex((float)i);
+		if (Random <= Sum) return i;
+	}
+	return 4;
+}
+// npc cosmetics and bosses
 void FortAthenaAISpawnerData::AIBotCosmeticLoadoutOnSpawned(UFortAthenaAISpawnerDataComponent_CosmeticLoadout* Component, AFortAIPawn* Pawn) {
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
 	if (!Component || !Pawn) return;
@@ -84,7 +101,16 @@ void FortAthenaAISpawnerData::AIBotCosmeticLoadoutOnSpawned(UFortAthenaAISpawner
 		ApplyCharacterCustomization(BotState, Casted);
 		UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(BotState);
 	}
-	
+}
+
+void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAISpawnerDataComponent_CosmeticLibrary* Component, AFortAIPawn* Pawn)
+{
+	std::cout << "Phoebe Cosmetics Called" << std::endl;
+	auto ChosenCosmeticLibrary = Component->CosmeticLibraries[GetRandomCosmeticLibrary(Component)].Get();
+	std::cout << ChosenCosmeticLibrary->CharactersDataTable.Get()->Name.ToString().c_str() << std::endl;
+	auto IDK = ChosenCosmeticLibrary->RetrieveDataTables(); // not stripped prob
+
+	AIBotPhoebeCosmeticLibraryOnSpawnedOG(Component, Pawn);
 }
 
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
@@ -125,6 +151,33 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 	
 	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
 }
+
+
+void FortAthenaAISpawnerData::AIBotGameplayAbilityOnSpawned(UFortAthenaAISpawnerDataComponent_GameplayAbilityBase* Component, AFortAIPawn* Pawn)
+{
+	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
+	auto ASC = Pawn->AbilitySystemComponent;
+	if (!Component || !Pawn || !AIBotController || !ASC) return;
+	
+	for (auto Effect : Component->InitialGameplayEffect)
+	{
+		auto EffectHandle = FGameplayEffectContextHandle();
+		ASC->BP_ApplyGameplayEffectToSelf(Effect.GameplayEffect, Effect.Level, EffectHandle);
+	}
+
+	for (auto AbilitySet : Component->InitialGameplayAbilitiesSet)
+	{
+		auto Interface = Pawn->PlayerState->GetInterfaceAddress<IAbilitySystemInterface>();
+		TScriptInterface<IAbilitySystemInterface> ScriptInterface;
+		ScriptInterface.ObjectPointer = Pawn->AbilitySystemComponent->GetOwner();
+		ScriptInterface.InterfacePointer = Interface;
+		
+		UFortKismetLibrary::EquipFortAbilitySet(ScriptInterface, AbilitySet, nullptr);
+	}
+	AIBotGameplayAbilityOnSpawnedOG(Component, Pawn);
+}
+
+
 
 void FortAthenaAISpawnerData::AIBotConversationOnSpawned(UFortAthenaAISpawnerDataComponent_AIBotConversation* Component, AFortAIPawn* Pawn) {
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
@@ -211,6 +264,17 @@ void FortAthenaAISpawnerData::Init() {
 	Hook->Original = (void**)&AIBotConversationOnSpawnedOG;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
+	/*Hook->Address = 0x59;
+	Hook->Class = UFortAthenaAISpawnerDataComponent_CosmeticLibrary::StaticClass();
+	Hook->Detour = AIBotPhoebeCosmeticLibraryOnSpawned;
+	Hook->Original = (void**)&AIBotPhoebeCosmeticLibraryOnSpawnedOG;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT); */
+
+	Hook->Address = 0x59;
+	Hook->Class = UFortAthenaAISpawnerDataComponent_GameplayAbilityBase::StaticClass();
+	Hook->Detour = AIBotGameplayAbilityOnSpawned;
+	Hook->Original = (void**)&AIBotGameplayAbilityOnSpawnedOG;
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	Hook->Address = ImageBase + 0x9A1E264;
 	Hook->Detour = sub_9A1E264;
