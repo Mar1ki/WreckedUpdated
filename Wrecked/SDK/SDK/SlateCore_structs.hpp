@@ -636,6 +636,17 @@ public:
 	class FName                                   ResourceName;                                      // 0x0098(0x0004)(Edit, ZeroConstructor, IsPlainOldData, NoDestructor, AdvancedDisplay, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
 	struct FBox2f                                 UVRegion;                                          // 0x009C(0x0014)(ZeroConstructor, IsPlainOldData, NoDestructor, Protected, NativeAccessSpecifierProtected)
 	uint8                                         Pad_B0[0x10];                                      // 0x00B0(0x0010)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	bool operator==(const FSlateBrush& Other) const
+	{
+		return ImageSize.X == Other.ImageSize.X && ImageSize.Y == Other.ImageSize.Y
+			&& DrawAs == Other.DrawAs
+			&& Margin.Bottom == Other.Margin.Bottom && Margin.Left == Other.Margin.Left && Margin.Right == Other.Margin.Right && Margin.Top == Other.Margin.Top
+			&& Tiling == Other.Tiling
+			&& Mirroring == Other.Mirroring
+			&& ResourceObject == Other.ResourceObject
+			&& ResourceName == Other.ResourceName
+			&& bIsDynamicallyLoaded == Other.bIsDynamicallyLoaded;
+	}
 };
 
 // ScriptStruct SlateCore.SlateWidgetStyle
