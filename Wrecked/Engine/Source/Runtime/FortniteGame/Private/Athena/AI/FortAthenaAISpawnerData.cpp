@@ -108,11 +108,19 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		Pawn->Inventory = Object;
 		Pawn->bHasInventory = true;
 	}
-	
+
+	auto Inventory = Pawn->Inventory;
 	for (auto Item : Component->Items)
 	{
-		auto Inventory = Pawn->Inventory;
-		Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, 1);
+		if (Item.Item->IsA(UFortWeaponItemDefinition::StaticClass()))
+		{
+			auto Casted = (UFortWeaponItemDefinition*)Item.Item;
+			auto WeaponStats = Casted->GetStats();
+			Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
+		} else
+		{
+			Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, 1);
+		}
 	}
 	
 	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
