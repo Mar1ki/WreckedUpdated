@@ -2,15 +2,15 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 
-void FortPlayerAugmentItemDefinition::OnItemInstanceAdded(UFortPlayerAugmentItemDefinition* Item,IFortInventoryOwnerInterface* InventoryOwner, UFortItem* Item2, bool bLoadedFromRecord)
+void FortPlayerAugmentItemDefinition::OnItemInstanceAdded(UFortPlayerAugmentItemDefinition* Item, IFortInventoryOwnerInterface* InventoryOwner, UFortItem* ItemInstance, bool bLoadedFromRecord)
 {
 	std::cout << "Dummy" << std::endl;
 
-	OnItemInstanceAddedOG(Item, InventoryOwner, Item2, bLoadedFromRecord);
+	OnItemInstanceAddedOG(Item, InventoryOwner, ItemInstance, bLoadedFromRecord);
 }
-void FortPlayerAugmentItemDefinition::OnItemInstanceRemoved(UFortPlayerAugmentItemDefinition* Item,IFortInventoryOwnerInterface* InventoryOwner, UFortItem* Item2, bool bLoadedFromRecord)
+void FortPlayerAugmentItemDefinition::OnItemInstanceRemoved(UFortPlayerAugmentItemDefinition* Item, IFortInventoryOwnerInterface* InventoryOwner, UFortItem* ItemInstance, bool bLoadedFromRecord)
 {
-	std::cout << "Dummy" << std::endl;
+	std::cout << "Dummy2"  << std::endl;
 }
 
 void FortPlayerAugmentItemDefinition::Init() {
