@@ -1,4 +1,6 @@
 #include "pch.h"
+
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 #ifndef Client
@@ -207,6 +209,7 @@ void Main()
     ConversationLibrary::Init();
     FortAthenaLivingWorldStaticPointProvider::Init();
     FortPlayerAugmentItemDefinition::Init();
+    AthenaSpecialActorComponent::Init();
     
     UHook* Hook = new UHook();
 
