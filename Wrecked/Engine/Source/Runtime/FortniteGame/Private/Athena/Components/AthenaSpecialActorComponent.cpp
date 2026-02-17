@@ -87,7 +87,7 @@ void AthenaSpecialActorComponent::Init() {
     Hook->Class = UAthenaSpecialActorComponent::StaticClass();
     Hook->Detour = Activate;
     Hook->Original = (void**)&ActivateOG;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT); 
+    //UKismetHookingLibrary::Hook(Hook, EveryVFT); 
 
     delete Hook;
 }
