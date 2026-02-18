@@ -18,6 +18,16 @@ void AthenaAIServicePlayerBots::InitializeMMRInfos() {
 		AIServicePlayerBots->CachedValidPOIVolumeLocations.Add(newLoc);
 	}
 
+
+	FVector2f Base(35.f, 35.f);
+	FDeprecateSlateVector2D Vec;
+	Vec.X = Base.X;
+	Vec.Y = Base.Y;
+	AIServicePlayerBots->DebugMinimapData.DebugMinimapIconBrush.ImageSize = FDeprecateSlateVector2D(Vec);
+	AIServicePlayerBots->DebugMinimapData.DebugMinimapIconScale = FVector2D(0.5, 0.5);
+	AIServicePlayerBots->DebugMinimapData.DebugCompassIconBrush.ResourceObject = StaticLoadObject<UTexture2D>("/Game/Athena/HUD/Spectator/DeimosRiftMapIcon.DeimosRiftMapIcon");
+	UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"Phoebe.Minimap 1", nullptr);
+
 	FMMRSpawningInfo NewSpawningInfo{};
 	NewSpawningInfo.BotSpawningDataInfoTargetELO = 1000.f;
 	NewSpawningInfo.BotSpawningDataInfoWeight = 100.f;
@@ -38,16 +48,6 @@ char AthenaAIServicePlayerBots::CheckForBotBrainActivation(UAthenaAIServicePlaye
 
 	AiService->CachedAIPopulationTracker->CachedGameMode = GetGameMode();
 	AiService->CachedAIPopulationTracker->AISystem = (UAISystem*)UWorld::GetWorld()->AISystem;
-
-
-	FVector2f Base(35.f, 35.f);
-	FDeprecateSlateVector2D Vec;
-	Vec.X = Base.X;
-	Vec.Y = Base.Y;
-	AiService->DebugMinimapData.DebugMinimapIconBrush.ImageSize = FDeprecateSlateVector2D(Vec);
-	AiService->DebugMinimapData.DebugMinimapIconScale = FVector2D(0.5, 0.5);
-	AiService->DebugMinimapData.DebugCompassIconBrush.ResourceObject = StaticLoadObject<UTexture2D>("/Game/Athena/HUD/Spectator/DeimosRiftMapIcon.DeimosRiftMapIcon");
-	UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"Phoebe.Minimap 1", nullptr);
 	
 	return CheckForBotBrainActivationOG(AiService);
 }
