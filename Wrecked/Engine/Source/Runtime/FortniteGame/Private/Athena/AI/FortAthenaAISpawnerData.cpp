@@ -142,10 +142,35 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		{
 			auto Casted = (UFortWeaponItemDefinition*)Item.Item;
 			auto WeaponStats = Casted->GetStats();
-			Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
+			auto Entry = Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
+			std::cout << Item.Item->Name.ToString().c_str() << std::endl;
+
+
+			for (auto& Slot : AIBotController->SlotItems)
+			{
+				if (!Slot.ItemDefinition)
+				{
+					Slot.ItemDefinition = Item.Item;
+					Slot.WeaponDefinitionCache = (UFortWeaponItemDefinition*)Item.Item;
+					Slot.BotController = AIBotController;
+				}
+			}
+			
 		} else
 		{
-			Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, 1);
+			auto Entry = Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, 1);
+			
+			for (auto& Slot : AIBotController->SlotItems)
+			{
+				if (!Slot.ItemDefinition)
+				{
+					auto idk = Inventory->GetWorldItemByGuid(Entry->ItemGuid);
+					Slot.ItemDefinition = Item.Item;
+					Slot.WeaponDefinitionCache = (UFortWeaponItemDefinition*)Item.Item;
+					Slot.BotController = AIBotController;
+					Slot.FortItem = *idk;
+				}
+			}
 		}
 	}
 	
@@ -279,7 +304,7 @@ void FortAthenaAISpawnerData::Init() {
 	Hook->Address = ImageBase + 0x9A1E264;
 	Hook->Detour = sub_9A1E264;
 	Hook->Original = (void**)&sub_9A1E264OG;
-	UKismetHookingLibrary::Hook(Hook, Address);
+	//UKismetHookingLibrary::Hook(Hook, Address);
 	
 	delete Hook;
 }
