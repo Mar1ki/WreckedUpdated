@@ -30,36 +30,71 @@ int8 RegisterBrushScale(const FVector2D& Scale)
     return GetGameState()->SpecialActorData->BrushScales.Num() - 1;
 }
 
-void AthenaSpecialActorComponent::Activate(UAthenaSpecialActorComponent* SpecialActorComponent, bool bReset)
+void AthenaSpecialActorComponent::Activate(UAthenaSpecialActorComponent* Component, bool bReset)
 {
-    
     UE_LOG(LogTemp, Log, "UAthenaSpecialActorComponent::Active Called");
-    FName SpecialActorID = SpecialActorComponent->SpecialActorID;
 
+    bool bShouldSkip = false;
+    
+    if (!Component->SpecialActorTag.TagName)
+    {
+        UE_LOG(LogTemp, Warning, "SpecialActorTag.TagName is null for component %c",*Component->GetName().c_str());
+        bShouldSkip = true;
+    }
+    
+    if (Component->SpecialActorMinimapIconScale.IsZero())
+    {
+        UE_LOG(LogTemp, Warning, "SpecialActorMinimapIconScale is null for component %s", Component->GetName().c_str());
+        bShouldSkip = true;
+    }
+    
+    if (Component->SpecialActorFullScreenMapIconScale.IsZero())
+    {
+        UE_LOG(LogTemp, Warning, "SpecialActorFullScreenMapIconScale is null for component %s", Component->GetName().c_str());
+        bShouldSkip = true;
+    }
+    
+    if (!Component->SpecialActorCompassIconBrush.ResourceObject)
+    {
+        UE_LOG(LogTemp, Warning, "SpecialActorCompassIconBrush.ResourceObject is null for component %s", Component->GetName().c_str());
+        bShouldSkip = true;
+    }
+    
+    if (Component->SpecialActorCompassIconScale.IsZero())
+    {
+        UE_LOG(LogTemp, Warning, "SpecialActorCompassIconScale is null for component %s", Component->GetName().c_str());
+        bShouldSkip = true;
+    }
+
+    if (bShouldSkip)
+    {
+        UE_LOG(LogTemp, Log, "SpecialActorComponent is ass so we dont process it %s", Component->GetName().c_str());
+        return ActivateOG(Component, bReset);
+    }
     FSpecialActorRepData NewRepData = {};
 
-    NewRepData.SpecialActorID = SpecialActorID;
-    NewRepData.SpecialActor = SpecialActorComponent->GetOwner();
-    NewRepData.CategoryTag = SpecialActorComponent->SpecialActorTag;
+    NewRepData.SpecialActorID = Component->SpecialActorID;
+    NewRepData.SpecialActor = Component->GetOwner();
+    NewRepData.CategoryTag = Component->SpecialActorTag;
     NewRepData.PlayerState = nullptr;
     NewRepData.ReplicationInterval = 0.1f;
     NewRepData.ReplicationIntervalDeviation = 0.05f;
     NewRepData.NextReplicationTime = GetWorld()->GetTimeSeconds();
 
-    NewRepData.bDrawCompassIcon = SpecialActorComponent->bUseCompassIcon;
-    NewRepData.bDrawCompassDistanceText = SpecialActorComponent->bDrawCompassDistanceText;
-    NewRepData.bDrawRotated = SpecialActorComponent->bDrawRotated;
-    NewRepData.YawOffset = SpecialActorComponent->YawOffset;
-    NewRepData.ElevationArrowData = SpecialActorComponent->ElevationArrowData;
-    NewRepData.RenderOnMapDuringPhases = SpecialActorComponent->RenderOnMapDuringPhases;
-    NewRepData.DrawLayer = SpecialActorComponent->DrawLayer;
-    NewRepData.SeasonItemTag = SpecialActorComponent->SeasonItemTag;
-    NewRepData.Priority = SpecialActorComponent->Priority;
-    NewRepData.RenderDistance = SpecialActorComponent->RenderDistance.Evaluate();
-    NewRepData.RenderTags = SpecialActorComponent->RenderTags;
+    NewRepData.bDrawCompassIcon = Component->bUseCompassIcon;
+    NewRepData.bDrawCompassDistanceText = Component->bDrawCompassDistanceText;
+    NewRepData.bDrawRotated = Component->bDrawRotated;
+    NewRepData.YawOffset = Component->YawOffset;
+    NewRepData.ElevationArrowData = Component->ElevationArrowData;
+    NewRepData.RenderOnMapDuringPhases = Component->RenderOnMapDuringPhases;
+    NewRepData.DrawLayer = Component->DrawLayer;
+    NewRepData.SeasonItemTag = Component->SeasonItemTag;
+    NewRepData.Priority = Component->Priority;
+    NewRepData.RenderDistance = Component->RenderDistance.Evaluate();
+    NewRepData.RenderTags = Component->RenderTags;
 
-    auto BrushIdx = RegisterSlateBrush(SpecialActorComponent->SpecialActorMinimapIconBrush);
-    auto Sclidx = RegisterBrushScale(SpecialActorComponent->SpecialActorMinimapIconScale);
+    auto BrushIdx = RegisterSlateBrush(Component->SpecialActorMinimapIconBrush);
+    auto Sclidx = RegisterBrushScale(Component->SpecialActorMinimapIconScale);
     NewRepData.MinimapIconBrushIndex = BrushIdx;
     NewRepData.MinimapScaleIndex = Sclidx;
     NewRepData.FullScreenMapIconBrushIndex = BrushIdx;
@@ -68,15 +103,12 @@ void AthenaSpecialActorComponent::Activate(UAthenaSpecialActorComponent* Special
     NewRepData.CompassScaleIndex = Sclidx;
 
     FSpecialActorTransform InitialTransform;
-    InitialTransform.Location = (FVector_NetQuantize)SpecialActorComponent->GetOwner()->K2_GetActorLocation();
-    InitialTransform.Yaw = SpecialActorComponent->GetOwner()->K2_GetActorRotation().Yaw;
-    GetGameState()->SpecialActorData->SpecialActorTransforms.Add(InitialTransform);
-    NewRepData.ReplicatedTransformIndex = GetGameState()->SpecialActorData->SpecialActorTransforms.Num() - 1;
+    InitialTransform.Location = (FVector_NetQuantize)Component->GetOwner()->K2_GetActorLocation();
+    InitialTransform.Yaw = Component->GetOwner()->K2_GetActorRotation().Yaw;
 
-    GetGameState()->SpecialActorData->SpecialActorRepList.SpecialActorList.Add(NewRepData);
-    GetGameState()->SpecialActorData->SpecialActorRepList.MarkArrayDirty();
-    GetGameState()->OnRep_SpecialActorData();
-    ActivateOG(SpecialActorComponent, bReset);
+    AddActorToReplicationList(GetGameState()->SpecialActorData, &NewRepData);
+
+   // ActivateOG(Component, bReset);
 }
 
 
@@ -87,7 +119,7 @@ void AthenaSpecialActorComponent::Init() {
     Hook->Class = UAthenaSpecialActorComponent::StaticClass();
     Hook->Detour = Activate;
     Hook->Original = (void**)&ActivateOG;
-    //UKismetHookingLibrary::Hook(Hook, EveryVFT); 
+    UKismetHookingLibrary::Hook(Hook, EveryVFT); 
 
     delete Hook;
 }
