@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaMarkerComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
@@ -203,6 +204,7 @@ void Main()
     FortAthenaLivingWorldStaticPointProvider::Init();
     FortPlayerAugmentItemDefinition::Init();
     AthenaSpecialActorComponent::Init();
+    AthenaMarkerComponent::Init();
 
     UHook* Hook = new UHook();
 
