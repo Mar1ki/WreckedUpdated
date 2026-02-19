@@ -164,7 +164,6 @@ void Main()
     freopen_s(&File, "CONOUT$", "w+", stdout);
     freopen_s(&File, "CONOUT$", "w+", stderr);
     SetConsoleTitleA("Wrecked | Setting up");
-
     Sleep(15000);
     
     while (!IsInFrontend())
@@ -204,7 +203,7 @@ void Main()
     FortAthenaLivingWorldStaticPointProvider::Init();
     FortPlayerAugmentItemDefinition::Init();
     AthenaSpecialActorComponent::Init();
-    
+
     UHook* Hook = new UHook();
 
     std::vector<uintptr_t> NullFuncs = {

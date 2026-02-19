@@ -1,274 +1,95 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
-    </Filter>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
+    <ClCompile Include="Engine\Plugins\HookingLibrary\Private\HookingLibrary.cpp" />
+    <ClCompile Include="Engine\Plugins\PapayaManagerLibrary\Private\PapayaManager.cpp" />
+    <ClCompile Include="Engine\Plugins\TaskLibrary\Private\TaskLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Private\NetDriver.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Engine\Private\World.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\AI\FortAthenaAISpawnerData.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\Components\AthenaSpecialActorComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaCreativePortal.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaMapInfo.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaVehicle.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortGameModeAthena.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortPoiVolume.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortVehicleMod.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\GameStateComponents\FortGameStateComponent_BattleRoyaleGamePhaseLogic.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\Player\FortPlayerControllerAthena.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingContainer.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Conversation\ConversationLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\AthenaAIServicePlayerBots.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Inventory\FortInventory.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortInventoryOwnerInterface.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortPlayerAugmentItemDefinition.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldEvent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldStaticPointProvider.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementComp_Character.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementMode_BaseExtLogic.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerController.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerPawn.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponModFunctionLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponModStation.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\Projectiles\FortLightWeightProjectileManager.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\Projectiles\FortProjectileAthena.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\GameplayAbilities\Private\AbilitySystemComponent.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\Windows\Private\LaunchWindows.cpp" />
+    <ClCompile Include="pch.cpp" />
+    <ClCompile Include="SDK\SDK\AIModule_functions.cpp" />
+    <ClCompile Include="SDK\SDK\AscenderCodeRuntime_functions.cpp" />
+    <ClCompile Include="SDK\SDK\Basic.cpp" />
+    <ClCompile Include="SDK\SDK\CommonConversationRuntime_functions.cpp" />
+    <ClCompile Include="SDK\SDK\CoreUObject_functions.cpp" />
+    <ClCompile Include="SDK\SDK\Engine_functions.cpp" />
+    <ClCompile Include="SDK\SDK\FortniteAI_functions.cpp" />
+    <ClCompile Include="SDK\SDK\FortniteGame_functions.cpp" />
+    <ClCompile Include="SDK\SDK\GameplayAbilities_functions.cpp" />
+    <ClCompile Include="SDK\SDK\GameplayTags_functions.cpp" />
+    <ClCompile Include="SDK\SDK\PlayspaceSystem_functions.cpp" />
+    <ClCompile Include="SDK\SDK\ValetRuntime_functions.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="pch.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Plugins\HookingLibrary\Public\HookingLibrary.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Plugins\TaskLibrary\Public\TaskLibrary.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\CoreUObject\Public\UObject\UObjectGlobals.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\NetDriver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaMapInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortGameModeAthena.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerControllerAthena.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Player\FortPlayerController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Kismet\FortKismetLibrary.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingContainer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\GameplayAbilities\Public\AbilitySystemComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerPawn.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModFunctionLibrary.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\CoreUObject\Public\UObject\Stack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\Projectiles\FortLightWeightProjectileManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\Projectiles\FortProjectileAthena.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementComp_Character.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaVehicle.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementMode_BaseExtLogic.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortPoiVolume.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Plugins\PapayaManagerLibrary\Private\PapayaManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\Core\Public\Math\UnrealMathUtility.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortVehicleMod.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\AthenaAIServicePlayerBots.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaCreativePortal.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\AI\FortAthenaAISpawnerData.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModStation.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\InventoryManagementLibrary.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortInventoryOwnerInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\GameStateComponents\FortGameStateComponent_BattleRoyaleGamePhaseLogic.h">
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Conversation\ConversationLibrary.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldEvent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldStaticPointProvider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\Basic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\CoreUObject_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\Engine_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\FortniteGame_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\GameplayAbilities_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Plugins\HookingLibrary\Private\HookingLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Plugins\TaskLibrary\Private\TaskLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Private\NetDriver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\Engine\Private\World.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaMapInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortGameModeAthena.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\GameStateComponents\FortGameStateComponent_BattleRoyaleGamePhaseLogic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\Player\FortPlayerControllerAthena.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Inventory\FortInventory.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\Windows\Private\LaunchWindows.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingContainer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\GameplayAbilities\Private\AbilitySystemComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerPawn.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponModFunctionLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\Projectiles\FortLightWeightProjectileManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\Projectiles\FortProjectileAthena.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\AscenderCodeRuntime_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementComp_Character.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaVehicle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementMode_BaseExtLogic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortPoiVolume.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Plugins\PapayaManagerLibrary\Private\PapayaManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortVehicleMod.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\AthenaAIServicePlayerBots.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\FortniteAI_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaCreativePortal.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\AIModule_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\AI\FortAthenaAISpawnerData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponModStation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\GameplayTags_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortInventoryOwnerInterface.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\PlayspaceSystem_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Conversation\ConversationLibrary.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldEvent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldStaticPointProvider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\CommonConversationRuntime_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\PlayspaceSystem_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SDK\SDK\ValetRuntime_functions.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
+    <ClInclude Include="Engine\Plugins\HookingLibrary\Public\HookingLibrary.h" />
+    <ClInclude Include="Engine\Plugins\PapayaManagerLibrary\Private\PapayaManager.h" />
+    <ClInclude Include="Engine\Plugins\TaskLibrary\Public\TaskLibrary.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\Public\UObject\Stack.h" />
+    <ClInclude Include="Engine\Source\Runtime\CoreUObject\Public\UObject\UObjectGlobals.h" />
+    <ClInclude Include="Engine\Source\Runtime\Core\Public\Math\UnrealMathUtility.h" />
+    <ClInclude Include="Engine\Source\Runtime\Engine\Classes\Engine\NetDriver.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\AI\FortAthenaAISpawnerData.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Components\AthenaSpecialActorComponent.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaCreativePortal.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaMapInfo.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaVehicle.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortGameModeAthena.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortPoiVolume.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortVehicleMod.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\GameStateComponents\FortGameStateComponent_BattleRoyaleGamePhaseLogic.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerControllerAthena.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerPawn.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingContainer.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Conversation\ConversationLibrary.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\AthenaAIServicePlayerBots.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortInventoryOwnerInterface.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortPlayerAugmentItemDefinition.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\InventoryManagementLibrary.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldEvent.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldStaticPointProvider.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementComp_Character.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementMode_BaseExtLogic.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModFunctionLibrary.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Kismet\FortKismetLibrary.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Player\FortPlayerController.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModStation.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\Projectiles\FortLightWeightProjectileManager.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\Projectiles\FortProjectileAthena.h" />
+    <ClInclude Include="Engine\Source\Runtime\GameplayAbilities\Public\AbilitySystemComponent.h" />
+    <ClInclude Include="pch.h" />
   </ItemGroup>
 </Project>

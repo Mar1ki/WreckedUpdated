@@ -337,7 +337,7 @@ void FortMovementComp_Character::Init() {
 
     Hook->Address = 0x139B788 + ImageBase;
     Hook->Detour = CoolFuncion;
-    UKismetHookingLibrary::Hook(Hook, Address);
+    //UKismetHookingLibrary::Hook(Hook, Address);
 
     delete Hook;
 }

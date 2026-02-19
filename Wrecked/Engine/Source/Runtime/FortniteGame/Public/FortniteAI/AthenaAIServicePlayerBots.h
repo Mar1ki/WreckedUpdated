@@ -6,5 +6,6 @@ namespace AthenaAIServicePlayerBots {
 	DefineOriginal(char, CheckForBotBrainActivation, UAthenaAIServicePlayerBots* AiService);
 	DefineOriginal(void, InitializeForWorld, UNavigationSystemV1* Nav,UWorld* World, EFNavigationSystemRunMode Mode);
 	DefineOriginal(void, CreateAndConfigureNavigationSystem, UAthenaNavSystemConfig* ModuleConfig, UWorld* World);
+	DefineOriginal(void, UpdateControlRotations, UAthenaAIServicePlayerBots* AiService, double Delta);
 	void Init();
 }

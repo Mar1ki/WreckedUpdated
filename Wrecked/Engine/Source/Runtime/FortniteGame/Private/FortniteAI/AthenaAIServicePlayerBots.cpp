@@ -18,7 +18,6 @@ void AthenaAIServicePlayerBots::InitializeMMRInfos() {
 		AIServicePlayerBots->CachedValidPOIVolumeLocations.Add(newLoc);
 	}
 
-
 	FVector2f Base(35.f, 35.f);
 	FDeprecateSlateVector2D Vec;
 	Vec.X = Base.X;
@@ -31,7 +30,7 @@ void AthenaAIServicePlayerBots::InitializeMMRInfos() {
 	FMMRSpawningInfo NewSpawningInfo{};
 	NewSpawningInfo.BotSpawningDataInfoTargetELO = 1000.f;
 	NewSpawningInfo.BotSpawningDataInfoWeight = 100.f;
-	NewSpawningInfo.NumBotsToSpawn = 0;
+	NewSpawningInfo.NumBotsToSpawn = 50;
 	NewSpawningInfo.AISpawnerData = AIServicePlayerBots->DefaultBotAISpawnerData;
 
 	AIServicePlayerBots->DefaultAISpawnerDataComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(AIServicePlayerBots->DefaultBotAISpawnerData, UWorld::GetWorld());
@@ -50,6 +49,31 @@ char AthenaAIServicePlayerBots::CheckForBotBrainActivation(UAthenaAIServicePlaye
 	AiService->CachedAIPopulationTracker->AISystem = (UAISystem*)UWorld::GetWorld()->AISystem;
 	
 	return CheckForBotBrainActivationOG(AiService);
+}
+
+void AthenaAIServicePlayerBots::UpdateControlRotations(UAthenaAIServicePlayerBots* AiService, double Delta) {
+	for (auto Bot : GetGameMode()->AliveBots) {
+		void (*UpdateControlRotation)(AFortAthenaAIBotController*, double, bool) = decltype(UpdateControlRotation)(Bot->VTable[0x8D8 / 8]);
+		UpdateControlRotation(Bot, Delta, true);
+	}
+	/*
+	for (auto BotInfo : AiService->PlayerBots) {
+		if (BotInfo.BotController) {
+			void (*UpdateControlRotation)(AFortAthenaAIBotController*, double, bool) = decltype(UpdateControlRotation)(BotInfo.BotController->VTable[0x8D8/8]);
+			UpdateControlRotation(BotInfo.BotController, Delta, true);
+			UE_LOG(LogAI, Log, "Updating Control Rotation");
+		}
+	}
+	for (auto BotInfo : AiService->NonAthenaParticipantBots) {
+		if (BotInfo.BotController) {
+			void (*UpdateControlRotation)(AFortAthenaAIBotController*, double, bool) = decltype(UpdateControlRotation)(BotInfo.BotController->VTable[0x8D8 / 8]);
+			UpdateControlRotation(BotInfo.BotController, Delta, true);
+			UE_LOG(LogAI, Log, "Updating Control Rotation");
+		}
+	}
+	*/
+	
+	UpdateControlRotationsOG(AiService, Delta);
 }
 
 void ModifyInstructionLEA(uintptr_t instrAddr, uintptr_t targetAddr, int offset)
@@ -107,6 +131,11 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Original = (void**)&CheckForBotBrainActivationOG;
 	UKismetHookingLibrary::Hook(Hook, Address);
 
+	Hook->Address = ImageBase + 0x4C2E634;
+	Hook->Detour = UpdateControlRotations;
+	Hook->Original = (void**)&UpdateControlRotationsOG;
+	UKismetHookingLibrary::Hook(Hook, Address);
+
 	Hook->Address = ImageBase + 0xAd370C4;
 	Hook->Detour = InitializeMMRInfos;
 	UKismetHookingLibrary::Hook(Hook, Address);
@@ -135,13 +164,13 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Address = 0x2B8 / 8;
 	Hook->Detour = CreateAndConfigureNavigationSystem;
 	Hook->Original = (void**)&CreateAndConfigureNavigationSystemOG;
-	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	//UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	Hook->Class = UNavigationSystemV1::StaticClass();
 	Hook->Address = 0x2F0 / 8;
 	Hook->Detour = InitializeForWorld;
 	Hook->Original = (void**)&InitializeForWorldOG;
-	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	//UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	delete Hook;
 }

@@ -40,6 +40,7 @@
 #include "SDK/SDK/JunoGameNative_classes.hpp"
 #include "SDK/SDK/WeaponModsCodeRuntime_classes.hpp"
 #include "SDK/SDK/AscenderCodeRuntime_classes.hpp"
+#include "SDK/SDK/FortniteAI_classes.hpp"
 #include <set>
 #include <atomic>
 #include "Engine/Source/Runtime/Core/Public/Math/UnrealMathUtility.h"
@@ -633,6 +634,6 @@ inline void ApplyWeaponModset(FFortItemEntry* Entry, UFortWeaponModSetData* Mods
         sub_9BA1D68(Entry, &v9);
     }
 }
-constexpr float WarmupDuration = 70.f;
+constexpr float WarmupDuration = 500.f;
 inline EGameModeType CurrentGamemode = EGameModeType::Athena;
 #endif //PCH_H
