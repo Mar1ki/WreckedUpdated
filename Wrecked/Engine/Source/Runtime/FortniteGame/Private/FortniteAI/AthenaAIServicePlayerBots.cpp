@@ -30,7 +30,7 @@ void AthenaAIServicePlayerBots::InitializeMMRInfos() {
 	FMMRSpawningInfo NewSpawningInfo{};
 	NewSpawningInfo.BotSpawningDataInfoTargetELO = 1000.f;
 	NewSpawningInfo.BotSpawningDataInfoWeight = 100.f;
-	NewSpawningInfo.NumBotsToSpawn = 50;
+	NewSpawningInfo.NumBotsToSpawn = 0;
 	NewSpawningInfo.AISpawnerData = AIServicePlayerBots->DefaultBotAISpawnerData;
 
 	AIServicePlayerBots->DefaultAISpawnerDataComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(AIServicePlayerBots->DefaultBotAISpawnerData, UWorld::GetWorld());
@@ -52,11 +52,6 @@ char AthenaAIServicePlayerBots::CheckForBotBrainActivation(UAthenaAIServicePlaye
 }
 
 void AthenaAIServicePlayerBots::UpdateControlRotations(UAthenaAIServicePlayerBots* AiService, double Delta) {
-	for (auto Bot : GetGameMode()->AliveBots) {
-		void (*UpdateControlRotation)(AFortAthenaAIBotController*, double, bool) = decltype(UpdateControlRotation)(Bot->VTable[0x8D8 / 8]);
-		UpdateControlRotation(Bot, Delta, true);
-	}
-	/*
 	for (auto BotInfo : AiService->PlayerBots) {
 		if (BotInfo.BotController) {
 			void (*UpdateControlRotation)(AFortAthenaAIBotController*, double, bool) = decltype(UpdateControlRotation)(BotInfo.BotController->VTable[0x8D8/8]);
@@ -70,9 +65,7 @@ void AthenaAIServicePlayerBots::UpdateControlRotations(UAthenaAIServicePlayerBot
 			UpdateControlRotation(BotInfo.BotController, Delta, true);
 			UE_LOG(LogAI, Log, "Updating Control Rotation");
 		}
-	}
-	*/
-	
+	}	
 	UpdateControlRotationsOG(AiService, Delta);
 }
 
@@ -164,13 +157,13 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Address = 0x2B8 / 8;
 	Hook->Detour = CreateAndConfigureNavigationSystem;
 	Hook->Original = (void**)&CreateAndConfigureNavigationSystemOG;
-	//UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	Hook->Class = UNavigationSystemV1::StaticClass();
 	Hook->Address = 0x2F0 / 8;
 	Hook->Detour = InitializeForWorld;
 	Hook->Original = (void**)&InitializeForWorldOG;
-	//UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	delete Hook;
 }

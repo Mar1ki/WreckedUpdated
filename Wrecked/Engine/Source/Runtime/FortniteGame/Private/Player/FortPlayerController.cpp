@@ -668,6 +668,23 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
 
             ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, Transform, false);
         }
+        // "/MoonFlaxBoss_TheOverseer/SpawnerData/BP_AIBSD_MoonFlaxBosses_TheOverseer.1"
+        if (Command == "spawnboss")
+        {
+            static auto SpawnerDataClass = StaticLoadObject<UClass>("/MoonFlaxBoss_TheOverseer/SpawnerData/BP_AIBSD_MoonFlaxBosses_TheOverseer.BP_AIBSD_MoonFlaxBosses_TheOverseer_C");
+            auto DefaultObject = (UFortAthenaAIBotSpawnerData*)SpawnerDataClass->DefaultObject;
+            auto ComponentList = DefaultObject->CreateComponentList(DefaultObject);
+            auto Transform = FTransform();
+            Transform.Translation = Controller->Pawn->K2_GetActorLocation();
+            Transform.Rotation = FQuat();
+            auto One = FVector();
+            One.X = 1;
+            One.Y = 1;
+            One.Z = 1;
+            Transform.Scale3D = One;
+
+            ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, Transform, false);
+        }
         if (Command == "clearmme") {
             auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
             Comp->PushedMovementModeExtensionRuntimeData.Clear();

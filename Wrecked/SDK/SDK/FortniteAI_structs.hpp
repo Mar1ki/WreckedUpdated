@@ -4629,7 +4629,7 @@ struct FFortServerBotInfo final
 public:
 	class AFortAthenaAIBotController*             BotController;                                     // 0x0000(0x0008)(ZeroConstructor, Transient, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
 	class AFortPoiVolume*                         SelectedPoiVolume;                                 // 0x0008(0x0008)(ZeroConstructor, Transient, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	uint8                                         Pad_10[0x8];                                       // 0x0010(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	float DeathTimeStamp;
 };
 
 // ScriptStruct FortniteAI.UpdateBotSkillInfo

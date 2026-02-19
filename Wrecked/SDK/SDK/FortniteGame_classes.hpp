@@ -59667,7 +59667,11 @@ public:
 	EFriendlyFireType                             FriendlyFireType;                                  // 0x1A42(0x0001)(Net, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 	uint8                                         Pad_1A43[0x1D];                                    // 0x1A43(0x001D)(Fixing Size After Last Property [ Dumper-7 ])
 	bool                                          SpectateAPartyMemberAvailable;                     // 0x1A60(0x0001)(Net, ZeroConstructor, IsPlainOldData, RepNotify, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
-	uint8                                         Pad_1A61[0x117];                                   // 0x1A61(0x0117)(Fixing Size After Last Property [ Dumper-7 ])
+	uint8                                         Pad_1A61[0x7];									 // 0x1A61(0x0117)(Fixing Size After Last Property [ Dumper-7 ])
+	FPlayerStateGroupTable TeamIndexToPlayerStateTable;
+	FPlayerStateGroupTable SquadIdToPlayerStateTable;
+	TMap<FUniqueNetIdRepl, unsigned char>		  MissedPlayerStatesToTeamIndex;
+	TMap<FUniqueNetIdRepl, unsigned char>		  MissedPlayerStatesToSquadId;
 	struct FGameMemberInfoArray                   GameMemberInfoArray;                               // 0x1B78(0x0120)(Net, Protected, NativeAccessSpecifierProtected)
 	uint8                                         Pad_1C98[0x78];                                    // 0x1C98(0x0078)(Fixing Size After Last Property [ Dumper-7 ])
 	TArray<uint8>                                 ActiveTeamNums;                                    // 0x1D10(0x0010)(Net, ZeroConstructor, Protected, NativeAccessSpecifierProtected)
@@ -59957,7 +59961,7 @@ public:
 		return GetDefaultObjImpl<AFortGameStateAthena>();
 	}
 };
-
+static_assert(offsetof(AFortGameStateAthena, GameMemberInfoArray) == 0x1B78, "Wrong!!");
 // Class FortniteGame.FortGameStateComponent_GroupQuests
 // 0x03D8 (0x0478 - 0x00A0)
 class UFortGameStateComponent_GroupQuests : public UFortGameStateComponent

@@ -33793,6 +33793,10 @@ public:
 	uint8                                         Pad_4[0x8];                                        // 0x0004(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
+struct FPlayerStateGroupTable {
+public:
+	TSparseArray<AFortPlayerStateAthena*> Array;
+};
 // ScriptStruct FortniteGame.ActiveGateData
 // 0x0058 (0x0058 - 0x0000)
 struct FActiveGateData final
