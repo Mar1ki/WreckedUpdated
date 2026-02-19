@@ -50,20 +50,35 @@ char AthenaAIServicePlayerBots::CheckForBotBrainActivation(UAthenaAIServicePlaye
 	
 	return CheckForBotBrainActivationOG(AiService);
 }
-
+//DefineOriginal(APawn*, SpawnAI, UAthenaAISpawner* Spawner, UFortAthenaAISpawnerDataComponentList* ComponentList, FTransform* Transform, FActorSpawnParameters* SpawnParams, int SpawnRequestId);
+APawn* AthenaAIServicePlayerBots::SpawnAI(UAthenaAISpawner* Spawner, UFortAthenaAISpawnerDataComponentList* ComponentList, FTransform* Transform, FActorSpawnParameters* SpawnParams, int SpawnRequestId) {
+	auto res = SpawnAIOG(Spawner, ComponentList, Transform, SpawnParams, SpawnRequestId);
+	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
+	
+	if (res) {
+		FFortServerBotInfo newInfo{};
+		newInfo.BotController = (AFortAthenaAIBotController*)res->GetController();
+		newInfo.SelectedPoiVolume = nullptr;
+		if (res->IsA(AIServicePlayerBots->DefaultAISpawnerDataComponentList->GetDefaultPawn()->Class)) {
+			AIServicePlayerBots->PlayerBots.Add(newInfo);
+		}
+		else {
+			AIServicePlayerBots->NonAthenaParticipantBots.Add(newInfo);
+		}
+	}
+	return res;
+}
 void AthenaAIServicePlayerBots::UpdateControlRotations(UAthenaAIServicePlayerBots* AiService, double Delta) {
 	for (auto BotInfo : AiService->PlayerBots) {
 		if (BotInfo.BotController) {
 			void (*UpdateControlRotation)(AFortAthenaAIBotController*, double, bool) = decltype(UpdateControlRotation)(BotInfo.BotController->VTable[0x8D8/8]);
 			UpdateControlRotation(BotInfo.BotController, Delta, true);
-			UE_LOG(LogAI, Log, "Updating Control Rotation");
 		}
 	}
 	for (auto BotInfo : AiService->NonAthenaParticipantBots) {
 		if (BotInfo.BotController) {
 			void (*UpdateControlRotation)(AFortAthenaAIBotController*, double, bool) = decltype(UpdateControlRotation)(BotInfo.BotController->VTable[0x8D8 / 8]);
 			UpdateControlRotation(BotInfo.BotController, Delta, true);
-			UE_LOG(LogAI, Log, "Updating Control Rotation");
 		}
 	}	
 	UpdateControlRotationsOG(AiService, Delta);
@@ -109,6 +124,11 @@ void AthenaAIServicePlayerBots::CreateAndConfigureNavigationSystem(UAthenaNavSys
 
 	return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }
+
+void AthenaAIServicePlayerBots::PerceptionTickComponent(UFortNearbyActorsPerceptionComponent* Comp, double Delta) {
+	*(FWeakObjectPtr*)(__int64(Comp) + 0xb8) = GetGameMode()->AIDirector;
+	return PerceptionTickComponentOG(Comp, Delta);
+}
 void AthenaAIServicePlayerBots::Init() {
 
 	UHook* Hook = new UHook();
@@ -122,6 +142,16 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Address = ImageBase + 0xA927B58;
 	Hook->Detour = CheckForBotBrainActivation;
 	Hook->Original = (void**)&CheckForBotBrainActivationOG;
+	UKismetHookingLibrary::Hook(Hook, Address);
+
+	Hook->Address = ImageBase + 0xA94E028;
+	Hook->Detour = SpawnAI;
+	Hook->Original = (void**)&SpawnAIOG;
+	UKismetHookingLibrary::Hook(Hook, Address);
+
+	Hook->Address = ImageBase + 0x9A1E264;
+	Hook->Detour = PerceptionTickComponent;
+	Hook->Original = (void**)&PerceptionTickComponentOG;
 	UKismetHookingLibrary::Hook(Hook, Address);
 
 	Hook->Address = ImageBase + 0x4C2E634;
