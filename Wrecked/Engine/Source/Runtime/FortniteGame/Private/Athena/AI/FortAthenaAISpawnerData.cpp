@@ -55,7 +55,14 @@ void FortAthenaAISpawnerData::AIBotBehaviourOnSpawned(UFortAthenaAISpawnerDataCo
 	AIBotBehaviourOnSpawnedOG(Component, Pawn);
 
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
+	auto BlackBoard = AIBotController->Blackboard;
+	AIBotController->BehaviorTree = Component->GetBehaviorTree();
 	AIBotController->RunBehaviorTree(Component->GetBehaviorTree());//this would prob never work)
+	auto Comp = (UBehaviorTreeComponent*)AIBotController->BrainComponent;
+	AIBotController->UseBlackboard(Component->GetBehaviorTree()->BlackboardAsset, &BlackBoard);
+	AIBotController->OnUsingBlackBoard(BlackBoard, Component->GetBehaviorTree()->BlackboardAsset);
+	Comp->DefaultBehaviorTreeAsset = Component->GetBehaviorTree();
+	Comp->StartLogic();
 }
 
 int GetRandomCosmeticLibrary(UFortAthenaAISpawnerDataComponent_CosmeticLibrary* Component)
@@ -116,7 +123,6 @@ void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAIS
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
 	if (!Component || !Pawn || !AIBotController) return;
-	
 	if (!AIBotController->Inventory.ObjectPointer)
 	{
 		FActorSpawnParameters SpawnParams{};
@@ -136,40 +142,25 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 	}
 
 	auto Inventory = Pawn->Inventory;
-	for (auto Item : Component->Items)
+	TArray<FItemAndCount> Items = { };
+	Component->GetAllPossibleItems(&Items);
+	for (auto Item : Items)
 	{
-		if (Item.Item->IsA(UFortWeaponItemDefinition::StaticClass()))
-		{
-			auto Casted = (UFortWeaponItemDefinition*)Item.Item;
-			auto WeaponStats = Casted->GetStats();
-			auto Entry = Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
-			std::cout << Item.Item->Name.ToString().c_str() << std::endl;
+		auto Casted = (UFortWeaponItemDefinition*)Item.Item;
+		auto WeaponStats = Casted->GetStats();
+		auto Entry = Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
+		std::cout << Item.Item->Name.ToString().c_str() << std::endl;
+		auto ItemInstance = Inventory->GetWorldItemByGuid(Entry->ItemGuid);
 
-
-			for (auto& Slot : AIBotController->SlotItems)
-			{
-				if (!Slot.ItemDefinition)
-				{
-					Slot.ItemDefinition = Item.Item;
-					Slot.WeaponDefinitionCache = (UFortWeaponItemDefinition*)Item.Item;
-					Slot.BotController = AIBotController;
-				}
-			}
-			
-		} else
+		for (auto& Slot : AIBotController->SlotItems)
 		{
-			auto Entry = Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, 1);
-			
-			for (auto& Slot : AIBotController->SlotItems)
+			if (!Slot.ItemDefinition)
 			{
-				if (!Slot.ItemDefinition)
-				{
-					auto idk = Inventory->GetWorldItemByGuid(Entry->ItemGuid);
-					Slot.ItemDefinition = Item.Item;
-					Slot.WeaponDefinitionCache = (UFortWeaponItemDefinition*)Item.Item;
-					Slot.BotController = AIBotController;
-					Slot.FortItem = *idk;
-				}
+				Slot.ItemDefinition = Item.Item;
+				Slot.WeaponDefinitionCache = Slot.ItemDefinition->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWeaponItemDefinition*)Item.Item: nullptr;
+				Slot.BotController = AIBotController;
+				Slot.FortItem = ItemInstance ? *ItemInstance : nullptr;
+				break;
 			}
 		}
 	}
@@ -180,26 +171,11 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 
 void FortAthenaAISpawnerData::AIBotGameplayAbilityOnSpawned(UFortAthenaAISpawnerDataComponent_GameplayAbilityBase* Component, AFortAIPawn* Pawn)
 {
+	AIBotGameplayAbilityOnSpawnedOG(Component, Pawn);
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
 	auto ASC = Pawn->AbilitySystemComponent;
 	if (!Component || !Pawn || !AIBotController || !ASC) return;
-	
-	for (auto Effect : Component->InitialGameplayEffect)
-	{
-		auto EffectHandle = FGameplayEffectContextHandle();
-		ASC->BP_ApplyGameplayEffectToSelf(Effect.GameplayEffect, Effect.Level, EffectHandle);
-	}
-
-	for (auto AbilitySet : Component->InitialGameplayAbilitiesSet)
-	{
-		auto Interface = Pawn->PlayerState->GetInterfaceAddress<IAbilitySystemInterface>();
-		TScriptInterface<IAbilitySystemInterface> ScriptInterface;
-		ScriptInterface.ObjectPointer = Pawn;
-		ScriptInterface.InterfacePointer = Interface;
-		
-		UFortKismetLibrary::EquipFortAbilitySet(ScriptInterface, AbilitySet, nullptr);
-	}
-	AIBotGameplayAbilityOnSpawnedOG(Component, Pawn);
+	reinterpret_cast<void(*)(void*)>(ImageBase + 0x993F158)(Pawn->GetInterfaceAddress<IAbilitySystemInterface>());
 }
 
 
@@ -252,13 +228,6 @@ void FortAthenaAISpawnerData::AIBotConversationOnSpawned(UFortAthenaAISpawnerDat
 }
 
 
-// todo make it better bc setting that cached one to the gamemode one is making npcs be dumb as hell
-void FortAthenaAISpawnerData::sub_9A1E264(UFortNearbyActorsPerceptionComponent* Component, float DeltaTime)
-{
-	Component->CachedAIDirector = GetGameMode()->AIDirector;
-	sub_9A1E264OG(Component, DeltaTime);
-}
-
 void FortAthenaAISpawnerData::Init() {
 	UHook* Hook = new UHook();
 	
@@ -300,11 +269,6 @@ void FortAthenaAISpawnerData::Init() {
 	Hook->Detour = AIBotGameplayAbilityOnSpawned;
 	Hook->Original = (void**)&AIBotGameplayAbilityOnSpawnedOG;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-	Hook->Address = ImageBase + 0x9A1E264;
-	Hook->Detour = sub_9A1E264;
-	Hook->Original = (void**)&sub_9A1E264OG;
-	//UKismetHookingLibrary::Hook(Hook, Address);
 	
 	delete Hook;
 }
