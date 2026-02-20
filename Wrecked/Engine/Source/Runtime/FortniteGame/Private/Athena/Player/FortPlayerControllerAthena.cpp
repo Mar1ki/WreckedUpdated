@@ -4,6 +4,7 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Player/FortPlayerController.h"
 
 
 void FortPlayerControllerAthena::ServerAttemptAircraftJump(UFortControllerComponent_Aircraft* Comp, FRotator ClientRot)
@@ -165,6 +166,17 @@ void ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
 
 }
 
+void FortPlayerControllerAthena::GetPlayerViewPoint(APlayerController* PlayerController, FVector& Loc, FRotator& Rot)
+{
+    if (PlayerController->StateName == UKismetStringLibrary::Conv_StringToName(L"Spectating"))
+    {
+        std::cout << "Spectating bro" << std::endl;
+    } else
+    {
+        GetPlayerViewPointOG(PlayerController, Loc, Rot);
+    }
+}
+
 void FortPlayerControllerAthena::Init()
 {
     UHook* Hook = new UHook();
@@ -192,4 +204,10 @@ void FortPlayerControllerAthena::Init()
     Hook->Detour = ServerGiveCreativeItem;
     UKismetHookingLibrary::Hook(Hook, Exec);
     delete Hook;
+
+    Hook->Address = 0x7F8/8;
+    Hook->Detour = GetPlayerViewPoint;
+    Hook->Original = (void**)&GetPlayerViewPointOG;
+    Hook->Class = AFortPlayerControllerAthena::StaticClass();
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
 }
