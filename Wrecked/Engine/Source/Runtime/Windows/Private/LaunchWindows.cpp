@@ -279,7 +279,7 @@ void Main()
     }
     else if (CurrentGamemode == EGameModeType::Juno)
     {
-        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open Juno_World_Inception", nullptr);
+        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open AW_Village_POI", nullptr);
     }
     else if (CurrentGamemode == EGameModeType::Creative)
     {
