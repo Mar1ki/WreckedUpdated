@@ -131,7 +131,7 @@ void AthenaMarkerComponent::Init() {
     Hook->Detour = ServerAddMapMarker;
     UKismetHookingLibrary::Hook(Hook, Exec);
     
-    Hook->Path = "/Script/FortniteGame.AthenaMarkerComponent.ServeRemoveMapMarker";
+    Hook->Path = "/Script/FortniteGame.AthenaMarkerComponent.ServerRemoveMapMarker";
     Hook->Detour = ServerRemoveMapMarker;
     UKismetHookingLibrary::Hook(Hook, Exec);
     
