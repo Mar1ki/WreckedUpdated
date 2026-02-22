@@ -207,8 +207,8 @@ void FortVehicleMod::Init()
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
     
     // AFortAthenaVehicle::AbsorbDamageIntoDamagablePart that has no impl
-    Hook->Address = 0x11A8/8;
+  /*  Hook->Address = 0x11A8/8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);*/
 }

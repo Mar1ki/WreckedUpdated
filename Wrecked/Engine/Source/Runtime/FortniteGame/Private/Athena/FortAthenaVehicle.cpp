@@ -144,6 +144,7 @@ void ServerMove(AFortPhysicsPawn* Pawn, FReplicatedPhysicsPawnState InState)
 
     RootComp->K2_SetWorldLocationAndRotation(InState.Translation, Rotation, false, nullptr, true);
     RootComp->SetPhysicsLinearVelocity(InState.LinearVelocity, 0, FName(0));
+    RootComp->bComponentToWorldUpdated = true;
     RootComp->SetPhysicsAngularVelocityInDegrees(InState.AngularVelocity, 0, FName(0));
 }   
 
