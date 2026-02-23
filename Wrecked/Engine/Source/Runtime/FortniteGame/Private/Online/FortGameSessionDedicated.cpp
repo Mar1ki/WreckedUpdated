@@ -18,9 +18,6 @@ TSubclassOf<AGameSession>* FortGameSessionDedicated::GetGameSessionClass(AFortGa
 }
 
 void* FortGameSessionDedicated::GetServicePermissionsByName(void* Config, FString* Name) {
-	if (Name) {
-		logtofile(Name->ToString().c_str());
-	}
 	static FServicePermissionsMcp* ServicePerms = nullptr;
 	if (!ServicePerms)
 	{
