@@ -170,7 +170,7 @@ void FortPlayerControllerAthena::GetPlayerViewPoint(APlayerController* PlayerCon
 {
     if (PlayerController->StateName == UKismetStringLibrary::Conv_StringToName(L"Spectating"))
     {
-        std::cout << "Spectating bro" << std::endl;
+        //std::cout << "Spectating bro" << std::endl;
     } else
     {
         GetPlayerViewPointOG(PlayerController, Loc, Rot);

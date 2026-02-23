@@ -17,6 +17,25 @@ TSubclassOf<AGameSession>* FortGameSessionDedicated::GetGameSessionClass(AFortGa
 	return result;
 }
 
+void* FortGameSessionDedicated::GetServicePermissionsByName(void* Config, FString* Name) {
+	if (Name) {
+		logtofile(Name->ToString().c_str());
+	}
+	static FServicePermissionsMcp* ServicePerms = nullptr;
+	if (!ServicePerms)
+	{
+		ServicePerms = new FServicePermissionsMcp{ .Id = L"ec684b8c687f479fadea3cb2ad83f5c6" };
+	}
+
+	return ServicePerms;
+}
+
+const wchar_t* FortGameSessionDedicated::CommandLineGet()
+{
+	auto Command = std::wstring(CommandLineGetOG()) + L" -AllowAllPlaylistsInShipping";
+	return Command.c_str();
+}
+
 void FortGameSessionDedicated::Init() {
 
 	UHook* Hook = new UHook();
@@ -26,10 +45,19 @@ void FortGameSessionDedicated::Init() {
 	Hook->Original = (void**)&LoadMapOG;
 	UKismetHookingLibrary::Hook(Hook, Address);
 
+	Hook->Address = ImageBase + 0x2161D28;
+	Hook->Detour = GetServicePermissionsByName;
+	UKismetHookingLibrary::Hook(Hook, Address);
+	
 	Hook->Address = 0x788 / 8;
 	Hook->Detour = GetGameSessionClass;
 	Hook->Class = AFortGameMode::StaticClass();
-	//UKismetHookingLibrary::Hook(Hook, VFT);
+	UKismetHookingLibrary::Hook(Hook, VFT);
 
+	Hook->Address = ImageBase + 0x145D240;
+	Hook->Detour = CommandLineGet;
+	Hook->Original = (void**)&CommandLineGetOG;
+	UKismetHookingLibrary::Hook(Hook, Address);
+	
 	delete Hook;
 }
