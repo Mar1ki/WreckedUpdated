@@ -193,6 +193,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldStaticPointProvider.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementComp_Character.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Movement\FortMovementMode_BaseExtLogic.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Online\FortGameSessionDedicated.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModFunctionLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Kismet\FortKismetLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Player\FortPlayerController.h" />
@@ -309,6 +310,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldStaticPointProvider.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementComp_Character.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Movement\FortMovementMode_BaseExtLogic.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Online\FortGameSessionDedicated.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerController.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerPawn.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponModFunctionLibrary.cpp" />
