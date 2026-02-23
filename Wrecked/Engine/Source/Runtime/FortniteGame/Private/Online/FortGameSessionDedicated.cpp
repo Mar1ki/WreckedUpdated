@@ -29,7 +29,7 @@ void FortGameSessionDedicated::Init() {
 	Hook->Address = 0x788 / 8;
 	Hook->Detour = GetGameSessionClass;
 	Hook->Class = AFortGameMode::StaticClass();
-	UKismetHookingLibrary::Hook(Hook, VFT);
+	//UKismetHookingLibrary::Hook(Hook, VFT);
 
 	delete Hook;
 }

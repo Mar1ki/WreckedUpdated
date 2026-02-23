@@ -493,6 +493,15 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         {
             GetLogic()->StartAircraftPhase();
         }
+        if (Command == "validate1")
+        {
+            if (GetWorld()->ServerStreamingLevelsVisibility) {
+                Controller->ClientMessage(L"Validated! Ok!", FName(), 1);
+            }
+            else {
+                Controller->ClientMessage(L"Error mariki is sped at patching", FName(), 1);
+            }
+        }
         if (Command == "testcar")
         {
             auto Vehicle = (AFortAthenaVehicle*)Pawn->CurrentVehicle;
