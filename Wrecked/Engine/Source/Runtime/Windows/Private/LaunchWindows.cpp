@@ -31,6 +31,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/GameStateComponents/FortGameStateComponent_BattleRoyaleGamePhaseLogic.h"
 #include "SDK/SDK/InfernoRuntime_classes.hpp"
 #include "Engine/Source/Runtime/FortniteGame/Public/Conversation/ConversationLibrary.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Online/FortGameSessionDedicated.h"
 #endif
 //#define Client
 inline __int64 (*SendRequestNowOG)(UMcpProfileGroup* Group, void* HttpRequest, int a3);
@@ -205,6 +206,7 @@ void Main()
     FortPlayerAugmentItemDefinition::Init();
     AthenaSpecialActorComponent::Init();
     AthenaMarkerComponent::Init();
+    FortGameSessionDedicated::Init();
 
     UHook* Hook = new UHook();
 
@@ -218,6 +220,8 @@ void Main()
         0x15AA5CC,  // WorldGetNetMode
         0x15AA5AC,  // DriverGetNetMode
         0x24B7E94,  // InternaalGetNetMode
+        0x2958210,  // SupportsMakingVisibleTransactionRequests
+
     };
 
     std::vector<uintptr_t> RetFalseFuncs = {
@@ -262,6 +266,10 @@ void Main()
     Hook->Original = (void**)&GetStringOG;
     Hook->Detour = GetStringINI;
     UKismetHookingLibrary::Hook(Hook, Address);
+
+    Hook->Address = ImageBase + 0x2958194;
+    Hook->Byte = 0x01;
+    UKismetHookingLibrary::Hook(Hook, Byte);
 
     GetWorld()->OwningGameInstance->LocalPlayers.Remove(0);
     *(bool*)(__int64(ImageBase) + 0x12BF67B0) = true;

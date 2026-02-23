@@ -10894,6 +10894,10 @@ public:
 	class UGameInstance*                          OwningGameInstance;                                // 0x0200(0x0008)(ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
 	TArray<struct FNamedNetDriver>                ActiveNetDrivers;                                  // 0x0208(0x0010)(ZeroConstructor, Transient, NativeAccessSpecifierPublic)
 	uint8                                         Pad_218[0xA8];                                     // 0x0218(0x00A8)(Fixing Struct Size After Last Property [ Dumper-7 ])
+
+	UWorld* GetWorld() {
+		return *(UWorld**)(__int64(this) + 0x2B8);
+	}
 };
 
 // ScriptStruct Engine.ComponentSpacePoseLink

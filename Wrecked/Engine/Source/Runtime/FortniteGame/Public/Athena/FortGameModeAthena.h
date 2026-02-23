@@ -7,7 +7,6 @@ namespace FortGameModeAthena
     APawn* SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot);
     DefineOriginal(void, HandleStartingNewPlayer, AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer);
     DefineOriginal(void, HandleMatchHasStarted, AFortGameModeAthena* GameMode);
-    DefineOriginal(bool, LoadMap, UEngine* Engine, FWorldContext& WorldContext, FURL URL, class UPendingNetGame* Pending, FString& Error);
 
     EFortTeam PickTeam(AFortGameModeAthena* GameMode, uint8_t PreferredTeam, AFortPlayerControllerAthena* Controller);
 

@@ -398,14 +398,6 @@ void FortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, 
 	return HandleStartingNewPlayerOG(GameMode, NewPlayer);
 }
 
-bool FortGameModeAthena::LoadMap(UEngine* Engine ,FWorldContext& WorldContext, FURL URL, class UPendingNetGame* Pending, FString& Error) {
-	auto res = LoadMapOG(Engine, WorldContext, URL, Pending, Error);
-	if (res) 
-		GetWorld()->ServerStreamingLevelsVisibility = Cast<AServerStreamingLevelsVisibility>(GetWorld()->SpawnActor(AServerStreamingLevelsVisibility::StaticClass(), {}));
-
-	return res;
-}
-
 EFortTeam FortGameModeAthena::PickTeam(AFortGameModeAthena* GameMode, uint8_t Team, AFortPlayerControllerAthena* PlayerController) {
 	
 	uint8_t returnvalue = CurrentTeam;
@@ -442,11 +434,6 @@ void FortGameModeAthena::Init()
 	Hook->Address = ImageBase + 0x8FCD25C;
 	Hook->Detour = HandleMatchHasStarted;
 	Hook->Original = (void**)&HandleMatchHasStartedOG;
-	UKismetHookingLibrary::Hook(Hook, Address);
-
-	Hook->Address = ImageBase + 0x24B61E4;
-	Hook->Detour = LoadMap;
-	Hook->Original = (void**)&LoadMapOG;
 	UKismetHookingLibrary::Hook(Hook, Address);
 
 	Hook->Address = ImageBase + 0x8FD26F0;

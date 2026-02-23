@@ -60565,5 +60565,13 @@ public:
 	uint8                                         Pad_14[0x4];                                       // 0x0014(0x0004)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
+struct FServicePermissionsMcp // sizeof=0x30
+{
+public:
+	class FString Name;
+	class FString Id;
+	class FString Key;
+};
+
 }
 
