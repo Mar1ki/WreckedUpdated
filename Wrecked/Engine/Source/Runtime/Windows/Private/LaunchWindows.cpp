@@ -221,12 +221,12 @@ void Main()
         0x15AA5AC,  // DriverGetNetMode
         0x24B7E94,  // InternaalGetNetMode
         0x2958210,  // SupportsMakingVisibleTransactionRequests
-        0xB68E5C4, // UFortDeterminismConfig::IsUsingNoLager()
-
     };
 
     std::vector<uintptr_t> RetFalseFuncs = {
-        0x1458F48
+        0x1458F48,
+        0xB68E5C4 //UFortDeterminismConfig::IsUsingNoLager()
+        
     };
 
     for (const auto& Addr : NullFuncs) {
