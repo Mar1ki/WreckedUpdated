@@ -313,6 +313,7 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"net.Iris.UseIrisReplication 1", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogEOSSDK off", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogOnline off", nullptr);
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogFortAscenderZipline none", nullptr); // random logs that pretty much we dont care about
     
     for (auto& Curie : GetObjectsOfClass<UCurieGlobals>())
        Curie->bEnableCurie = false;
