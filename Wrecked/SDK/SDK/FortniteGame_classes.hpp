@@ -35697,6 +35697,7 @@ public:
 	float                                         StormDespawnTime;                                  // 0x074C(0x0004)(ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
 	float                                         StartSimulatingTime;                               // 0x0750(0x0004)(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
 	uint8                                         Pad_754[0x2C];                                     // 0x0754(0x002C)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	bool RegisterSpecialActor();
 
 public:
 	static float GetMovementCapsuleHalfHeight();

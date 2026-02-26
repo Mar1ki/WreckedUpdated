@@ -508,14 +508,14 @@ AFortPickupAthena* FortKismetLibrary::SpawnPickup(FVector Loc, FFortItemEntry En
 		}
 	}
 	NewPickup->OnRep_PrimaryPickupItemEntry();
-
+	
 	if (Toss) NewPickup->TossPickup(Loc, Pawn, -1, Toss, true, SourceTypeFlag, SpawnSource);
 
 	if (SourceTypeFlag == EFortPickupSourceTypeFlag::Container) {
 		NewPickup->bTossedFromContainer = true;
 		NewPickup->OnRep_TossedFromContainer();
 	}
-
+	
 	NewPickup->MovementComponent = (UFortProjectileMovementComponent*)UGameplayStatics::SpawnObject(UFortProjectileMovementComponent::StaticClass(), NewPickup);
 	NewPickup->SetReplicateMovement(true);
 	NewPickup->OnRep_ReplicateMovement();
