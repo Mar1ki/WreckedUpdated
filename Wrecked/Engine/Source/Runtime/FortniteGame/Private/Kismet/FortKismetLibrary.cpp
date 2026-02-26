@@ -519,6 +519,7 @@ AFortPickupAthena* FortKismetLibrary::SpawnPickup(FVector Loc, FFortItemEntry En
 	NewPickup->MovementComponent = (UFortProjectileMovementComponent*)UGameplayStatics::SpawnObject(UFortProjectileMovementComponent::StaticClass(), NewPickup);
 	NewPickup->SetReplicateMovement(true);
 	NewPickup->OnRep_ReplicateMovement();
+	NewPickup->RegisterSpecialActor();
 	return NewPickup;
 }
 
