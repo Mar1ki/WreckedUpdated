@@ -520,6 +520,14 @@ AFortPickupAthena* FortKismetLibrary::SpawnPickup(FVector Loc, FFortItemEntry En
 	NewPickup->SetReplicateMovement(true);
 	NewPickup->OnRep_ReplicateMovement();
 	NewPickup->RegisterSpecialActor();
+
+	if (Entry.ItemDefinition->IsA(UFortPlayerAugmentItemDefinition::StaticClass()))
+	{
+		auto Casted = (UFortPlayerAugmentItemDefinition*)Entry.ItemDefinition;
+		auto Something = (FFortItemComponentData_Pickup*)Casted->DataList[0].Struct;
+
+		NewPickup->LandedSoundOverride = Something->LandedSound;
+	}
 	return NewPickup;
 }
 
