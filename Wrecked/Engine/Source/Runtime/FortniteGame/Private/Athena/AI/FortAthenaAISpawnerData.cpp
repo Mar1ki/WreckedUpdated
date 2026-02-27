@@ -6,17 +6,21 @@
 
 void FortAthenaAISpawnerData::AIBotSkillsetOnSpawned(UFortAthenaAISpawnerDataComponent_AIBotSkillset* AIBotSkillset, AFortAIPawn* Pawn) {
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
+	static void (*InitializeSkills)(AFortAthenaAIBotController*, float*, TArray<TSubclassOf<UFortAthenaAIBotSkillSet>>*) = decltype(InitializeSkills)(ImageBase + 0xA7B8A78);
 	static UFortAthenaAIBotDigestedSkillSet* (__fastcall * GetOrCreateDigestedSkillSetInternal)(AFortAthenaAIBotController * Controller, TSubclassOf<UFortAthenaAIBotSkillSet> *InSkillSetClass, bool bForceUpdate, unsigned int* CRC) = decltype(GetOrCreateDigestedSkillSetInternal)(ImageBase + 0xA7AE888);
-	if (AIBotController && AIBotController->BotSkillSetClasses.Num() == 0)
+	if (AIBotController)
 	{
+		auto Skill = AIBotSkillset->Skill.Evaluate();
 		auto SkillSets = AIBotSkillset->GetSkillSets();
+		InitializeSkills(AIBotController, &Skill, &SkillSets);
 		for (auto SkillSet : SkillSets) {
-			AIBotController->SetSkillSet(SkillSet);
+			//AIBotController->SetSkillSet(SkillSet);
+			UE_LOG(LogAI, Log, "Initializing Skillset: %s", SkillSet.Get()->GetName().c_str());
 			unsigned int WtfIsThis = 0;
 			auto DigestSkillset = GetOrCreateDigestedSkillSetInternal(AIBotController, &SkillSet, true, &WtfIsThis);
 			if (DigestSkillset) {
 				unsigned int (*Digest)(UFortAthenaAIBotDigestedSkillSet*, int, UFortAthenaAIBotSkillSet*) = decltype(Digest)(__int64(DigestSkillset->VTable[0x57]));
-				Digest(DigestSkillset, AIBotSkillset->Skill.Evaluate(), (UFortAthenaAIBotSkillSet*)SkillSet.Get()->GetDefaultObj());
+				Digest(DigestSkillset, Skill, (UFortAthenaAIBotSkillSet*)SkillSet.Get()->DefaultObject);
 			}
 		}
 	}
@@ -232,7 +236,7 @@ void FortAthenaAISpawnerData::Init() {
 	UHook* Hook = new UHook();
 	
 	Hook->Address = 0x59;
-	Hook->Class = UFortAthenaAISpawnerDataComponent_AIBotSkillset::StaticClass();
+	Hook->Class = UFortAthenaAISpawnerDataComponent_SkillsetBase::StaticClass();
 	Hook->Detour = AIBotSkillsetOnSpawned;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 	
