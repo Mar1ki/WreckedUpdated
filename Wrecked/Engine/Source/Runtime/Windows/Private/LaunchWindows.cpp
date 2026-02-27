@@ -2,6 +2,7 @@
 
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaMarkerComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/FortniteAI/FortAthenaPatrolPath.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 #ifndef Client
@@ -207,6 +208,7 @@ void Main()
     AthenaSpecialActorComponent::Init();
     AthenaMarkerComponent::Init();
     FortGameSessionDedicated::Init();
+    FortAthenaPatrolPath::Init();
 
     UHook* Hook = new UHook();
 
