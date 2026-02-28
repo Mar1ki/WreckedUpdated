@@ -116,27 +116,29 @@ bool FortVehicleMod::CanApplyMod(IFortVehicleInterface* VehicleInterface, FGamep
 
 void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, FGameplayEffectContextHandle *EffectContextHandle)
 {
-    std::cout << "InOutDamage: " << InOutDamage << std::endl;
-    for (auto tag : InTags->GameplayTags)
+    std::cout << std::hex << (uint64_t)_ReturnAddress() - ImageBase << std::endl;
+   /* std::cout << "InOutDamage: " << InOutDamage << std::endl;
+    auto EffectContext = (FGameplayEffectContext*)EffectContextHandle->Data.Object;
+
+    auto OBJ = (FGameplayEffectContext*)EffectContextHandle->Data.Object;
+    auto HitResult = (FHitResult*)OBJ->HitResult.Object;
+    if (HitResult)
     {
-        if (EffectContextHandle && EffectContextHandle->Data.Ptr) {
-            auto EffectContext = EffectContextHandle->Data.Ptr;
-            std::cout << EffectContext->AbilityLevel << "\n";
-        }
-        std::cout << "Tag: "<< tag.TagName.ToString().c_str() << std::endl;
+        HitResult.
     }
-    
-    std::cout << "dummy called" << std::endl;
+    std::cout << "dummy called" << std::endl; */
     
 
 }
 void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* PlayerController, const FGameplayTag& RequestType, UFortVehicleModComponent* ModInstance, int32 SeatIndex) {
-    std::cout << "Vehicle Mod Rpc Called" << std::endl;
+    std::cout << "Vehicle Mod Rpc Called" <<  RequestType.TagName.ToString().c_str() <<std::endl;
     ServerVehicleModSeatRPCOG(PlayerController, RequestType, ModInstance, SeatIndex);
     
-    AFortAthenaVehicle* Car = Cast<AFortAthenaVehicle>(PlayerController->MyFortPawn->CurrentVehicle);
+    auto Vehicle = (AFortAthenaVehicle*)PlayerController->MyFortPawn->CurrentVehicle;
+
+
     
-    if (Car) {
+ /*   if (Car) {
         UFortVehicleModComponent_VertexAnimTurret* Comp = Cast<UFortVehicleModComponent_VertexAnimTurret>(Car->GetComponentByClass(UFortVehicleModComponent_VertexAnimTurret::StaticClass()));
         if (Comp) {
             for (UFortVehicleSeatWeaponComponent* SeatComp : Comp->DynamicSeatWeaponComponents) {
@@ -177,7 +179,9 @@ void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* Player
                 }
             }
         }
-    }
+    }*/
+
+    
 }
 
 void FortVehicleMod::Init()
@@ -207,8 +211,8 @@ void FortVehicleMod::Init()
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
     
     // AFortAthenaVehicle::AbsorbDamageIntoDamagablePart that has no impl
-  /*  Hook->Address = 0x11A8/8;
+    Hook->Address = 0x11A8/8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);*/
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
 }
