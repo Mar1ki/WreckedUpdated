@@ -114,7 +114,8 @@ bool FortVehicleMod::CanApplyMod(IFortVehicleInterface* VehicleInterface, FGamep
     return true;
 }
 
-void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, FGameplayEffectContextHandle *EffectContextHandle)
+//void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, FGameplayEffectContextHandle *EffectContextHandle)
+void Dummy(AFortAthenaVehicle* Vehicle, float* InOutDamage, const FGameplayTagContainer* InTags, FGameplayEffectContextHandle *EffectContextHandle, AController* Controller, AActor* Actor, AFortPlayerPawn* PlayerPawn)
 {
     std::cout << std::hex << (uint64_t)_ReturnAddress() - ImageBase << std::endl;
    /* std::cout << "InOutDamage: " << InOutDamage << std::endl;
@@ -211,8 +212,8 @@ void FortVehicleMod::Init()
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
     
     // AFortAthenaVehicle::AbsorbDamageIntoDamagablePart that has no impl
-    Hook->Address = 0x11A8/8;
+   /* Hook->Address = 0x11A8/8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+    UKismetHookingLibrary::Hook(Hook, EveryVFT); */
 }
