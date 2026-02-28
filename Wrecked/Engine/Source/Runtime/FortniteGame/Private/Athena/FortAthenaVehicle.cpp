@@ -233,7 +233,7 @@ void FortAthenaVehicle::TryGiveMetalOnHarvest(IFortVehicleInterface *Interface, 
     if (!Pawn) return;
     auto Inventory =  (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
     auto MetalItemDefinition = GetAssetManager()->GameDataCommon->MetalItemDefinition.Get();
-    
+    auto Vehicle = (AFortAthenaVehicle*)(__int64(Interface) - 0x510);
     
     auto FoundEntry = Inventory->GetItemEntryByDef(MetalItemDefinition);
     if (FoundEntry)
@@ -247,10 +247,13 @@ void FortAthenaVehicle::TryGiveMetalOnHarvest(IFortVehicleInterface *Interface, 
         {
             FoundEntry->Count += MetalOnHit;
             Inventory->ReplaceEntry(*FoundEntry);
+            PlayerController->ClientReportGotResourceFromVehicle(Vehicle, MetalOnHit);
+
         }
     } else
     {
         Inventory->AddItem(MetalItemDefinition, MetalOnHit, 0);
+        PlayerController->ClientReportGotResourceFromVehicle(Vehicle, MetalOnHit);
     }
 }
 
