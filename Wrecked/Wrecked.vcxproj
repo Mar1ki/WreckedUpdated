@@ -189,6 +189,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortPlayerAugmentItemDefinition.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\InventoryManagementLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldDensityGrid.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldEvent.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldManager.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldStaticPointProvider.h" />
@@ -307,6 +308,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldDensityGrid.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldEvent.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldManager.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldStaticPointProvider.cpp" />

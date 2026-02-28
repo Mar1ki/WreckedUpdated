@@ -17227,7 +17227,16 @@ public:
 struct alignas(0x08) FFortSpatialGrid
 {
 public:
-	uint8                                         Pad_0[0xC0];                                       // 0x0000(0x00C0)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	class TWeakObjectPtr<class UObject>            Owner;
+	uint8                                          bIsInitialized : 1;
+	uint8                                          Pad_0[0x7];
+	struct TBox<double>                            GridBounds;
+	struct TVector<double>                         GridCellSize;
+    struct TIntVector3<int>                        MaxGridSize;
+    uint8                                          Pad_1[0x4];
+    struct TVector<double>                         GridOrigin;
+    struct TVector<double>                         HalfGridCellSize;
+    struct TVector<double>                         InverseGridCellSize;
 };
 
 // ScriptStruct FortniteGame.FortHLODTemplatedISMComponentDescriptor

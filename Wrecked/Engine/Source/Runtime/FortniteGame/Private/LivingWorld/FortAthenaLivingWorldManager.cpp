@@ -58,17 +58,6 @@ inline void logtofile2(const std::string& message) {
     }
 }
 
-char (*DensityGridAddActorOG)(FFortAthenaLivingWorldDensityGrid*, AActor*, double, double);
-char DensityGridAddActor(FFortAthenaLivingWorldDensityGrid* DensityGrid, AActor* InActor, double DensityValue, double DensityRange)
-{
-
-    std::cout << InActor->Name.ToString().c_str() << std::endl;
-
-
-
-
-    return DensityGridAddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
-}
 
 static bool NeedsLoadForClient() {
     return true;
@@ -78,12 +67,6 @@ void FortAthenaLivingWorldManager::Hook()
 {
     // og might be needed
     UHook* Hook = new UHook();
-
-    Hook->Detour = DensityGridAddActor;
-    Hook->Address = ImageBase + 0xB680704;
-    Hook->Original = (void**)&DensityGridAddActorOG;
-    UKismetHookingLibrary::Hook(Hook, Address);
-
 
     Hook->Class = AFortAthenaLivingWorldPointProvidersEnabler::StaticClass();
     Hook->Detour = NeedsLoadForClient;

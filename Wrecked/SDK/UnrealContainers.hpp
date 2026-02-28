@@ -941,5 +941,27 @@ ValueElementType* Search(PT Predicate)
 		T* Ptr;
 		FSharedReferencer Referencer;
 	};
+
+	template<typename T>
+	struct TVector
+	{
+		T X, Y, Z;
+	};
+
+	template<typename T>
+	struct TBox
+	{
+		TVector<T> Min;
+		TVector<T> Max;
+		uint8       IsValid;
+	};
+
+	template<typename IntType>
+	struct TIntVector3
+	{
+		IntType X;
+		IntType Y;
+		IntType Z;
+	};
 }
 

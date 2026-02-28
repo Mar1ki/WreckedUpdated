@@ -4,6 +4,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/FortniteAI/FortAthenaPatrolPath.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldDensityGrid.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 #ifndef Client
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
@@ -209,6 +210,7 @@ void Main()
     AthenaMarkerComponent::Init();
     FortGameSessionDedicated::Init();
     FortAthenaPatrolPath::Init();
+    FortAthenaLivingWorldDensityGrid::Hook();
 
     UHook* Hook = new UHook();
 
