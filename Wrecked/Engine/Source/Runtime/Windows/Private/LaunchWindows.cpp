@@ -2,6 +2,7 @@
 
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaMarkerComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/FortControllerComponent_RechargeWeapons.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/FortniteAI/FortAthenaPatrolPath.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldDensityGrid.h"
@@ -211,6 +212,7 @@ void Main()
     FortGameSessionDedicated::Init();
     FortAthenaPatrolPath::Init();
     FortAthenaLivingWorldDensityGrid::Hook();
+    FortControllerComponent_RechargeWeapons::Init();
 
     UHook* Hook = new UHook();
 
