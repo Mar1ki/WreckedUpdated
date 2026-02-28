@@ -104,6 +104,7 @@ struct FSharedReferencer {
 public:
 	void* ReferenceController;
 };
+template<typename T>
 struct FSharedPtr {
 public:
 	UObject* Object;

@@ -566,7 +566,7 @@ public:
 struct alignas(0x08) FGameplayEffectContextHandle final
 {
 public:
-	TSharedPtr<struct FGameplayEffectContext> Data;
+	FSharedPtr<struct FGameplayEffectContext> Data;
 	uint8 Pad_10[0x08];
 };
 
@@ -1641,7 +1641,7 @@ public:
 	uint8                                         Pad_3C[0x4];                                       // 0x003C(0x0004)(Fixing Size After Last Property [ Dumper-7 ])
 	TArray<TWeakObjectPtr<class AActor>>          Actors;                                            // 0x0040(0x0010)(ZeroConstructor, Protected, UObjectWrapper, NativeAccessSpecifierProtected)
 	//uint8                                       Pad_50[0x10];                                      // 0x0050(0x0010)(Fixing Size After Last Property [ Dumper-7 ])
-	TSharedPtr<FHitResult>						  HitResult;
+	FSharedPtr<FHitResult>						  HitResult;
 	struct FVector                                WorldOrigin;                                       // 0x0060(0x0018)(ZeroConstructor, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
 	uint8                                         bHasWorldOrigin : 1;                               // 0x0078(0x0001)(BitIndex: 0x00, PropSize: 0x0001 (NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected))
 	uint8                                         bReplicateSourceObject : 1;                        // 0x0078(0x0001)(BitIndex: 0x01, PropSize: 0x0001 (RepSkip, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected))
