@@ -795,19 +795,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
 
 void FortPlayerController::Init()
 {
-
-    for (auto i = 0; i < UObject::GObjects->Num(); i++) {
-        auto Object = UObject::GObjects->GetByIndex(i);
-
-        if (!Object || !Object->IsDefaultObject() || !Object->IsA(AFortAthenaVehicle::StaticClass()))
-            continue;
-
-        auto InterfaceAddress = Object->GetInterface<IFortVehicleInterface>(IFortInventoryOwnerInterface::StaticClass());
-        if (InterfaceAddress) {
-            VHook3(InterfaceAddress, 198 / 8, RemoveInventoryItem);
-        } 
-    }
-    
     UHook* Hook = new UHook();
 
     Hook->Address = 0x133;
