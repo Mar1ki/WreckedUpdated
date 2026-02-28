@@ -2,6 +2,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaVehicle.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 
 void VHook(void* Base, uintptr_t Index, void* Detour, void** Original = nullptr) {
     auto VTable = (*(void***)Base);
@@ -224,6 +225,34 @@ void FortAthenaVehicle::BreakDamageablePart(AFortAthenaVehicle* Vehicle, const F
         }
     }
 }
+void FortAthenaVehicle::TryGiveMetalOnHarvest(IFortVehicleInterface *Interface, AActor *DamageCauser, AController *EventInstigator, const int MetalOnHit)
+{
+    auto PlayerController = (AFortPlayerControllerAthena*)EventInstigator;
+    if (!PlayerController) return;
+    auto Pawn = PlayerController->MyFortPawn;
+    if (!Pawn) return;
+    auto Inventory =  (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
+    auto MetalItemDefinition = GetAssetManager()->GameDataCommon->MetalItemDefinition.Get();
+    
+    
+    auto FoundEntry = Inventory->GetItemEntryByDef(MetalItemDefinition);
+    if (FoundEntry)
+    {
+
+        if (FoundEntry->Count == 500)
+        {
+            FortKismetLibrary::SpawnPickup(DamageCauser->K2_GetActorLocation(), MetalItemDefinition, EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource::TossedByPlayer, MetalOnHit, 0, Pawn);
+            
+        } else
+        {
+            FoundEntry->Count += MetalOnHit;
+            Inventory->ReplaceEntry(*FoundEntry);
+        }
+    } else
+    {
+        Inventory->AddItem(MetalItemDefinition, MetalOnHit, 0);
+    }
+}
 
 void FortAthenaVehicle::Hook()
 {
@@ -261,5 +290,11 @@ void FortAthenaVehicle::Hook()
     Hook->Detour = PostInitializeComponents;
     Hook->Original = (void**)&PostInitializeComponentsOG;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
+    
+    Hook->Address = 0x748 / 8;
+    Hook->Class = AFortAthenaVehicle::StaticClass();
+    Hook->Interface = IFortVehicleInterface::StaticClass();
+    Hook->Detour = TryGiveMetalOnHarvest;
+    UKismetHookingLibrary::Hook(Hook, Interface);
     
 }
