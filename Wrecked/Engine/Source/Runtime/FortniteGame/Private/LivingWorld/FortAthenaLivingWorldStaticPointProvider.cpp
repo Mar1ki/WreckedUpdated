@@ -63,12 +63,15 @@ TArray<AFortAthenaLivingWorldStaticPointProvider*> FortAthenaLivingWorldStaticPo
 
 
 
-void EnablePointProvider(UObject* Object, FFrame& Params)
+void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Object, FFrame& Params)
 {
     auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
     PointProvider->bStartEnabled = true;
     
     std::cout << "EnablePointProvider" << std::endl;
+
+    EnablePointProviderOG(Object, Params);
+    
 }
 void FortAthenaLivingWorldStaticPointProvider::Init()
 {
@@ -80,6 +83,7 @@ void FortAthenaLivingWorldStaticPointProvider::Init()
     
     Hook->Path = "/Script/LagerRuntime.FortAthenaPatrolPathPointProvider.EnablePointProvider";
     Hook->Detour = EnablePointProvider;
+    Hook->Original = (void**)&EnablePointProviderOG;
     UKismetHookingLibrary::Hook(Hook, Exec);
     delete Hook;
 }

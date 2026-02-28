@@ -22,9 +22,9 @@ void FortAthenaPatrolPath::Init()
 {
     UHook* Hook = new UHook();
     
-    Hook->Path = "/Script/FortniteAI.FortAthenaPatrolPath.GetPatrolPoints";
+    /*Hook->Path = "/Script/FortniteAI.FortAthenaPatrolPath.GetPatrolPoints";
     Hook->Detour = GetPatrolPoints;
-    UKismetHookingLibrary::Hook(Hook, Exec);
+    UKismetHookingLibrary::Hook(Hook, Exec); */
     
     delete Hook;
 }

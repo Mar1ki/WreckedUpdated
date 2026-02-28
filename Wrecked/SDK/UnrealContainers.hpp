@@ -949,11 +949,11 @@ ValueElementType* Search(PT Predicate)
 	};
 
 	template<typename T>
-	struct TBox
+    struct TBox
 	{
 		TVector<T> Min;
 		TVector<T> Max;
-		uint8       IsValid;
+		uint8 IsValid;
 	};
 
 	template<typename IntType>
