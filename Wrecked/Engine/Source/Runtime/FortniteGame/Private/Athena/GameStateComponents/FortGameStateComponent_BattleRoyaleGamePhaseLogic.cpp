@@ -298,7 +298,6 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::SpawnInitialSafeZone() 
         if (SafeZoneIndicatorClass)
         {
             SafeZoneIndicator = (AFortSafeZoneIndicator*)GetWorld()->SpawnActor(SafeZoneIndicatorClass, {});
-            OnRep_SafeZoneIndicator();
         }
         if (SafeZoneIndicator)
         {
@@ -308,6 +307,7 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::SpawnInitialSafeZone() 
             SafeZoneIndicator->OnSafeZonePhaseChanged.InvocationList.Add(Delegate);
             SafeZoneIndicator->InitializeWithMapDefaultPhases();
             SafeZoneIndicator->StartPhase(1);
+            OnRep_SafeZoneIndicator();
         }
     }
 }

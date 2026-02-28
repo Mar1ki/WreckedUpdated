@@ -41,6 +41,7 @@
 #include "SDK/SDK/WeaponModsCodeRuntime_classes.hpp"
 #include "SDK/SDK/AscenderCodeRuntime_classes.hpp"
 #include "SDK/SDK/FortniteAI_classes.hpp"
+#include "SDK/SDK/FortniteAIServer_classes.hpp"
 #include <set>
 #include <atomic>
 #include "Engine/Source/Runtime/Core/Public/Math/UnrealMathUtility.h"

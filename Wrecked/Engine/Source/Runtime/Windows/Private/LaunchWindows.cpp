@@ -31,6 +31,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortWorldItem.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/InventoryManagementLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortInventoryOwnerInterface.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/FortniteAI/FortAthenaBTService_PickUpLoot.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/GameStateComponents/FortGameStateComponent_BattleRoyaleGamePhaseLogic.h"
 #include "SDK/SDK/InfernoRuntime_classes.hpp"
 #include "Engine/Source/Runtime/FortniteGame/Public/Conversation/ConversationLibrary.h"
@@ -211,6 +212,7 @@ void Main()
     AthenaMarkerComponent::Init();
     FortGameSessionDedicated::Init();
     FortAthenaPatrolPath::Init();
+    FortAthenaBTService_PickUpLoot::Init();
     FortAthenaLivingWorldDensityGrid::Hook();
     FortControllerComponent_RechargeWeapons::Init();
 
@@ -219,6 +221,7 @@ void Main()
     std::vector<uintptr_t> NullFuncs = {
         0x1C6A23C,
         0x1C6A588,
+        0xA90678C //inventoryPostOnspawned (crashing for no reason)
     };
 
     std::vector<uintptr_t> RetTrueFuncs = {

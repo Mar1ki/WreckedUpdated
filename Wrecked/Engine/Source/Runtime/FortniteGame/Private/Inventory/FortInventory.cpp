@@ -73,6 +73,47 @@ FFortItemEntry* AFortInventory::AddItem(UFortItemDefinition* Def, int32 Count, i
     return &Item->ItemEntry;
 }
 
+UFortWorldItem* AFortInventory::AddItemInst(UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level, UFortWeaponModSetData* Modset) {
+    UFortWorldItem* Item = (UFortWorldItem*)Def->CreateTemporaryItemInstanceBP(Count, Level);
+    if (!Item) return nullptr;
+    auto Controller = Cast<AFortPlayerController>(GetOwner());
+
+    Item->ItemEntry.LoadedAmmo = LoadedAmmo;
+    Item->SetOwningControllerForTemporaryItem(Controller);
+
+    if (auto Weapon = Cast<UFortWeaponRangedItemDefinition>(Def))
+    {
+        auto Stats = Weapon->GetStats();
+        if (Weapon->bUsesPhantomReserveAmmo)
+        {
+            Item->ItemEntry.PhantomReserveAmmo = (Stats->InitialClips - 1) * Stats->ClipSize;
+        }
+    }
+    // theres our issue when reloading gng prob
+    if (Def->IsA(UFortAmmoItemDefinition::StaticClass()) || Def->IsA(UFortResourceItemDefinition::StaticClass()))
+    {
+        FFortItemEntryStateValue Value{};
+        Value.IntValue = true;
+        Value.StateType = EFortItemEntryState::ShouldShowItemToast;
+        Item->ItemEntry.StateValues.Add(Value);
+    }
+    if (auto Weapon = Cast<UFortWeaponRangedItemDefinition>(Def) && Modset) {
+        ApplyWeaponModset(&Item->ItemEntry, Modset);
+        FFortItemEntryStateValueConstObject NewState;
+        NewState.ObjectData = Modset;
+        FGameplayTag ModsetTag = *(FGameplayTag*)(ImageBase + 0x12BCBA54);
+        NewState.StateType = ModsetTag;
+        Item->ItemEntry.StateValuesConstObject.Add(NewState);
+    }
+
+    Inventory.ReplicatedEntries.Add(Item->ItemEntry);
+    Inventory.ItemInstances.Add(Item);
+
+    Update(&Item->ItemEntry);
+
+    return Item;
+}
+
 bool AFortInventory::ReplaceEntry(FFortItemEntry& Entry)
 {
     bool bSuccess = false;

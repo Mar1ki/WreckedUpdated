@@ -125,6 +125,8 @@ void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAIS
 }
 
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
+	static bool (*WouldItemFitInBotInventory)(AFortAthenaAIBotController*, const UFortWorldItem* NewItem, int* OutInventorySlot, bool* bOutIsItemSupported) = decltype(WouldItemFitInBotInventory)(ImageBase + 0xA7DD1AC);
+
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
 	if (!Component || !Pawn || !AIBotController) return;
 	if (!AIBotController->Inventory.ObjectPointer)
@@ -148,25 +150,31 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 	auto Inventory = Pawn->Inventory;
 	TArray<FItemAndCount> Items = { };
 	Component->GetAllPossibleItems(&Items);
+
 	for (auto Item : Items)
 	{
 		auto Casted = (UFortWeaponItemDefinition*)Item.Item;
 		auto WeaponStats = Casted->GetStats();
-		auto Entry = Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
+		auto ItemInst = Inventory->AddItemInst((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
 		std::cout << Item.Item->Name.ToString().c_str() << std::endl;
-		auto ItemInstance = Inventory->GetWorldItemByGuid(Entry->ItemGuid);
-
-		for (auto& Slot : AIBotController->SlotItems)
-		{
-			if (!Slot.ItemDefinition)
-			{
-				Slot.ItemDefinition = Item.Item;
-				Slot.WeaponDefinitionCache = Slot.ItemDefinition->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWeaponItemDefinition*)Item.Item: nullptr;
-				Slot.BotController = AIBotController;
-				Slot.FortItem = ItemInstance ? *ItemInstance : nullptr;
-				break;
+		
+		int InventorySlot = -1;
+		bool bIsSupported = false;
+		if (ItemInst) {
+			auto Result = WouldItemFitInBotInventory(AIBotController, ItemInst, &InventorySlot, &bIsSupported);
+			UE_LOG(LogAI, Log, "WouldItemFitInBotInventory Reuslt %i Inventorylot %i bIsSupported %i", Result, InventorySlot, bIsSupported);
+			if (Result) {
+				FFortBotInventoryInfo& BotInfo = AIBotController->SlotItems[InventorySlot];
+				BotInfo.BotController = AIBotController;
+				BotInfo.FortItem = ItemInst;
+				BotInfo.ItemDefinition = Item.Item;
+				BotInfo.WeaponDefinitionCache = Item.Item->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWorldItemDefinition*)Item.Item : nullptr;
+				BotInfo.MultiItemDefinitionCache = Item.Item->IsA(UFortWorldMultiItemDefinition::StaticClass()) ? (UFortWorldMultiItemDefinition*)Item.Item : nullptr;
+				AIBotController->SlotItems[InventorySlot] = BotInfo;
 			}
+			
 		}
+		
 	}
 	
 	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
@@ -255,7 +263,7 @@ void FortAthenaAISpawnerData::Init() {
 	Hook->Detour = AIBotInventoryBaseOnSpawned;
 	Hook->Original = (void**)&AIBotInventoryBaseOnSpawnedOG;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
-	
+
 	Hook->Address = 0x59;
 	Hook->Class = UFortAthenaAISpawnerDataComponent_AIBotConversation::StaticClass();
 	Hook->Detour = AIBotConversationOnSpawned;

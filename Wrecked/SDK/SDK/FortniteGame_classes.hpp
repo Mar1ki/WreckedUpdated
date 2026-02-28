@@ -20253,6 +20253,7 @@ public:
 public:
 	void HandleInventoryLocalUpdate();
 	FFortItemEntry* AddItem(class UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level = 1, UFortWeaponModSetData* Modset = nullptr);
+	class UFortWorldItem* AddItemInst(class UFortItemDefinition* Def, int32 Count, int LoadedAmmo, int32 Level=1, UFortWeaponModSetData* Modset=nullptr);
     bool ReplaceEntry(class FFortItemEntry& Entry);
     void Remove(FGuid Guid);
     FFortItemEntry* GetItemEntryByGuid(FGuid Guid) { return Inventory.ReplicatedEntries.Search([Guid](FFortItemEntry& Entry) {return Entry.ItemGuid == Guid; }); }

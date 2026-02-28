@@ -185,6 +185,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingContainer.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Conversation\ConversationLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\AthenaAIServicePlayerBots.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\FortAthenaBTService_PickUpLoot.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\FortAthenaPatrolPath.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortInventoryOwnerInterface.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortPlayerAugmentItemDefinition.h" />
@@ -303,6 +304,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingContainer.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Conversation\ConversationLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\AthenaAIServicePlayerBots.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\FortAthenaBTService_PickUpLoot.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\FortAthenaPatrolPath.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Inventory\FortInventory.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortInventoryOwnerInterface.cpp" />
