@@ -464,6 +464,8 @@ int32_t SearchIndex(PT Predicate) {
 
 		inline bool IsValid() const { return Data && NumElements > 0 && MaxElements >= NumElements; }
 
+		inline bool IsEmpty() const { return NumElements == 0; }
+
 	public:
 		inline       ArrayElementType& operator[](int32 Index)       { VerifyIndex(Index); return Data[Index]; }
 		inline const ArrayElementType& operator[](int32 Index) const { VerifyIndex(Index); return Data[Index]; }
