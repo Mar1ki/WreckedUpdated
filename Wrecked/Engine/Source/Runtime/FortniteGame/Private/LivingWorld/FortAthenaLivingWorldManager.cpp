@@ -63,6 +63,11 @@ static bool NeedsLoadForClient() {
     return true;
 }
 
+
+void Dummy()
+{
+    std::cout << "One of the event exec is called" << std::endl;
+}
 void FortAthenaLivingWorldManager::Hook()
 {
     // og might be needed
@@ -79,6 +84,16 @@ void FortAthenaLivingWorldManager::Hook()
     Hook->Address = 0x108 / 8;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
+
+    Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.TrySpawnEvent";
+    Hook->Detour = Dummy;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+
+    Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.RequestEventGeneration";
+    Hook->Detour = Dummy;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+
+    
 }
 
 
