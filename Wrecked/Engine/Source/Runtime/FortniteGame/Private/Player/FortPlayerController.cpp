@@ -493,50 +493,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         {
             GetLogic()->StartAircraftPhase();
         }
-        if (Command == "testcar")
-        {
-            auto Vehicle = (AFortAthenaVehicle*)Pawn->CurrentVehicle;
-            auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
-            
-            
-            if (VehicleConfigClass) {
-                auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
-
-                if (Vehicle) {
-                    TArray<FVehicleDamageablePart> Old;
-                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
-                        Old.Add(Vehicle->DamageableParts[i]);
-                    }
-
-                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
-                        Vehicle->DamageableParts[i].Health = 0;
-                    }
-                    Vehicle->OnRep_DamageableParts(Old);
-                }
-            }
-        }
-        if (Command == "testcar2")
-        {
-            auto Vehicle = (AFortAthenaVehicle*)Pawn->CurrentVehicle;
-            auto VehicleConfigClass = Vehicle->VehicleConfigsClass.Get();
-
-
-            if (VehicleConfigClass) {
-                auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
-
-                if (Vehicle) {
-                    TArray<FVehicleDamageablePart> Old;
-                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
-                        Old.Add(Vehicle->DamageableParts[i]);
-                    }
-
-                    for (auto i = 0; i < Vehicle->DamageableParts.Num(); i++) {
-                        Vehicle->DamageableParts[i].Health = 10;
-                    }
-                    Vehicle->OnRep_DamageableParts(Old);
-                }
-            }
-        }
         if (Command == "testvolumes") {
             TArray<AActor*> Actors;
             UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFortPoiVolume::StaticClass(), &Actors);
@@ -591,32 +547,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             auto idkclass = StaticLoadObject<UClass>("/WeaponModStation/Gameplay/Actors/BP_WeaponModStation_v2.BP_WeaponModStation_v2_C");
             GetWorld()->SpawnActor(idkclass, newloc, Pawn->K2_GetActorRotation());
         }
-        if (Command == "vehicleinfo")
-        {
-            auto Vehicle =  (AFortAthenaVehicle*)Pawn->CurrentVehicle;
-            auto VehicleCfgClass =  Vehicle->VehicleConfigsClass_BR.Get();
-            auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleCfgClass->DefaultObject;
-            
-            std::cout << Vehicle->Name.ToString().c_str() << std::endl;
-            // i think we get the current config through the interface
-            auto VehicleInterface = Vehicle->GetInterface<IFortVehicleInterface>(IFortVehicleInterface::StaticClass());
-
-        
-            if (VehicleConfig)
-            {
-                std::cout << VehicleConfig->DamageableParts.Num() <<  std::endl;
-            }
-            for (auto Part : Vehicle->DamageableParts)
-            {
-                std::cout << "ShapeName: " << Part.ShapeName.ToString().c_str() << "Health: " << Part.Health << std::endl;
-            }
-
-            for (auto Part : Vehicle->ToggledParts)
-            {
-                std::cout << "ShapeName: "  << Part.ShapeName.ToString().c_str() << "Enabled: "  << Part.bEnabled << std::endl;
-            }
-        }
-
         if (Command == "bruh")
         {
             FortAthenaLivingWorldEvent::TrySpawnEvents();
@@ -691,21 +621,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Comp->PushedMovementModeExtensionRuntimeData.Clear();
             Comp->NewlyAddedMovementModeExtensionRuntimeData.Clear();
             Comp->ActiveLayeredMovementModeRuntimeData.Clear();
-        }
-        if (Command == "modmod") {
-            auto TurretClass = StaticLoadObject<UClass>("/VehicleMods/Mods/SocketPropDestructor/Tire/VMConfig_SocketPropDestructor_Tire.VMConfig_SocketPropDestructor_Tire_C", UBlueprintGeneratedClass::StaticClass());
-            auto ModConfig = (UFortVehicleModConfig*)TurretClass->DefaultObject;
-            auto Car = Pawn->CurrentVehicle;
-            if (Car) {
-                void (__fastcall* ApplyToVehicleInternal)(UFortVehicleModConfig* ModConfig, IFortVehicleInterface* Vehicle) = decltype(ApplyToVehicleInternal)(ImageBase + 0xA644268);
-                auto VehicleInterface = Car->GetInterface<IFortVehicleInterface>(IFortVehicleInterface::StaticClass());
-                if (VehicleInterface) {
-                    ApplyToVehicleInternal(ModConfig, VehicleInterface);
-                }
-                else {
-                    std::cout << "Car has no interface\n";
-                }
-            }
         }
         if (Command == "spawnnpc")
         {
