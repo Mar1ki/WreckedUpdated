@@ -67,6 +67,7 @@ void FortPlayerController::ServerPlayEmoteItem(AFortPlayerController* PlayerCont
 
     static UClass* DanceAbility = StaticLoadObject<UClass>("/Game/Abilities/Emotes/GAB_Emote_Generic.GAB_Emote_Generic_C");
     static UClass* SprayAbility = StaticLoadObject<UClass>("/Game/Abilities/Sprays/GAB_Spray_Generic.GAB_Spray_Generic_C");
+    static UClass* GroupEmoteAbility = StaticLoadObject<UClass>("/Game/Abilities/Emotes/GAB_GroupEmoteRequest.GAB_GroupEmoteRequest_C");
 
     if (!DanceAbility || !SprayAbility)
         return;
@@ -82,7 +83,7 @@ void FortPlayerController::ServerPlayEmoteItem(AFortPlayerController* PlayerCont
     
     PlayerController->MyFortPawn->LastEmoteItemDef = EmoteDef;
     PlayerController->MyFortPawn->LastReplicatedEmoteExecuted = EmoteDef;
-    PlayerController->MyFortPawn->OnRep_LastReplicatedEmoteExecuted(nullptr);
+    PlayerController->MyFortPawn->OnRep_LastReplicatedEmoteExecuted(PlayerController->MyFortPawn->LastReplicatedEmoteExecuted);
 
     FGameplayAbilitySpec Spec{};
     UGameplayAbility* Ability = nullptr;
@@ -90,7 +91,11 @@ void FortPlayerController::ServerPlayEmoteItem(AFortPlayerController* PlayerCont
     {
         Ability = (UGameplayAbility*)SprayAbility->DefaultObject;
     }
-
+    if (EmoteDef->bGroupEmote == true)
+    {
+        std::cout << "group emote" << std::endl;
+        Ability = (UGameplayAbility*)GroupEmoteAbility->DefaultObject;
+    }
     if (Ability == nullptr) {
         Ability = (UGameplayAbility*)DanceAbility->DefaultObject;
     }
