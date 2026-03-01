@@ -687,7 +687,7 @@ bool FortKismetLibrary::OpenActorInternal(AActor* Object, AFortPlayerControllerA
 	if (auto Wall = (ABuildingWall*)Object)
 	{
 		auto Pawn = (AFortPlayerPawnAthena*)Controller;
-		SetIsDoorOpen(Wall, Wall->DoorOpenStyle, Pawn);
+		SetIsDoorOpen(Wall, EDoorOpenStyle::SlamOpen, Pawn);
 	}
 	return OpenActorInternalOG(Object, Controller, bRequestFastOpen);
 }
