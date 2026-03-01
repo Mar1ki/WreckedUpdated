@@ -145,6 +145,7 @@ bool AFortAthenaAIBotController::SetUpInventorySlot(UFortWorldItem* ItemInst) {
 	}
 	return false;
 }
+
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
 	static bool (*WouldItemFitInBotInventory)(AFortAthenaAIBotController*, const UFortWorldItem* NewItem, int* OutInventorySlot, bool* bOutIsItemSupported) = decltype(WouldItemFitInBotInventory)(ImageBase + 0xA7DD1AC);
 
@@ -166,22 +167,27 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		AIBotController->Inventory.InterfacePointer = Object->GetInterfaceAddress<IFortInventoryInterface>();
 		Pawn->Inventory = Object;
 		Pawn->bHasInventory = true;
-		//auto Interface = AIBotController->GetInterfaceAddress<IFortInventoryOwnerInterface>();
 	}
 
 	auto Inventory = Pawn->Inventory;
 	TArray<FItemAndCount> Items = { };
 	Component->GetAllPossibleItems(&Items);
-
+	int CurrentSlot = 0;
 	for (auto Item : Items)
 	{
 		auto Casted = (UFortWeaponItemDefinition*)Item.Item;
 		auto WeaponStats = Casted->GetStats();
 		auto ItemInst = Inventory->AddItemInst((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
-		std::cout << Item.Item->Name.ToString().c_str() << std::endl;
-		
-		
+		FFortBotInventoryInfo& BotInfo = AIBotController->SlotItems[CurrentSlot];
+		BotInfo.BotController = AIBotController;
+		BotInfo.FortItem = ItemInst;
+		BotInfo.ItemDefinition = ItemInst->GetItemDefinitionBP();
+		BotInfo.WeaponDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWorldItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
+		BotInfo.MultiItemDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWorldMultiItemDefinition::StaticClass()) ? (UFortWorldMultiItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
+		AIBotController->SlotItems[CurrentSlot] = BotInfo;
+		CurrentSlot++;
 	}
+
 	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
 
 	if (Pawn->IsA(AIServicePlayerBots->DefaultAISpawnerDataComponentList->GetDefaultPawn()->Class)) {
