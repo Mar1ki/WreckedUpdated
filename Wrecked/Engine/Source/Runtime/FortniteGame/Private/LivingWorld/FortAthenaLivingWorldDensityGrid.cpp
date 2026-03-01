@@ -3,15 +3,30 @@
 
 char FortAthenaLivingWorldDensityGrid::AddActor(FFortAthenaLivingWorldDensityGrid* DensityGrid, AActor* InActor, double DensityValue, double DensityRange)
 {
-    if (DensityGrid->GridCellSize.X == 0 || !DensityGrid->GridBounds.IsValid)
+    auto LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
+    auto WorldConfig = LivingWorldManager->GetConfig();
+
+
+    /*std::cout << DensityGrid->GridBounds.Max.X << std::endl;
+    std::cout << DensityGrid->GridBounds.Max.Y << std::endl;
+    std::cout << DensityGrid->GridBounds.Max.Z << std::endl;
+
+    std::cout << "-----------------------------------" << std::endl;
+    
+    std::cout << DensityGrid->GridBounds.Min.X << std::endl;
+    std::cout << DensityGrid->GridBounds.Min.Y << std::endl;
+    std::cout << DensityGrid->GridBounds.Min.Z << std::endl */
+
+
+    
+    
+    if (DensityGrid->GridCellSize.X == 0)
     {
-        // grid bounds and grid cell size isnt set so um im setting it to random ass values rn but it should work if u find a better way to make it then do it
+        // thats the last thing i need to setup rn
         DensityGrid->GridBounds.Min= { -150000.0, -150000.0, -50000.0 };
         DensityGrid->GridBounds.Max= {  150000.0,  150000.0,  50000.0 };
-        DensityGrid->GridBounds.IsValid = 1;
-        DensityGrid->GridCellSize= { 200.0, 200.0, 200.0 };
         
-        InitializeGrid(DensityGrid, &DensityGrid->GridBounds, (int)DensityGrid->GridCellSize.X, (int)DensityGrid->GridCellSize.Y, (int)DensityGrid->GridCellSize.Z);
+        InitializeGrid(DensityGrid, &DensityGrid->GridBounds, (int) WorldConfig->ActorDensityGridCellSize.Value, (int) WorldConfig->ActorDensityGridCellSize.Value, (int) WorldConfig->ActorDensityGridCellSize.Value);
     }
 
     return AddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
