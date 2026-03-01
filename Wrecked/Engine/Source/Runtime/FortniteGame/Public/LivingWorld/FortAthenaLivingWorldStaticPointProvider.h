@@ -12,6 +12,7 @@ namespace FortAthenaLivingWorldStaticPointProvider
     void LivingWorldManagerEnablePointProvider(AActor* PointProvider);
     void LivingWorldManagerDisablePointProvider(AActor* PointProvider);
     TArray<AFortAthenaLivingWorldStaticPointProvider*> GetPointProvidersFromTagQuery(const FGameplayTag& SearchTag);
+    AFortAthenaLivingWorldStaticPointProvider* GetRandomPointProviderForEventSpawn(TArray<AFortAthenaLivingWorldStaticPointProvider*> InArray);
 
     DefineOriginal(void, EnablePointProvider, UObject* Object, FFrame& Params);
 

@@ -61,7 +61,19 @@ TArray<AFortAthenaLivingWorldStaticPointProvider*> FortAthenaLivingWorldStaticPo
 }
 
 
+AFortAthenaLivingWorldStaticPointProvider* FortAthenaLivingWorldStaticPointProvider::GetRandomPointProviderForEventSpawn(TArray<AFortAthenaLivingWorldStaticPointProvider*> InArray)
+{
+    TArray<AFortAthenaLivingWorldStaticPointProvider*> RandArray;   
 
+    for (auto PointProvider : InArray)
+    {
+        if (PointProvider->bStartEnabled)
+        {
+            RandArray.Add(PointProvider);
+        }
+    }
+    return RandArray[FMath::RandHelper(RandArray.Num())];
+}
 
 void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Object, FFrame& Params)
 {
