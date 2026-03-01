@@ -250,14 +250,17 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
     auto ItemDefinition = (UFortItemDefinition*)Pickup->PrimaryPickupItemEntry.ItemDefinition;
     auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
     auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
+
+    if (Pawn->IsA(AFortAIPawn::StaticClass())) return;
     
     if (Pickup->PawnWhoDroppedPickup != Pawn)
     {
         // here we check if the item is a consumable and we have it in the inv already so it will just stack
         if (ItemDefinition->ItemType == EFortItemType::Consumable)
         {
+            auto MaxStack = FortKismetLibrary::GetMaxStackSize(ItemDefinition);
             auto ItemToStack = Inventory->GetItemEntryByDef(ItemDefinition);
-            if (ItemToStack)
+            if (ItemToStack && ItemToStack->Count < MaxStack)
             {
                 Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
             }
