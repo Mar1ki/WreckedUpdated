@@ -5086,6 +5086,7 @@ public:
 	void SwitchTeam(uint8 TeamIndex);
 	void ThankBusDriver();
 	void UpdateLeashActorToFollowLocation();
+	bool SetUpInventorySlot(class UFortWorldItem* ItemInst);
 
 	class AActor* GetBotOwner() const;
 	class AActor* GetCurrentTarget() const;

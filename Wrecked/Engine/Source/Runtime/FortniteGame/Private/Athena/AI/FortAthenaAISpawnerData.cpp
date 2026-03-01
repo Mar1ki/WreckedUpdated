@@ -124,6 +124,27 @@ void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAIS
 	AIBotPhoebeCosmeticLibraryOnSpawnedOG(Component, Pawn);
 }
 
+bool AFortAthenaAIBotController::SetUpInventorySlot(UFortWorldItem* ItemInst) {
+	static bool (*WouldItemFitInBotInventory)(AFortAthenaAIBotController*, const UFortWorldItem * NewItem, int* OutInventorySlot, bool* bOutIsItemSupported) = decltype(WouldItemFitInBotInventory)(ImageBase + 0xA7DD1AC);
+	int InventorySlot = -1;
+	bool bIsSupported = false;
+	if (ItemInst) {
+		auto Result = WouldItemFitInBotInventory(this, ItemInst, &InventorySlot, &bIsSupported);
+		UE_LOG(LogAI, Log, "WouldItemFitInBotInventory Reuslt %i Inventorylot %i bIsSupported %i", Result, InventorySlot, bIsSupported);
+		if (Result) {
+			FFortBotInventoryInfo& BotInfo = this->SlotItems[InventorySlot];
+			BotInfo.BotController = this;
+			BotInfo.FortItem = ItemInst;
+			BotInfo.ItemDefinition = ItemInst->GetItemDefinitionBP();
+			BotInfo.WeaponDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWorldItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
+			BotInfo.MultiItemDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWorldMultiItemDefinition::StaticClass()) ? (UFortWorldMultiItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
+			this->SlotItems[InventorySlot] = BotInfo;
+			return true;
+		}
+		return false;
+	}
+	return false;
+}
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
 	static bool (*WouldItemFitInBotInventory)(AFortAthenaAIBotController*, const UFortWorldItem* NewItem, int* OutInventorySlot, bool* bOutIsItemSupported) = decltype(WouldItemFitInBotInventory)(ImageBase + 0xA7DD1AC);
 
@@ -145,6 +166,7 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		AIBotController->Inventory.InterfacePointer = Object->GetInterfaceAddress<IFortInventoryInterface>();
 		Pawn->Inventory = Object;
 		Pawn->bHasInventory = true;
+		//auto Interface = AIBotController->GetInterfaceAddress<IFortInventoryOwnerInterface>();
 	}
 
 	auto Inventory = Pawn->Inventory;
@@ -158,23 +180,26 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		auto ItemInst = Inventory->AddItemInst((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
 		std::cout << Item.Item->Name.ToString().c_str() << std::endl;
 		
-		int InventorySlot = -1;
-		bool bIsSupported = false;
-		if (ItemInst) {
-			auto Result = WouldItemFitInBotInventory(AIBotController, ItemInst, &InventorySlot, &bIsSupported);
-			UE_LOG(LogAI, Log, "WouldItemFitInBotInventory Reuslt %i Inventorylot %i bIsSupported %i", Result, InventorySlot, bIsSupported);
-			if (Result) {
-				FFortBotInventoryInfo& BotInfo = AIBotController->SlotItems[InventorySlot];
-				BotInfo.BotController = AIBotController;
-				BotInfo.FortItem = ItemInst;
-				BotInfo.ItemDefinition = Item.Item;
-				BotInfo.WeaponDefinitionCache = Item.Item->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWorldItemDefinition*)Item.Item : nullptr;
-				BotInfo.MultiItemDefinitionCache = Item.Item->IsA(UFortWorldMultiItemDefinition::StaticClass()) ? (UFortWorldMultiItemDefinition*)Item.Item : nullptr;
-				AIBotController->SlotItems[InventorySlot] = BotInfo;
-			}
-			
-		}
 		
+	}
+	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
+
+	if (Pawn->IsA(AIServicePlayerBots->DefaultAISpawnerDataComponentList->GetDefaultPawn()->Class)) {
+		AFortGameModeAthena* GameMode = GetGameMode();
+		if (!GameMode)
+			return;
+
+		for (const FItemAndCount& Item : GameMode->StartingItems)
+		{
+			if (Item.Count != 0)
+			{
+				auto ItemInst = Pawn->Inventory->AddItemInst((UFortItemDefinition*)Item.Item, Item.Count, 0);
+				AIBotController->SetUpInventorySlot(ItemInst);
+			}
+		}
+		static auto PickaxeDef = StaticFindObject<UFortItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
+		auto ItemInst = Pawn->Inventory->AddItemInst((UFortItemDefinition*)PickaxeDef, 1, 0);
+		AIBotController->SetUpInventorySlot(ItemInst);
 	}
 	
 	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
