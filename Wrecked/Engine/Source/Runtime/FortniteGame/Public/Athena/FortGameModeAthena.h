@@ -15,6 +15,9 @@ namespace FortGameModeAthena
 
     static uint8_t PlayersOnCurrentTeam = 0;
     static uint8_t CurrentTeam = 3;
+
+    static void (*NotifyGameMemberAdded)(AFortGameStateAthena*, uint8_t, uint8_t, FUniqueNetIdRepl*) = decltype(NotifyGameMemberAdded)(ImageBase + 0x26D37F4);
+
     
     
     void Init();

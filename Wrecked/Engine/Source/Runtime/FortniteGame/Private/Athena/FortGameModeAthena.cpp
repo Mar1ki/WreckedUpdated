@@ -358,6 +358,8 @@ void FortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, 
 		GameState->GameMemberInfoArray.Members.Add(Member);
 		GameState->GameMemberInfoArray.MarkItemDirty(Member);
 
+		NotifyGameMemberAdded(GameState, Member.SquadID, Member.TeamIndex, &Member.MemberUniqueId);
+		
 		PlayerState->SeasonLevelUIDisplay = NewPlayer->XPComponent->CurrentLevel;
 		PlayerState->OnRep_SeasonLevelUIDisplay();
 	}
