@@ -110,6 +110,7 @@ void AthenaAIServicePlayerBots::InitializeForWorld(UNavigationSystemV1* Nav,UWor
 	Nav->bAutoCreateNavigationData = true;
 	Nav->SupportedAgentsMask.bSupportsAgent3 = 1;
 	Nav->bSpawnNavDataInNavBoundsLevel = true;
+	Nav->DefaultAgentName = UKismetStringLibrary::Conv_StringToName(L"Phoebe");
 	
 	return InitializeForWorldOG(Nav, World, Mode);
 }
@@ -121,6 +122,8 @@ void AthenaAIServicePlayerBots::CreateAndConfigureNavigationSystem(UAthenaNavSys
 	ModuleConfig->bAllowAutoRebuild = true;
 	ModuleConfig->bSupportRuntimeNavmeshDisabling = false;
 	ModuleConfig->bUsesStreamedInNavLevel = true;
+	ModuleConfig->bSuspendNavmeshWhenNoPossibleUsers = true; // makes sense ngl
+	ModuleConfig->DefaultAgentName = UKismetStringLibrary::Conv_StringToName(L"Phoebe");
 
 	return CreateAndConfigureNavigationSystemOG(ModuleConfig, World);
 }
