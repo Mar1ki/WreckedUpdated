@@ -83,6 +83,14 @@ void __fastcall FortInventoryOwnerInterface::InitializeInventory(IFortInventoryO
     }
 }
 
+AFortQuickBars* FortInventoryOwnerInterface::GetQuickBars(IFortInventoryOwnerInterface* Interface)
+{
+    const AFortPawn* Pawn = ((const AFortPawn * (*)(IFortInventoryOwnerInterface*))(*(void***)Interface)[9])(Interface);
+    auto Controller = (AFortPlayerControllerAthena*)Pawn->Controller;
+
+   return Controller->ClientQuickBars;
+}
+
 void FortInventoryOwnerInterface::Init() {
 
     UHook* Hook = new UHook();
@@ -91,6 +99,12 @@ void FortInventoryOwnerInterface::Init() {
     Hook->Interface = IFortInventoryOwnerInterface::StaticClass();
     Hook->Address = 440 / 8;
     Hook->Detour = RemoveInventoryItem;
+    UKismetHookingLibrary::Hook(Hook, Interface);
+
+    Hook->Class = AFortPlayerControllerAthena::StaticClass();
+    Hook->Interface = IFortInventoryOwnerInterface::StaticClass();
+    Hook->Address = 112 / 8;
+    Hook->Detour = GetQuickBars;
     UKismetHookingLibrary::Hook(Hook, Interface);
     
  /*   Hook->Class = AFortPlayerControllerAthena::StaticClass();
