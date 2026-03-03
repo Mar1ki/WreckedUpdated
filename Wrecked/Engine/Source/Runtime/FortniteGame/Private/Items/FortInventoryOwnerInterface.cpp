@@ -91,6 +91,23 @@ AFortQuickBars* FortInventoryOwnerInterface::GetQuickBars(IFortInventoryOwnerInt
    return Controller->ClientQuickBars;
 }
 
+// we dont give a fuck about the item input so its prob unproper rn but works
+bool FortInventoryOwnerInterface::HasInfiniteAmmo(IFortInventoryOwnerInterface* Interface, const UFortItemDefinition* Item)
+{
+    const AFortPawn* Pawn = ((const AFortPawn * (*)(IFortInventoryOwnerInterface*))(*(void***)Interface)[9])(Interface);
+    auto Controller = (AFortPlayerControllerAthena*)Pawn->Controller;
+
+    return Controller->bInfiniteAmmo;
+}
+
+bool FortInventoryOwnerInterface::HasInfiniteConsumables(IFortInventoryOwnerInterface* Interface)
+{
+    const AFortPawn* Pawn = ((const AFortPawn * (*)(IFortInventoryOwnerInterface*))(*(void***)Interface)[9])(Interface);
+    auto Controller = (AFortPlayerControllerAthena*)Pawn->Controller;
+
+    return Controller->bInfiniteConsumables;
+}
+
 void FortInventoryOwnerInterface::Init() {
 
     UHook* Hook = new UHook();
@@ -107,6 +124,18 @@ void FortInventoryOwnerInterface::Init() {
     Hook->Detour = GetQuickBars;
     UKismetHookingLibrary::Hook(Hook, Interface);
     
+    Hook->Class = AFortPlayerControllerAthena::StaticClass();
+    Hook->Interface = IFortInventoryOwnerInterface::StaticClass();
+    Hook->Address = 128 / 8;
+    Hook->Detour = HasInfiniteAmmo;
+    UKismetHookingLibrary::Hook(Hook, Interface);
+
+    Hook->Class = AFortPlayerControllerAthena::StaticClass();
+    Hook->Interface = IFortInventoryOwnerInterface::StaticClass();
+    Hook->Address = 136 / 8;
+    Hook->Detour = HasInfiniteConsumables;
+    UKismetHookingLibrary::Hook(Hook, Interface);
+
  /*   Hook->Class = AFortPlayerControllerAthena::StaticClass();
     Hook->Interface = IFortInventoryOwnerInterface::StaticClass();
     Hook->Address = 0x18 / 8;
