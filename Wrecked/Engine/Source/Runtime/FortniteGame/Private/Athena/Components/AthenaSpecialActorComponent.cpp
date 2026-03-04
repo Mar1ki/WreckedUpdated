@@ -36,6 +36,7 @@ public:
 
 void AthenaSpecialActorComponent::Activate(UAthenaSpecialActorComponent* Component, bool bReset)
 {
+	std::cout << "SpecialActorComponent::Activate" << std::endl;
     if (!Component || !Component->GetOwner())
     {
         return;
@@ -45,8 +46,8 @@ void AthenaSpecialActorComponent::Activate(UAthenaSpecialActorComponent* Compone
     InitData.SpecialActorRef = Component->GetOwner();
     InitData.UniqueID = Component->SpecialActorID;
     InitData.CategoryTag = Component->SpecialActorTag;
-    auto* OwnerPawn = Cast<AFortPawn>(Component->GetOwner());
-    InitData.PlayerState = OwnerPawn ? OwnerPawn->PlayerState : nullptr;
+   // auto* OwnerPawn = Cast<AFortPawn>(Component->GetOwner()); // that does nothing i think
+    //InitData.PlayerState = OwnerPawn ? OwnerPawn->PlayerState : nullptr;
     InitData.MinimapIconBrush = Component->SpecialActorMinimapIconBrush;
     InitData.MinimapScale = Component->SpecialActorMinimapIconScale;
     InitData.FullScreenMapIconBrush = Component->SpecialActorFullScreenMapIconBrush;
@@ -62,7 +63,16 @@ void AthenaSpecialActorComponent::Activate(UAthenaSpecialActorComponent* Compone
     InitData.SeasonItemInteractedBrush = Component->SeasonItemInteractedBrush;
     InitData.ElevationArrowData = Component->ElevationArrowData;
     static __int64 (*AddActorToReplicationList)(AFortSpecialActorReplicationInfo*, FSpecialActorInitData*) = decltype(AddActorToReplicationList)(ImageBase + 0x9A7BF4C);
-    AddActorToReplicationList(GetGameState()->SpecialActorData, &InitData);
+	static void (*wtfisthat2)(FSpecialActorInitData*) = decltype(wtfisthat2)(ImageBase + 0x8EFCB88);
+
+	
+   auto idk =  AddActorToReplicationList(GetGameState()->SpecialActorData, &InitData);
+
+	if (idk)
+	{
+		wtfisthat2(&InitData);
+	}
+	
     ActivateOG(Component, bReset);
 }
 
