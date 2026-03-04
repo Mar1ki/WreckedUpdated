@@ -184,32 +184,6 @@ void AFortInventory::Remove(FGuid ItemGuid)
         Update(nullptr);
 }
 
-
-void AFortInventory::UpdateLoadedAmmo(AFortPlayerController* PC, AFortWeapon* Weapon)
-{
-	auto Inventory = (AFortInventory*)PC->WorldInventory.ObjectPointer;
-	
-	if (!Inventory || !Inventory->Inventory.ReplicatedEntries.IsValid())
-		return;
-		
-	for (size_t i = 0; i < Inventory->Inventory.ReplicatedEntries.Num(); i++)
-	{
-		if (!Inventory->Inventory.ReplicatedEntries.IsValidIndex(i))
-			continue;
-			
-		if (Inventory->Inventory.ReplicatedEntries[i].ItemGuid == Weapon->ItemEntryGuid)
-		{
-			Inventory->Inventory.ReplicatedEntries[i].LoadedAmmo = Weapon->AmmoCount;
-			
-			Inventory->bRequiresLocalUpdate = true;
-			Inventory->HandleInventoryLocalUpdate();
-			Inventory->Inventory.MarkItemDirty(Inventory->Inventory.ReplicatedEntries[i]);
-			
-			break;
-		}
-	}
-}
-
 bool AFortInventory::RemoveItem(AFortPlayerController* PC, UFortWorldItemDefinition* ItemDef, int Count)
 {
 	auto Inventory = (AFortInventory*)PC->WorldInventory.ObjectPointer;
