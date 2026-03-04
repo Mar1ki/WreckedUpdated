@@ -272,57 +272,6 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	return Pawn;
 }
 
-
-
-void BotEnterAircraft(AFortAthenaAIBotController* Controller, AFortAthenaAircraft* InAircraft)
-{
-	// Enter aircraft through aircraft component
-	UFortControllerComponent_Aircraft* AircraftComponent =
-		(UFortControllerComponent_Aircraft*)Controller->GetComponentByClass(
-			UFortControllerComponent_Aircraft::StaticClass());
-
-	if (AircraftComponent && !AircraftComponent->CurrentAircraft)
-	{
-		void (*EnterAircraftOG)(UFortControllerComponent_Aircraft * Comp, AFortAircraft * InAircraft) = decltype(EnterAircraftOG)(ImageBase + 0x9505D40);
-		EnterAircraftOG(AircraftComponent, InAircraft);
-	}
-
-	// Handle thank bus driver logic
-	if (Controller->CachedAIServicePlayerBots)
-	{
-		UWorld* World = GetWorld();
-		if (World && GetGameState())
-		{
-			// Check if game state is AFortGameStateAthena
-			if (GetGameState()->IsA(AFortGameStateAthena::StaticClass()))
-			{
-				float ThankProbability = Controller->CachedAIServicePlayerBots->ThankBusDriverProbability.Evaluate();
-
-				if (ThankProbability > 0 && (rand() & 0x7FFF) < (ThankProbability * 32767.0f))
-				{
-					UAthenaAIServicePlayerBots* AIService = Controller->CachedAIServicePlayerBots;
-					float MaxTime = AIService->ThankBusDriverMaxTime.Evaluate();
-					float MinTime = AIService->ThankBusDriverMinTime.Evaluate();
-
-					float RandomTime = MinTime + ((rand() & 0x7FFF) / 32767.0f) * (MaxTime - MinTime);
-
-					if (RandomTime > 0.0f)
-					{
-
-					}
-				}
-			}
-		}
-	}
-
-	UBlackboardComponent* BlackboardComp = (UBlackboardComponent*)Controller->Blackboard;
-	if (BlackboardComp)
-	{
-		BlackboardComp->SetValueAsBool(UKismetStringLibrary::Conv_StringToName(TEXT("AIEvaluator_Global_IsInBus")), true);
-	}
-}
-
-
 void FortGameModeAthena::HandleMatchHasStarted(AFortGameModeAthena* GameMode)
 {
 	UFortGameStateComponent_BattleRoyaleGamePhaseLogic* Logic = GetLogic();

@@ -1311,6 +1311,8 @@ public:
 	class UFortWorldMultiItemDefinition*          MultiItemDefinitionCache;                          // 0x0038(0x0008)(ZeroConstructor, Transient, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
 	uint8                                         Pad_40[0x20];                                      // 0x0040(0x0020)(Fixing Size After Last Property [ Dumper-7 ])
 	class AFortAthenaAIBotController*             BotController;                                     // 0x0060(0x0008)(ZeroConstructor, Transient, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
+
+	void SetItem(UFortWorldItem* NewItem);
 };
 
 // ScriptStruct FortniteAI.FortAIInjectedDecisionsByTag

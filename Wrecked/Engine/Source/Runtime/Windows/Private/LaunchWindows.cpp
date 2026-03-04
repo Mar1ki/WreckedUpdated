@@ -170,6 +170,7 @@ void Main()
     freopen_s(&File, "CONOUT$", "w+", stdout);
     freopen_s(&File, "CONOUT$", "w+", stderr);
     SetConsoleTitleA("Wrecked | Setting up");
+
     Sleep(15000);
     
     while (!IsInFrontend())

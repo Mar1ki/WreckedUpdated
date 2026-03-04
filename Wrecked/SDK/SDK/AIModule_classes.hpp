@@ -874,6 +874,7 @@ public:
 	class FString GetValueAsString(const class FName& KeyName) const;
 	struct FVector GetValueAsVector(const class FName& KeyName) const;
 	bool IsVectorValueSet(const class FName& KeyName) const;
+	string GetKeyName(unsigned __int8 Key);
 
 public:
 	static class UClass* StaticClass()

@@ -5087,6 +5087,7 @@ public:
 	void ThankBusDriver();
 	void UpdateLeashActorToFollowLocation();
 	bool SetUpInventorySlot(class UFortWorldItem* ItemInst);
+	bool IsPlayerBot();
 
 	class AActor* GetBotOwner() const;
 	class AActor* GetCurrentTarget() const;

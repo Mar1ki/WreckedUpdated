@@ -21,6 +21,68 @@ class UFunction* FindFunctionByFName(UClass* Class, FName FuncName)
     return nullptr;
 }
 
+void UpdateBotsGamePhase() {
+    for (auto Bot : GetGameMode()->AliveBots) {
+        UBlackboardComponent* BlackboardComp = (UBlackboardComponent*)Bot->Blackboard;
+        if (BlackboardComp)
+        {
+            static void (*SetValueAsEnumn)(UBlackboardComponent*, unsigned __int8, uint8) = decltype(SetValueAsEnumn)(ImageBase + 0x751A76C);
+            SetValueAsEnumn(BlackboardComp, *(unsigned __int8*)(__int64(Bot) + 0x16B6), (uint8)GetLogic()->GamePhase);
+            SetValueAsEnumn(BlackboardComp, *(unsigned __int8*)(__int64(Bot) + 0x16B4), (uint8)GetLogic()->GamePhaseStep);
+        }
+    }
+}
+
+void BotEnterAircraft(AFortAthenaAIBotController* Controller, AFortAthenaAircraft* InAircraft)
+{
+    UE_LOG(LogAI, Log, "Placing bot in aircraft!");
+    UFortControllerComponent_Aircraft* AircraftComponent =
+        (UFortControllerComponent_Aircraft*)Controller->GetComponentByClass(
+            UFortControllerComponent_Aircraft::StaticClass());
+
+    if (AircraftComponent && !AircraftComponent->CurrentAircraft)
+    {
+        void (*EnterAircraftOG)(UFortControllerComponent_Aircraft * Comp, AFortAircraft * InAircraft) = decltype(EnterAircraftOG)(ImageBase + 0x9505D40);
+        EnterAircraftOG(AircraftComponent, InAircraft);
+    }
+
+    if (Controller->CachedAIServicePlayerBots)
+    {
+        UWorld* World = GetWorld();
+        if (World && GetGameState())
+        {
+            if (GetGameState()->IsA(AFortGameStateAthena::StaticClass()))
+            {
+                float ThankProbability = Controller->CachedAIServicePlayerBots->ThankBusDriverProbability.Evaluate();
+
+                if (ThankProbability > 0 && (rand() & 0x7FFF) < (ThankProbability * 32767.0f))
+                {
+                    UAthenaAIServicePlayerBots* AIService = Controller->CachedAIServicePlayerBots;
+                    float MaxTime = AIService->ThankBusDriverMaxTime.Evaluate();
+                    float MinTime = AIService->ThankBusDriverMinTime.Evaluate();
+
+                    float RandomTime = MinTime + ((rand() & 0x7FFF) / 32767.0f) * (MaxTime - MinTime);
+
+                    if (RandomTime > 0.0f)
+                    {
+
+                    }
+                }
+            }
+        }
+    }
+
+    UBlackboardComponent* BlackboardComp = (UBlackboardComponent*)Controller->Blackboard;
+    if (BlackboardComp)
+    {
+        static void (*SetValueAsBool)(UBlackboardComponent*, unsigned __int8, bool) = decltype(SetValueAsBool)(ImageBase + 0x751A76C);
+        static void (*SetValueAsEnumn)(UBlackboardComponent*, unsigned __int8, uint8) = decltype(SetValueAsEnumn)(ImageBase + 0x751A76C);
+        SetValueAsBool(BlackboardComp, *(unsigned __int8*)(__int64(Controller) + 0x16BE), true);
+        SetValueAsBool(BlackboardComp, *(unsigned __int8*)(__int64(Controller) + 0x16C0), false);
+    }
+}
+
+
 bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
     AFortGameStateAthena* GS = GetGameState();
     const UFortPlaylistAthena* PlaylistData = GS ? GS->CurrentPlaylistInfo.BasePlaylist : nullptr;
@@ -85,6 +147,7 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
     this->SetGamePhase(EAthenaGamePhase::Aircraft);
     GamePhaseStep = EAthenaGamePhaseStep::BusLocked;
     HandleGamePhaseStepChanged(GamePhaseStep);
+    UpdateBotsGamePhase();
     int32 AircraftReadyPlayerCount = 0;
 
     for (auto Player: GetGameMode()->AlivePlayers)
@@ -132,6 +195,14 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
                 static void* (*Reset)(AFortPlayerControllerAthena*) = decltype(Reset)(ImageBase + 0x6DD1E84);
                 Reset(Player);
             }
+        }
+    }
+
+    for (auto Bot : GetGameMode()->AliveBots) {
+        int32 TargetIndex = (PlaylistData->AirCraftBehavior == EAirCraftBehavior::OpposingAirCraftForEachTeam) ? ((AFortPlayerStateAthena*)Bot->PlayerState)->TeamIndex : 0;
+        if (Aircrafts_GameMode.IsValidIndex(TargetIndex)) {
+            AFortAthenaAircraft* TargetAircraft = Aircrafts_GameMode[TargetIndex].Get();
+            BotEnterAircraft(Bot, TargetAircraft);
         }
     }
     return true;
@@ -194,6 +265,7 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartSafeZonesPhase(boo
         this->SetGamePhase(EAthenaGamePhase::SafeZones);
         this->GamePhaseStep = EAthenaGamePhaseStep::StormForming;
         this->HandleGamePhaseStepChanged(GamePhaseStep);
+        UpdateBotsGamePhase();
         UE_LOG(LogGamePhases, Log, "Starting Safezones!");
     }
     return true;
@@ -223,6 +295,7 @@ void AFortSafeZoneIndicator::StartPhase(int32 InPhaseIndex) {
 
     GamePhaseLogic->GamePhaseStep = EAthenaGamePhaseStep::StormHolding;
     GamePhaseLogic->HandleGamePhaseStepChanged(GamePhaseLogic->GamePhaseStep);
+    UpdateBotsGamePhase();
     OnRep_CurrentPhase();
     UE_LOG(LogGamePhases, Log, "Starting new SafeZone (Index: %i): ShrinkTime: %f WaitTime %f Radius %f", InPhaseIndex, Info.ShrinkTime, Info.WaitTime, Info.Radius);
 }
@@ -366,6 +439,7 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartWarmupPhase() {
         this->SetGamePhase(EAthenaGamePhase::Warmup);
         GamePhaseStep = EAthenaGamePhaseStep::Warmup;
         HandleGamePhaseStepChanged(GamePhaseStep);
+        UpdateBotsGamePhase();
         if (CurrentPlaylist)
         {
             this->WarmupCountdownDuration = WarmupDuration;
@@ -400,12 +474,14 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateSafeZonePhase(flo
                 SetGamePhase(EAthenaGamePhase::EndGame);
                 GamePhaseStep = EAthenaGamePhaseStep::EndGame;
                 HandleGamePhaseStepChanged(GamePhaseStep);
+                UpdateBotsGamePhase();
             }
             SafeZoneIndicator->StartPhase(SafeZoneIndicator->CurrentPhase+1);
         }
         else if (!bFinishedHolding && !bFinishedShrinking && GamePhaseStep == EAthenaGamePhaseStep::StormHolding) {
             GamePhaseStep = EAthenaGamePhaseStep::StormShrinking;
             HandleGamePhaseStepChanged(GamePhaseStep);
+            UpdateBotsGamePhase();
 
             *(EFortSafeZoneState*)(__int64(SafeZoneIndicator) + 0x60C) = EFortSafeZoneState::Shrinking;
             SafeZoneIndicator->OnSafeZoneStateChange(EFortSafeZoneState::Holding, SafeZoneIndicator->CurrentPhase == 0);
@@ -428,6 +504,7 @@ void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateAircraftPhase(flo
         if (!bAircraftIsLocked && GamePhaseStep != EAthenaGamePhaseStep::BusFlying) {
             GamePhaseStep = EAthenaGamePhaseStep::BusFlying;
             HandleGamePhaseStepChanged(GamePhaseStep);
+            UpdateBotsGamePhase();
         }
         
         bool ShouldEjectPlayers = Aircraft->DropEndTime < Time;

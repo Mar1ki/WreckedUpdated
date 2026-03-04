@@ -134,14 +134,27 @@ bool AFortAthenaAIBotController::SetUpInventorySlot(UFortWorldItem* ItemInst) {
 		if (Result) {
 			FFortBotInventoryInfo& BotInfo = this->SlotItems[InventorySlot];
 			BotInfo.BotController = this;
-			BotInfo.FortItem = ItemInst;
-			BotInfo.ItemDefinition = ItemInst->GetItemDefinitionBP();
-			BotInfo.WeaponDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWorldItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
-			BotInfo.MultiItemDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWorldMultiItemDefinition::StaticClass()) ? (UFortWorldMultiItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
+			BotInfo.SetItem(ItemInst);
 			this->SlotItems[InventorySlot] = BotInfo;
 			return true;
 		}
 		return false;
+	}
+	return false;
+}
+
+void FFortBotInventoryInfo::SetItem(UFortWorldItem* NewItem) {
+	static void (*SetItemOG)(FFortBotInventoryInfo*, const UFortWorldItem * NewItem) = decltype(SetItemOG)(ImageBase + 0xA7CF680);
+	SetItemOG(this, NewItem);
+}
+
+bool AFortAthenaAIBotController::IsPlayerBot() {
+	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
+
+	for (auto Bot : AIServicePlayerBots->PlayerBots)
+	{
+		if (Bot.BotController == this)
+			return true;
 	}
 	return false;
 }
@@ -179,22 +192,16 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		auto WeaponStats = Casted->GetStats();
 		auto ItemInst = Inventory->AddItemInst((UFortItemDefinition*)Item.Item, Item.Count, WeaponStats->ClipSize);
 		FFortBotInventoryInfo& BotInfo = AIBotController->SlotItems[CurrentSlot];
+		BotInfo.SetItem(ItemInst);
 		BotInfo.BotController = AIBotController;
-		BotInfo.FortItem = ItemInst;
-		BotInfo.ItemDefinition = ItemInst->GetItemDefinitionBP();
-		BotInfo.WeaponDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWeaponItemDefinition::StaticClass()) ? (UFortWorldItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
-		BotInfo.MultiItemDefinitionCache = ItemInst->GetItemDefinitionBP()->IsA(UFortWorldMultiItemDefinition::StaticClass()) ? (UFortWorldMultiItemDefinition*)ItemInst->GetItemDefinitionBP() : nullptr;
 		AIBotController->SlotItems[CurrentSlot] = BotInfo;
 		CurrentSlot++;
 	}
-
-	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
-
-	if (Pawn->IsA(AIServicePlayerBots->DefaultAISpawnerDataComponentList->GetDefaultPawn()->Class)) {
+	/*
+	if (AIBotController->IsPlayerBot()) {
 		AFortGameModeAthena* GameMode = GetGameMode();
 		if (!GameMode)
 			return;
-
 		for (const FItemAndCount& Item : GameMode->StartingItems)
 		{
 			if (Item.Count != 0)
@@ -207,6 +214,7 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		auto ItemInst = Pawn->Inventory->AddItemInst((UFortItemDefinition*)PickaxeDef, 1, 0);
 		AIBotController->SetUpInventorySlot(ItemInst);
 	}
+	*/
 	
 	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
 }
@@ -220,7 +228,6 @@ void FortAthenaAISpawnerData::AIBotGameplayAbilityOnSpawned(UFortAthenaAISpawner
 	if (!Component || !Pawn || !AIBotController || !ASC) return;
 	reinterpret_cast<void(*)(void*)>(ImageBase + 0x993F158)(Pawn->GetInterfaceAddress<IAbilitySystemInterface>());
 }
-
 
 
 void FortAthenaAISpawnerData::AIBotConversationOnSpawned(UFortAthenaAISpawnerDataComponent_AIBotConversation* Component, AFortAIPawn* Pawn) {
