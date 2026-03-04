@@ -41,57 +41,7 @@ bool BuildingContainer::SpawnLoot(ABuildingContainer* Container)
 
 	return true;
 }
-void BuildingContainer::OnDied_Event(UObject* Context, FFrame& Params) {
-	AActor* DamagedActor;
-	float Damage;
-	APlayerController* InstigatedBy;
-	AActor* DamageCauser;
-	FVector HitLocation;
-	UPrimitiveComponent* FHitComponent;
-	FName BoneName;
-	FVector Momentum;
 
-	Params.StepCompiledIn(&DamagedActor);
-	Params.StepCompiledIn(&Damage);
-	Params.StepCompiledIn(&InstigatedBy);
-	Params.StepCompiledIn(&DamageCauser);
-	Params.StepCompiledIn(&HitLocation);
-	Params.StepCompiledIn(&FHitComponent);
-	Params.StepCompiledIn(&BoneName);
-	Params.StepCompiledIn(&Momentum);
-	Params.IncrementCode();
-	std::cout << "IDK uhh\n";
-	if (DamagedActor && DamageCauser) {
-		auto static ModBoxClass = StaticLoadObject<UClass>("/VehicleMods/Gameplay/Actors/ModBox/ModBox_Parent.ModBox_Parent_C", UBlueprintGeneratedClass::StaticClass());
-		if (DamagedActor->IsA(ModBoxClass)) {
-			auto ModTag = *(FGameplayTag*)(__int64(DamagedActor) + 2464);
-			UFortVehicleModConfig* ModConfig = nullptr;
-			for (int i = 0; i < UObject::GObjects->Num(); i++)
-			{
-				auto Object = UObject::GObjects->GetByIndex(i);
-
-				if (!Object)
-					continue;
-
-				if (Object->IsA(UFortVehicleModConfig::StaticClass()) && Object->IsDefaultObject())
-				{
-					auto ModConfig1 = (UFortVehicleModConfig*)Object;
-					if (ModConfig1->ModTag == ModTag)
-					{
-						ModConfig = ModConfig1;
-						break;
-					}
-				}
-			}
-			if (ModConfig != nullptr) {
-				std::cout << ModConfig->GetName().c_str() << "\n";
-			}
-
-		}
-	}
-
-	OnDied_EventOG(Context, Params);
-}
 void BuildingContainer::OnDamageServer(ABuildingSMActor* BuildingActor, float Damage, FGameplayTagContainer& DamageTags, FVector& Momentum, FHitResult& HitInfo, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FGameplayEffectContextHandle& EffectContext)
 {
 	if (!BuildingActor || !InstigatedBy || !BuildingActor->IsA(ABuildingSMActor::StaticClass()) || BuildingActor->bPlayerPlaced || !DamageCauser || !DamageCauser->IsA(AFortWeapon::StaticClass()) || !((AFortWeapon*)DamageCauser)->WeaponData)
@@ -180,14 +130,5 @@ void BuildingContainer::Setup() {
 	Hook->Original = (void**)&OnDamageServerOG;
 	Hook->Detour = OnDamageServer;
 	UKismetHookingLibrary::Hook(Hook, EHook::Address);
-
-	auto Class = StaticLoadObject<UClass>("/VehicleMods/Gameplay/Actors/ModBox/ModBox_Parent.ModBox_Parent_C", UBlueprintGeneratedClass::StaticClass());
-	auto Function = Class->GetFunction("ModBox_Parent_C", "OnDied_Event");
-	if (Function) {
-		auto idk = (void**)&OnDied_EventOG;
-		*idk = Function->ExecFunction;
-		Function->ExecFunction = reinterpret_cast<UFunction::FNativeFuncPtr>(OnDied_Event);
-
-	}
-	free(Hook);
+	
 }
