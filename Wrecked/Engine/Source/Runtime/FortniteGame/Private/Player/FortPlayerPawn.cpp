@@ -51,7 +51,7 @@ void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
     {
         if (auto Ascender = Cast<AFortAscenderZipline>(Zipline))
         {
-            Ascender->BP_HandlePlayerStoppedUsingHandle(Pawn); // same as below its prob stripped
+            Ascender->BP_HandlePlayerStartedUsingHandle(Pawn);
             
             Ascender->PawnUsingHandle = Pawn;
             Ascender->OnRep_PawnUsingHandle();
@@ -251,7 +251,7 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
     auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
     auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
 
-    if (Pawn->IsA(AFortAIPawn::StaticClass())) return;
+    if (!Pawn->IsA(AFortPlayerPawnAthena::StaticClass())) return;
     
     if (Pickup->PawnWhoDroppedPickup != Pawn)
     {
