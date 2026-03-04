@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
+#include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
 // lot of if statements and for so yh refactor that shit later
 void FortAthenaLivingWorldManager::PerformPointProviderSpawn()
 {
@@ -68,6 +69,18 @@ void Dummy()
 {
     std::cout << "One of the event exec is called" << std::endl;
 }
+
+
+void FortAthenaLivingWorldManager::HandleGamePhaseStepChanged(UObject* Object, FFrame* Frame)
+{
+   // auto InGamePhaseStep = Frame->StepCompiledInRef<EAthenaGamePhaseStep>();
+    //rame->IncrementCode();
+
+
+    std::cout << "gamephase step changed" << std::endl;
+
+    HandleGamePhaseStepChangedOG(Object, Frame);
+}
 void FortAthenaLivingWorldManager::Hook()
 {
     // og might be needed
@@ -92,8 +105,11 @@ void FortAthenaLivingWorldManager::Hook()
     Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.RequestEventGeneration";
     Hook->Detour = Dummy;
     UKismetHookingLibrary::Hook(Hook, Exec);
-
     
+    Hook->Path = "/Script/FortniteGame.FortGameStateComponent_BattleRoyaleGamePhaseLogic.HandleGamePhaseStepChanged";
+    Hook->Detour = HandleGamePhaseStepChanged;
+    Hook->Original = (void**)&HandleGamePhaseStepChangedOG;
+    UKismetHookingLibrary::Hook(Hook, Exec);
 }
 
 
