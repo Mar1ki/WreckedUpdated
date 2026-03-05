@@ -45,6 +45,7 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
         Vehicle->AppliedVehicleModTags.GameplayTags.Add(Tag);
         FortVehicleMod::ApplyModConfigToVehicleInternal(ModConfig, VehicleInterface);
 
+        // prob most ass way btw
         if (ModTag->TagName.ToString().contains("Vehicle.Mod.Tire"))
         {
             auto VehicleConfigClass = Vehicle->VehicleConfigsClass_BR.Get();
@@ -57,6 +58,13 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.ServerTireModVersion++;
 
+                VehicleConfig->GrassBehavior = TireInfo->GrassBehavior;
+                VehicleConfig->MudBehavior = TireInfo->MudBehavior;
+                VehicleConfig->RoadBehavior = TireInfo->RoadBehavior;
+                // vehicle and base tire info
+
+
+                
                 auto OldModifiedProperties = DagwoodVehicle->DagwoodRuntimeModifiedProperties;
                 DagwoodVehicle->OnRep_DagwoodRuntimeModifiers(OldModifiedProperties);
                 DagwoodVehicle->ApplyRuntimeModifiers();
@@ -132,15 +140,14 @@ void Dummy(AFortAthenaVehicle* Vehicle, float* InOutDamage, const FGameplayTagCo
 
 }
 void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* PlayerController, const FGameplayTag& RequestType, UFortVehicleModComponent* ModInstance, int32 SeatIndex) {
-    std::cout << "Vehicle Mod Rpc Called" <<  RequestType.TagName.ToString().c_str() <<std::endl;
+    std::cout << "VehicleModRpc Called" <<std::endl;
     ServerVehicleModSeatRPCOG(PlayerController, RequestType, ModInstance, SeatIndex);
     
     auto Vehicle = (AFortAthenaVehicle*)PlayerController->MyFortPawn->CurrentVehicle;
+    std::cout << ModInstance->Name.ToString().c_str() << std::endl;
 
-
-    
- /*   if (Car) {
-        UFortVehicleModComponent_VertexAnimTurret* Comp = Cast<UFortVehicleModComponent_VertexAnimTurret>(Car->GetComponentByClass(UFortVehicleModComponent_VertexAnimTurret::StaticClass()));
+    if (Vehicle) {
+        UFortVehicleModComponent_VertexAnimTurret* Comp = Cast<UFortVehicleModComponent_VertexAnimTurret>(Vehicle->GetComponentByClass(UFortVehicleModComponent_VertexAnimTurret::StaticClass()));
         if (Comp) {
             for (UFortVehicleSeatWeaponComponent* SeatComp : Comp->DynamicSeatWeaponComponents) {
                 for (FWeaponSeatDefinition& Weapon : SeatComp->WeaponSeatDefinitions) {
@@ -159,17 +166,19 @@ void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* Player
                     }
                     else {
                         UE_LOG(LogTemp, Log, "Adding VehicleWeapon!");
-                        auto ItemEntry = PlayerController->GetInventory()->AddItem(WeaponDef, 1, 100);
-                        ItemEntry->PhantomReserveAmmo = 100;
+                        auto ItemEntry = PlayerController->GetInventory()->AddItem(WeaponDef, 1, 6);
+                        ItemEntry->PhantomReserveAmmo = 6;
                         auto Guid = ItemEntry->ItemGuid;
                         auto TrackerGuid = ItemEntry->TrackerGuid;
                         std::cout << WeaponDef->Name.ToString().c_str() << std::endl;
                         
-                        ItemEntry->LoadedAmmo = 5; 
+                        ItemEntry->LoadedAmmo = 6; 
                         auto Weapon = (AFortWeaponRangedForVehicleMod*)PlayerController->MyFortPawn->EquipWeaponDefinition(WeaponDef, Guid, TrackerGuid, false);
+                        Weapon->ModInstance = ModInstance;
+                        
 
-                        Weapon->AmmoCount = 5;
-                        Weapon->OnRep_AmmoCount(0);
+                        Weapon->AmmoCount = 6;
+                        Weapon->OnRep_AmmoCount(6);
                         
                         Weapon->bIsEquippingWeapon = false;
                         Weapon->OnRep_IsEquippingWeapon();
@@ -180,8 +189,7 @@ void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* Player
                 }
             }
         }
-    }*/
-
+    }
     
 }
 
