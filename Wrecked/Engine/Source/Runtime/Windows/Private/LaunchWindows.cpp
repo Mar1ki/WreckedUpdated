@@ -209,7 +209,7 @@ void Main()
     ConversationLibrary::Init();
     FortAthenaLivingWorldStaticPointProvider::Init();
     FortPlayerAugmentItemDefinition::Init();
-    AthenaSpecialActorComponent::Init();
+    //AthenaSpecialActorComponent::Init();
     AthenaMarkerComponent::Init();
     FortGameSessionDedicated::Init();
     FortAthenaPatrolPath::Init();

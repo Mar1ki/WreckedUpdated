@@ -163,6 +163,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Plugins\HookingLibrary\Public\HookingLibrary.h" />
+    <ClInclude Include="Engine\Plugins\LateGameLibrary\Public\LateGameLibrary.h" />
     <ClInclude Include="Engine\Plugins\PapayaManagerLibrary\Private\PapayaManager.h" />
     <ClInclude Include="Engine\Plugins\TaskLibrary\Public\TaskLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\CoreUObject\Public\UObject\Stack.h" />
@@ -209,6 +210,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\Plugins\HookingLibrary\Private\HookingLibrary.cpp" />
+    <ClCompile Include="Engine\Plugins\LateGameLibrary\Private\LateGameLibrary.cpp" />
     <ClCompile Include="Engine\Plugins\PapayaManagerLibrary\Private\PapayaManager.cpp" />
     <ClCompile Include="Engine\Plugins\TaskLibrary\Private\TaskLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\Engine\Private\NetDriver.cpp" />

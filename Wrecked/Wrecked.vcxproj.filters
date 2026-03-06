@@ -55,6 +55,9 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Online\FortGameSessionDedicated.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\FortAthenaPatrolPath.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\FortAthenaBTService_PickUpLoot.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\Components\FortControllerComponent_RechargeWeapons.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldDensityGrid.cpp" />
+    <ClCompile Include="Engine\Plugins\LateGameLibrary\Private\LateGameLibrary.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Plugins\HookingLibrary\Public\HookingLibrary.h" />
@@ -99,5 +102,8 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Online\FortGameSessionDedicated.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\FortAthenaPatrolPath.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\FortAthenaBTService_PickUpLoot.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Components\FortControllerComponent_RechargeWeapons.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldDensityGrid.h" />
+    <ClInclude Include="Engine\Plugins\LateGameLibrary\Public\LateGameLibrary.h" />
   </ItemGroup>
 </Project>

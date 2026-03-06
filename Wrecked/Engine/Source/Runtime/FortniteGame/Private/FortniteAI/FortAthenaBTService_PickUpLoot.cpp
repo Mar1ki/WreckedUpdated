@@ -62,10 +62,10 @@ void FortAthenaBTService_PickUpLoot::Init() {
     Hook->Original = (void**)&ManageWeaponOG;
     UKismetHookingLibrary::Hook(Hook, Address);
 
-    Hook->Address = ImageBase + 0xA8CDCE4;
-    Hook->Detour = SetExecutionStatus;
-    Hook->Original = (void**)&SetExecutionStatusOG;
-    UKismetHookingLibrary::Hook(Hook, Address);
+    //Hook->Address = ImageBase + 0xA8CDCE4;
+    //Hook->Detour = SetExecutionStatus;
+    //Hook->Original = (void**)&SetExecutionStatusOG;
+    //UKismetHookingLibrary::Hook(Hook, Address);
 
 	delete Hook;
 }
