@@ -58,9 +58,10 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.ServerTireModVersion++;
 
-                VehicleConfig->GrassBehavior = TireInfo->GrassBehavior;
+                /*VehicleConfig->GrassBehavior = TireInfo->GrassBehavior;
                 VehicleConfig->MudBehavior = TireInfo->MudBehavior;
-                VehicleConfig->RoadBehavior = TireInfo->RoadBehavior;
+                VehicleConfig->RoadBehavior = TireInfo->RoadBehavior; */
+                DagwoodVehicle->BaseTireInfo = *TireInfo;
                 // vehicle and base tire info
 
 
