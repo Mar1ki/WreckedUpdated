@@ -10,6 +10,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Movement/FortMovementMode_BaseExtLogic.h"
 #include "SDK/SDK/VaultingCodeRuntime_classes.hpp"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
 
 void VHook3(void* Base, uintptr_t Index, void* Detour, void** Original = nullptr) {
@@ -135,6 +136,10 @@ void FortPlayerController::ServerAttemptInventoryDrop(AFortPlayerController* Con
     FortKismetLibrary::SpawnPickup(Controller->Pawn->K2_GetActorLocation(), *Entry, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::TossedByPlayer, Controller->MyFortPawn, Count, true, false, false);
     Entry->Count -= Count;
     Inventory->ReplaceEntry(*Entry);
+    if (Entry->ItemDefinition->IsA(UFortPlayerAugmentItemDefinition::StaticClass()))
+    {
+        FortPlayerAugmentItemDefinition::OnItemInstanceRemoved((UFortPlayerAugmentItemDefinition*)Entry->ItemDefinition, Controller->MyFortPawn->GetInterfaceAddress<IFortInventoryOwnerInterface>(), 1);
+    }
 }
 
 // TODO: switch to AFortPlayerControllerAthena::OnPawnDied (proper func, fixes some issues)
