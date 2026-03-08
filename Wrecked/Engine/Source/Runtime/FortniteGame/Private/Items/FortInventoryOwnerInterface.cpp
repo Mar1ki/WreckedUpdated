@@ -130,11 +130,11 @@ void FortInventoryOwnerInterface::Init() {
     Hook->Detour = HasInfiniteAmmo;
     UKismetHookingLibrary::Hook(Hook, Interface);
 
-    Hook->Class = AFortPlayerControllerAthena::StaticClass();
+   /* Hook->Class = AFortPlayerControllerAthena::StaticClass();
     Hook->Interface = IFortInventoryOwnerInterface::StaticClass();
     Hook->Address = 136 / 8;
     Hook->Detour = HasInfiniteConsumables;
-    UKismetHookingLibrary::Hook(Hook, Interface);
+    UKismetHookingLibrary::Hook(Hook, Interface); */
 
  /*   Hook->Class = AFortPlayerControllerAthena::StaticClass();
     Hook->Interface = IFortInventoryOwnerInterface::StaticClass();
