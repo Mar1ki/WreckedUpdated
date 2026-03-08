@@ -234,7 +234,8 @@ void FortAthenaVehicle::TryGiveMetalOnHarvest(IFortVehicleInterface *Interface, 
     auto Inventory =  (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
     auto MetalItemDefinition = GetAssetManager()->GameDataCommon->MetalItemDefinition.Get();
     auto Vehicle = (AFortAthenaVehicle*)(__int64(Interface) - 0x510);
-    
+
+    if (!DamageCauser->IsA(AFortWeaponPickaxeAthena::StaticClass()))return;
     auto FoundEntry = Inventory->GetItemEntryByDef(MetalItemDefinition);
     if (FoundEntry)
     {
