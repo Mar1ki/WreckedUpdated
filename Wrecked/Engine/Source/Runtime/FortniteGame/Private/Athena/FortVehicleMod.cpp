@@ -48,27 +48,29 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
         // prob most ass way btw
         if (ModTag->TagName.ToString().contains("Vehicle.Mod.Tire"))
         {
+            
             auto VehicleConfigClass = Vehicle->VehicleConfigsClass_BR.Get();
             auto VehicleConfig = (UFortPhysicsVehicleConfigs*)VehicleConfigClass->DefaultObject;
             auto DagwoodVehicle = (AFortDagwoodVehicle*)Vehicle;
+            DagwoodVehicle->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
+
             if (auto* TireInfo = VehicleConfig->TireModDataMapping.Search([&](auto& Key, auto&) { return Key == *ModTag; }))
             {
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.SpringsInfo = TireInfo->SpringTuning;
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.bTireModAdjustsPosition = true;
-                DagwoodVehicle->DagwoodRuntimeModifiedProperties.TireModTag = *ModTag;
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.ServerTireModVersion++;
 
                 /*VehicleConfig->GrassBehavior = TireInfo->GrassBehavior;
                 VehicleConfig->MudBehavior = TireInfo->MudBehavior;
                 VehicleConfig->RoadBehavior = TireInfo->RoadBehavior; */
-                DagwoodVehicle->BaseTireInfo = *TireInfo;
+                DagwoodVehicle->BaseTireInfo = *TireInfo; // that does nothing im fr or we dont onrep something
                 // vehicle and base tire info
 
 
                 
                 auto OldModifiedProperties = DagwoodVehicle->DagwoodRuntimeModifiedProperties;
                 DagwoodVehicle->OnRep_DagwoodRuntimeModifiers(OldModifiedProperties);
-                DagwoodVehicle->ApplyRuntimeModifiers();
+                DagwoodVehicle->ApplyRuntimeModifiers(); // that actually calls apply tire mod when u change TireModTag in dagwood runtime properties but doesnt do shit idk why so we just do it manually
             }
             
         }
