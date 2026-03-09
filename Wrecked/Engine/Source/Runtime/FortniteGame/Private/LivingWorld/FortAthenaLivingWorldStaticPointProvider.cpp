@@ -79,8 +79,13 @@ void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Obje
 {
     auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
     PointProvider->bStartEnabled = true;
+
+    std::cout << "EnablePointProvider:" << PointProvider->GetFullName().c_str() << std::endl;
+    for (auto tag : PointProvider->FiltersTags.GameplayTags)
+    {
+        std::cout << tag.TagName.ToString().c_str() << std::endl;
+    }
     
-    std::cout << "EnablePointProvider" << std::endl;
 
     EnablePointProviderOG(Object, Params);
     
