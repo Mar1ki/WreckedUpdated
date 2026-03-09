@@ -81,7 +81,7 @@ AFortAthenaVehicle* SpawnBossVehicle1(FVector Location, FRotator Rotation) {
 void FortAthenaVehicle::PostInitializeComponents(AFortAthenaVehicle* Vehicle) {
     PostInitializeComponentsOG(Vehicle);
 
-    UE_LOG(LogVehicles, Log, "Initializeing Vehicle Damagable Parts!");
+    //UE_LOG(LogVehicles, Log, "Initializing Vehicle Damageable Parts!");
     ApplyDamagableParts(Vehicle);
 }
 void FortAthenaVehicle::SpawnVehicles()
