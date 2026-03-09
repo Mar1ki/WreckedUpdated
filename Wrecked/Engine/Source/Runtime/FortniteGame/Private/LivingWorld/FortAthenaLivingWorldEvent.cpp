@@ -1,6 +1,8 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
 
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
+
 
 TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager)
 {
@@ -34,6 +36,40 @@ TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEven
     UE_LOG(LogLivingWorldManager, Warning, "Total Events Found: %d", AllEvents.Num());
     return AllEvents;
 }
+
+TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager)
+{
+    std::cout << "GetAllWorldEvents" << std::endl;
+    auto WorldConfig = LivingWorldManager->GetConfig();
+    TArray<FFortAthenaLivingWorldEvent*> AllEvents;
+    for (auto& LivingWorldCategory : WorldConfig->CategoryTableDatas)
+    {
+        auto* CategoryDataTable = LivingWorldCategory.CategoryTable.Get();
+        if (CategoryDataTable)
+        {
+            auto& RowMap = CategoryDataTable->RowMap;
+            for (auto& Row : RowMap)
+            {
+                auto* RowData = Row.Value();
+                auto* CategoryRow = (FFortAthenaLivingWorldCategory*)RowData;
+                
+                if (auto* EventTable = CategoryRow->EventTable.Table.Get())
+                {
+                    auto& EventRowMap = EventTable->RowMap;
+                    for (auto& EventRow : EventRowMap)
+                    {
+                        auto* EventRowData = EventRow.Value();
+                        auto* Event = (FFortAthenaLivingWorldEvent*)EventRowData;
+                        AllEvents.Add(Event);
+                    }
+                }
+            }
+        }
+    }
+    UE_LOG(LogLivingWorldManager, Warning, "Total Events Found: %d", AllEvents.Num());
+    return AllEvents;
+}
+
 
 FGameplayTag FixTandemTag(const FGameplayTag& Tag)
 {
@@ -75,7 +111,14 @@ TArray<AFortAthenaPatrolPath*> FortAthenaLivingWorldEvent::GetPatrolPathsFromTag
     return FoundPoints;
 }
 
+UEAllocatedString GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* NpcEvent)
+{
+    return NpcEvent->EventDatas[0].EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString(); // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
+    //return NpcEvent->EventDatas[0].EventData->ActorDescriptions[0].SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // old way it returned AISpawnerData.Type.JobBoard.Vehicle 
+}
 
+
+std::map<std::string, UEAllocatedString> PatchMap;
 void FortAthenaLivingWorldEvent::TrySpawnEvents()
 {
     auto LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass()); // ig we can use cached lwm
@@ -86,8 +129,20 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
     TArray<FFortAthenaLivingWorldEvent*> NpcEvents; // handled rn not good but works
     TArray<FFortAthenaLivingWorldEvent*> ValetEvents;
     TArray<FFortAthenaLivingWorldEvent*> OtherEvents; // ig we can handle random shit here like bosses and more prob wildlife too
+    TArray<FFortAthenaLivingWorldEvent*> JobBoardEvents;
+    TArray<FFortAthenaLivingWorldEvent*> ChallengeEvents; // these ch5 s3 challenges that u take 
 
 
+    PatchMap.insert({"Athena.AI.SpawnLocation.JobBoard.Vehicle", UEAllocatedString("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_Vehicle.BP_StationProp_JobBoard_Experimental_Vehicle_C")});
+    PatchMap.insert({"Athena.AI.SpawnLocation.JobBoard.Bounty", UEAllocatedString("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_Bounty.BP_StationProp_JobBoard_Experimental_Bounty_C")});
+    PatchMap.insert({"Athena.AI.SpawnLocation.JobBoard.Plunder", UEAllocatedString("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_Treasure.BP_StationProp_JobBoard_Experimental_Treasure_C")});
+    PatchMap.insert({"Athena.AI.SpawnLocation.JobBoard.SupplyDrop", UEAllocatedString("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_SupplyDropGeneric.BP_StationProp_JobBoard_Experimental_SupplyDropGeneric_C")});
+
+    // These Challenges
+    PatchMap.insert({"Athena.AI.SpawnLocation.Challenge", UEAllocatedString("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_SupplyDropGeneric.BP_StationProp_JobBoard_Experimental_SupplyDropGeneric_C")});
+
+
+    
     for (auto Event : EventArray)
     {
        for (auto EventData :  Event->EventDatas)
@@ -96,7 +151,7 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
            {
               auto SpawnerTag =  ActorDesc.SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // these events have multiple tags for example valet
 
-               if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is normal npcs and specialists are specialist npcs
+               if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is npcs and specialists are some sort of npcs idk 
                {
                    NpcEvents.Add(Event);
                }
@@ -104,14 +159,49 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
                {
                    ValetEvents.Add(Event);
                }
-               else
+               else if (SpawnerTag.contains("JobBoard"))
                {
-                   OtherEvents.Add(Event);
+                   JobBoardEvents.Add(Event);
                }
            }
        }
     }
+    
+    for (auto JobBoardEvent : JobBoardEvents)
+    {
+        auto SpawnerTag = GetSpawnerTagFromEvent(JobBoardEvent);
+        auto MaxCount = JobBoardEvent->MaxCount[0];
 
+        auto resultig = PatchMap.find(SpawnerTag.c_str());
+        if (resultig == PatchMap.end())
+            continue;
+
+        auto Path = resultig->second;
+        auto Actor = StaticLoadObject<UClass>(Path);
+        if (!Actor) continue;
+
+        UEAllocatedWString WideTag(SpawnerTag.begin(), SpawnerTag.end());
+        WideTag += L'\0';
+        FString FStr(WideTag.c_str());
+        FGameplayTag SearchTag;
+        SearchTag.TagName = UKismetStringLibrary::Conv_StringToName(FStr);
+
+        auto Out = FortAthenaLivingWorldStaticPointProvider::GetPointProvidersFromTagQuery(SearchTag);
+        if (Out.Num() == 0) continue;
+
+        int SpawnedCount = 0;
+        for (int i = 0; i < Out.Num() && SpawnedCount < MaxCount; i++)
+        {
+            auto SpawnProvider = Out[i];
+            auto SpawnLoc = SpawnProvider->GetTransform();
+            
+            GetWorld()->SpawnActor(Actor, SpawnLoc);
+            SpawnProvider->bStartEnabled = false;
+            SpawnedCount++;
+        }
+    }
+    std::cout << "Challenge: " << ChallengeEvents.Num() << std::endl;
+    
 
     for (auto NpcEvent : NpcEvents)
     {
@@ -139,8 +229,10 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
                    //std::cout << "Spawned at: X=" << Loc.X << " Y=" << Loc.Y << " Z=" << Loc.Z << std::endl;
                }
            }
-        }
+        } 
     } 
+
+
+    
     
 }
-
