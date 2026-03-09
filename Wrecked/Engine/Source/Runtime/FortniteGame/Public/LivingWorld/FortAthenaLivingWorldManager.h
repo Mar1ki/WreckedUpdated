@@ -12,4 +12,6 @@ namespace FortAthenaLivingWorldManager
     void PerformPointProviderSpawn();
     DefineOriginal(char, RegisterActorAndTagDensityReservoir, UFortAthenaLivingWorldManager *a1, UObject a2, float a3, float a4, __int64 a5);
     DefineOriginal(void, HandleGamePhaseStepChanged, UObject* Object, FFrame* Frame);
+    DefineOriginal(void, RequestEventGeneration, UObject* Object, FFrame* Frame);
+    DefineOriginal(void, TrySpawnEvent, UObject* Object, FFrame* Frame);
 }

@@ -65,9 +65,16 @@ static bool NeedsLoadForClient() {
 }
 
 
-void Dummy()
+void FortAthenaLivingWorldManager::RequestEventGeneration(UObject* Object, FFrame* Frame)
 {
     std::cout << "One of the event exec is called" << std::endl;
+    RequestEventGenerationOG(Object, Frame);
+}
+
+void FortAthenaLivingWorldManager::TrySpawnEvent(UObject* Object, FFrame* Frame)
+{
+    std::cout << "TrySpawnEvent" << std::endl;
+    TrySpawnEventOG(Object, Frame);
 }
 
 
@@ -75,8 +82,6 @@ void FortAthenaLivingWorldManager::HandleGamePhaseStepChanged(UObject* Object, F
 {
    // auto InGamePhaseStep = Frame->StepCompiledInRef<EAthenaGamePhaseStep>();
     //rame->IncrementCode();
-
-
     std::cout << "gamephase step changed" << std::endl;
 
     HandleGamePhaseStepChangedOG(Object, Frame);
@@ -98,13 +103,15 @@ void FortAthenaLivingWorldManager::Hook()
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 
-   /* Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.TrySpawnEvent";
-    Hook->Detour = Dummy;
+    Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.TrySpawnEvent";
+    Hook->Detour = TrySpawnEvent;
+    Hook->Detour = (void**)&TrySpawnEventOG;
     UKismetHookingLibrary::Hook(Hook, Exec);
 
     Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.RequestEventGeneration";
-    Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, Exec); */
+    Hook->Detour = RequestEventGeneration;
+    Hook->Original = (void**)&RequestEventGenerationOG;
+    UKismetHookingLibrary::Hook(Hook, Exec); 
     
     Hook->Path = "/Script/FortniteGame.FortGameStateComponent_BattleRoyaleGamePhaseLogic.HandleGamePhaseStepChanged";
     Hook->Detour = HandleGamePhaseStepChanged;
