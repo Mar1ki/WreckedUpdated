@@ -636,6 +636,28 @@ inline void ApplyWeaponModset(FFortItemEntry* Entry, UFortWeaponModSetData* Mods
         sub_9BA1D68(Entry, &v9);
     }
 }
+
+inline void UpdateBaseWeaponAmmo(FFortItemEntry* Entry)
+{
+        for (auto Mod : Entry->WeaponModSlots)
+        {
+                if (Mod.WeaponMod->IsA(UFortWeaponModItemDefinitionMagazine::StaticClass()))
+                {
+                        auto tag = Mod.WeaponMod->WeaponModTag;
+
+                        auto result = Mod.WeaponMod->WeaponModDataTable->Search([&tag](FName& key, uint8*& value)
+                        {
+                                return key.ToString().contains(tag.TagName.ToString().c_str());
+                        });
+
+                        if (result)
+                        {
+                                auto ModInfo = (FFortWeaponModDataRow*)(*result);
+                                Entry->LoadedAmmo = Entry->LoadedAmmo * ModInfo->WeaponAmmoClipSize;
+                        }
+                }
+        }
+}
 constexpr float WarmupDuration = 500.f;
 inline EGameModeType CurrentGamemode = EGameModeType::Athena;
 #endif //PCH_H
