@@ -98,13 +98,13 @@ void FortAthenaLivingWorldManager::Hook()
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 
-    Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.TrySpawnEvent";
+   /* Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.TrySpawnEvent";
     Hook->Detour = Dummy;
     UKismetHookingLibrary::Hook(Hook, Exec);
 
     Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.RequestEventGeneration";
     Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, Exec);
+    UKismetHookingLibrary::Hook(Hook, Exec); */
     
     Hook->Path = "/Script/FortniteGame.FortGameStateComponent_BattleRoyaleGamePhaseLogic.HandleGamePhaseStepChanged";
     Hook->Detour = HandleGamePhaseStepChanged;
