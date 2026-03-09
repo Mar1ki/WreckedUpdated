@@ -242,10 +242,16 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 		SpawnCactuses();
 		FortAthenaVehicle::SpawnVehicles();
 	}
-	TArray<AActor*> Starts;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AJunoTeamStart::StaticClass(), &Starts);
-	FTransform Transform = Starts.Num() > 0 ? Starts[0]->GetTransform() : StartSpot->GetTransform();
+	FTransform Transform;
+	if (GetLogic()->GamePhase == EAthenaGamePhase::Warmup)
+	{
+		Transform = NewPlayer->WarmupPlayerStart->GetTransform();
+	} else
+	{
+		Transform = StartSpot->GetTransform();
+	}
 	auto Pawn = (AFortPlayerPawnAthena*)GameMode->SpawnDefaultPawnAtTransform(NewPlayer, Transform);
+	
 	AFortInventory* Inventory = (AFortInventory*)NewPlayer->WorldInventory.GetObjectRef();
 	for (int i = 0; i < GameMode->StartingItems.Num(); i++)
 	{
@@ -261,6 +267,7 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
     	
 		Inventory->AddItem((UFortItemDefinition*)Item.Item, Item.Count, 0);
 	}
+	
 	if (CurrentGamemode == Creative)
 	{
 		FortAthenaCreativePortal::CreatePortal(NewPlayer);
