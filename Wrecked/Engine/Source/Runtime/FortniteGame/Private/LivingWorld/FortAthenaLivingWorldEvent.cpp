@@ -112,17 +112,17 @@ TArray<AFortAthenaPatrolPath*> FortAthenaLivingWorldEvent::GetPatrolPathsFromTag
 }
 
 
-UEAllocatedString FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent)
+FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent)
 {
     auto EventData =  InEvent->EventDatas[0].EventData.Get();
 
     if (EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains("Athena.Vehicle.SpawnLocation.AlwaysSpawn"))
     {
         UE_LOG(LogLivingWorldManager, Warning, "Found a scuffed always spawn event using the second tag");
-        return EventData->ProviderFiltersTagQuery.TagDictionary[1].TagName.ToString();
+        return EventData->ProviderFiltersTagQuery.TagDictionary[1];
     } else
     {
-        return EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString(); // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
+        return EventData->ProviderFiltersTagQuery.TagDictionary[0]; // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
   
     }
     //return NpcEvent->EventDatas[0].EventData->ActorDescriptions[0].SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // old way it returned AISpawnerData.Type.JobBoard.Vehicle 
@@ -182,21 +182,16 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
         auto SpawnerTag = GetSpawnerTagFromEvent(JobBoardEvent);
         auto MaxCount = JobBoardEvent->MaxCount[0];
 
-        auto resultig = PatchMap.find(SpawnerTag.c_str());
+        auto resultig = PatchMap.find(SpawnerTag.TagName.ToString().c_str());
         if (resultig == PatchMap.end())
             continue;
 
         auto Path = resultig->second;
         auto Actor = StaticLoadObject<UClass>(Path);
         if (!Actor) continue;
+        
 
-        UEAllocatedWString WideTag(SpawnerTag.begin(), SpawnerTag.end());
-        WideTag += L'\0';
-        FString FStr(WideTag.c_str());
-        FGameplayTag SearchTag;
-        SearchTag.TagName = UKismetStringLibrary::Conv_StringToName(FStr);
-
-        auto Out = FortAthenaLivingWorldStaticPointProvider::GetPointProvidersFromTagQuery(SearchTag);
+        auto Out = FortAthenaLivingWorldStaticPointProvider::GetPointProvidersFromTagQuery(SpawnerTag);
         if (Out.Num() == 0) continue;
 
         int SpawnedCount = 0;
@@ -213,7 +208,7 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
     std::cout << "Challenge: " << ChallengeEvents.Num() << std::endl;
     
 
-    for (auto NpcEvent : NpcEvents)
+    /*for (auto NpcEvent : NpcEvents)
     {
         for (auto EventData : NpcEvent->EventDatas)
         {
@@ -240,5 +235,19 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
                }
            }
         } 
-    } 
+    } */
+
+    for (auto ValetEvent : ValetEvents)
+    {
+        auto EventData = ValetEvent->EventDatas[0].EventData.Get();
+        auto Tag = GetSpawnerTagFromEvent(ValetEvent);
+
+        
+      //  FortAthenaLivingWorldStaticPointProvider::GetPointProvidersFromTagQuery();
+
+     //   FortAthenaLivingWorldStaticPointProvider::GetPointProvidersFromTagQuery();
+
+       // std::cout << "EventName: " << EventData->Name.ToString().c_str() << "EventTag: " << Tag.c_str() << std::endl;
+
+    }
 }

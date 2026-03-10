@@ -9,7 +9,7 @@ namespace FortAthenaLivingWorldEvent
 
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager);
     TArray<AFortAthenaPatrolPath*> GetPatrolPathsFromTagQuery(const FGameplayTag& SearchTag);
-    UEAllocatedString GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent);
+    FGameplayTag GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent);
 
     void TrySpawnEvents();
     void Hook();
