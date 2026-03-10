@@ -111,12 +111,22 @@ TArray<AFortAthenaPatrolPath*> FortAthenaLivingWorldEvent::GetPatrolPathsFromTag
     return FoundPoints;
 }
 
-UEAllocatedString GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* NpcEvent)
+
+UEAllocatedString FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent)
 {
-    return NpcEvent->EventDatas[0].EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString(); // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
+    auto EventData =  InEvent->EventDatas[0].EventData.Get();
+
+    if (EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains("Athena.Vehicle.SpawnLocation.AlwaysSpawn"))
+    {
+        UE_LOG(LogLivingWorldManager, Warning, "Found a scuffed always spawn event using the second tag");
+        return EventData->ProviderFiltersTagQuery.TagDictionary[1].TagName.ToString();
+    } else
+    {
+        return EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString(); // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
+  
+    }
     //return NpcEvent->EventDatas[0].EventData->ActorDescriptions[0].SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // old way it returned AISpawnerData.Type.JobBoard.Vehicle 
 }
-
 
 std::map<std::string, UEAllocatedString> PatchMap;
 void FortAthenaLivingWorldEvent::TrySpawnEvents()
@@ -231,8 +241,4 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
            }
         } 
     } 
-
-
-    
-    
 }
