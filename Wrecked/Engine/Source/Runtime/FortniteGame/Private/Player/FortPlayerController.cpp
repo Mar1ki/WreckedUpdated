@@ -237,9 +237,9 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
             DamageCauser = Weapon;
 
         ((void (*)(AFortGameModeAthena*, AFortPlayerController*, APlayerState*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char))(ImageBase + 0x8FD53FC))(GameMode, PlayerController, KillerPlayerState == PlayerState ? nullptr : KillerPlayerState, KillerPawn, DamageCauser ? DamageCauser->WeaponData : nullptr, PlayerState->DeathInfo.DeathCause, 0);
-
+        
         PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, PlayerController->MatchReport->EndOfMatchResults);
-        if (PlayerController->MyFortPawn && ((KillerPlayerState && KillerPlayerState->Place == 1) || PlayerState->Place == 1))
+        if (PlayerController->MyFortPawn && ((KillerPlayerState && KillerPlayerState->Place == 1) || PlayerState->Place == 1) && false)
         {
             if (PlayerState->Place == 1)
             {
@@ -465,6 +465,14 @@ void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Con
         }
     }
 }
+
+void ServerSetFollowedPlayer_Implementation(AFortLiveSpectatorController* Controller, AFortPlayerState* NewPlayerToFollow, FVector* SpectatorLocation, bool bValidPos) {
+    Controller->FollowedPlayerState = NewPlayerToFollow;
+    if (bValidPos) {
+        Controller->K2_SetActorLocation(*SpectatorLocation, false, nullptr, true);
+    }
+}
+
 void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, FString Msg) {
     auto PlayerState = Cast<AFortPlayerStateAthena>(Controller->PlayerState);
     auto PlayerName = PlayerState->GetPlayerName().ToString();
@@ -770,6 +778,11 @@ void FortPlayerController::Init()
     Hook->Address = 0x1F9;
     Hook->Class = AFortPlayerController::StaticClass();
     Hook->Detour = ServerCheat;
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+
+    Hook->Address = 0x2440 / 8;
+    Hook->Class = AFortLiveSpectatorController::StaticClass();
+    Hook->Detour =ServerSetFollowedPlayer_Implementation;
     UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
 
     Hook->Path = "/Script/FortniteGame.FortPawn.MovingEmoteStopped";
