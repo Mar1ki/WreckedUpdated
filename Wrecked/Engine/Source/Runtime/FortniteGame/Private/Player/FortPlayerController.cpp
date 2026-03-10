@@ -213,7 +213,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
         return ClientOnPawnDiedOG(PlayerController, DeathReport);
     }
 
-    if (!GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
+    if (!GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true) && false)
     {
         PlayerState->Place = GameState->PlayersLeft;
         PlayerState->OnRep_Place();
@@ -239,7 +239,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
         ((void (*)(AFortGameModeAthena*, AFortPlayerController*, APlayerState*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char))(ImageBase + 0x8FD53FC))(GameMode, PlayerController, KillerPlayerState == PlayerState ? nullptr : KillerPlayerState, KillerPawn, DamageCauser ? DamageCauser->WeaponData : nullptr, PlayerState->DeathInfo.DeathCause, 0);
         
         PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, PlayerController->MatchReport->EndOfMatchResults);
-        if (PlayerController->MyFortPawn && ((KillerPlayerState && KillerPlayerState->Place == 1) || PlayerState->Place == 1) && false)
+        if (PlayerController->MyFortPawn && ((KillerPlayerState && KillerPlayerState->Place == 1) || PlayerState->Place == 1))
         {
             if (PlayerState->Place == 1)
             {
