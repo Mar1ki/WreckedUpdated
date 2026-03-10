@@ -37,40 +37,6 @@ TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEven
     return AllEvents;
 }
 
-TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager)
-{
-    std::cout << "GetAllWorldEvents" << std::endl;
-    auto WorldConfig = LivingWorldManager->GetConfig();
-    TArray<FFortAthenaLivingWorldEvent*> AllEvents;
-    for (auto& LivingWorldCategory : WorldConfig->CategoryTableDatas)
-    {
-        auto* CategoryDataTable = LivingWorldCategory.CategoryTable.Get();
-        if (CategoryDataTable)
-        {
-            auto& RowMap = CategoryDataTable->RowMap;
-            for (auto& Row : RowMap)
-            {
-                auto* RowData = Row.Value();
-                auto* CategoryRow = (FFortAthenaLivingWorldCategory*)RowData;
-                
-                if (auto* EventTable = CategoryRow->EventTable.Table.Get())
-                {
-                    auto& EventRowMap = EventTable->RowMap;
-                    for (auto& EventRow : EventRowMap)
-                    {
-                        auto* EventRowData = EventRow.Value();
-                        auto* Event = (FFortAthenaLivingWorldEvent*)EventRowData;
-                        AllEvents.Add(Event);
-                    }
-                }
-            }
-        }
-    }
-    UE_LOG(LogLivingWorldManager, Warning, "Total Events Found: %d", AllEvents.Num());
-    return AllEvents;
-}
-
-
 FGameplayTag FixTandemTag(const FGameplayTag& Tag)
 {
     UEAllocatedString TagStr = Tag.TagName.ToString();
