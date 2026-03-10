@@ -963,5 +963,16 @@ ValueElementType* Search(PT Predicate)
 		IntType Y;
 		IntType Z;
 	};
+
+	template<typename InElementType, typename InSizeType = int32_t>
+    class TArrayView
+	{
+	public:
+		using ElementType = InElementType;
+		using SizeType    = InSizeType;
+	private:
+		ElementType* DataPtr;
+		SizeType     ArrayNum;
+	};
 }
 
