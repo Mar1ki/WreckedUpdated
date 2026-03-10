@@ -213,7 +213,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
         return ClientOnPawnDiedOG(PlayerController, DeathReport);
     }
 
-    if (!GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true) && false)
+    if (!GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
     {
         PlayerState->Place = GameState->PlayersLeft;
         PlayerState->OnRep_Place();
@@ -239,7 +239,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
         ((void (*)(AFortGameModeAthena*, AFortPlayerController*, APlayerState*, AFortPawn*, UFortWeaponItemDefinition*, EDeathCause, char))(ImageBase + 0x8FD53FC))(GameMode, PlayerController, KillerPlayerState == PlayerState ? nullptr : KillerPlayerState, KillerPawn, DamageCauser ? DamageCauser->WeaponData : nullptr, PlayerState->DeathInfo.DeathCause, 0);
         
         PlayerController->ClientSendEndBattleRoyaleMatchForPlayer(true, PlayerController->MatchReport->EndOfMatchResults);
-        if (PlayerController->MyFortPawn && ((KillerPlayerState && KillerPlayerState->Place == 1) || PlayerState->Place == 1))
+        if (/*PlayerController->MyFortPawn && ((KillerPlayerState && KillerPlayerState->Place == 1) || PlayerState->Place == 1)*/ false)
         {
             if (PlayerState->Place == 1)
             {
@@ -468,6 +468,7 @@ void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Con
 
 void ServerSetFollowedPlayer_Implementation(AFortLiveSpectatorController* Controller, AFortPlayerState* NewPlayerToFollow, FVector* SpectatorLocation, bool bValidPos) {
     Controller->FollowedPlayerState = NewPlayerToFollow;
+    UE_LOG(LogGameMode, Log, "ServerSetFollowedPlayer clalled!");
     if (bValidPos) {
         Controller->K2_SetActorLocation(*SpectatorLocation, false, nullptr, true);
     }
