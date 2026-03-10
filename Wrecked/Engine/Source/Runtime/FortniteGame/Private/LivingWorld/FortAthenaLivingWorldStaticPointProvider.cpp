@@ -90,6 +90,22 @@ void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Obje
     EnablePointProviderOG(Object, Params);
     
 }
+
+void FortAthenaLivingWorldStaticPointProvider::DisablePointProvider(UObject* Object, FFrame& Params)
+{
+    auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
+    PointProvider->bStartEnabled = false;
+
+    std::cout << "EnablePointProvider:" << PointProvider->GetFullName().c_str() << std::endl;
+    for (auto tag : PointProvider->FiltersTags.GameplayTags)
+    {
+        std::cout << tag.TagName.ToString().c_str() << std::endl;
+    }
+    
+
+    DisablePointProviderOG(Object, Params);
+    
+}
 void FortAthenaLivingWorldStaticPointProvider::Init()
 {
     UHook* Hook = new UHook();
@@ -102,5 +118,11 @@ void FortAthenaLivingWorldStaticPointProvider::Init()
     Hook->Detour = EnablePointProvider;
     Hook->Original = (void**)&EnablePointProviderOG;
     UKismetHookingLibrary::Hook(Hook, Exec);
+    
+    Hook->Path = "/Script/LagerRuntime.FortAthenaPatrolPathPointProvider.DisablePointProvider";
+    Hook->Detour = DisablePointProvider;
+    Hook->Original = (void**)&DisablePointProviderOG;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+    
     delete Hook;
 }

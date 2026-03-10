@@ -15,6 +15,8 @@ namespace FortAthenaLivingWorldStaticPointProvider
     AFortAthenaLivingWorldStaticPointProvider* GetRandomPointProviderForEventSpawn(TArray<AFortAthenaLivingWorldStaticPointProvider*> InArray);
 
     DefineOriginal(void, EnablePointProvider, UObject* Object, FFrame& Params);
+    DefineOriginal(void, DisablePointProvider, UObject* Object, FFrame& Params);
+
 
     void Init();
 }
