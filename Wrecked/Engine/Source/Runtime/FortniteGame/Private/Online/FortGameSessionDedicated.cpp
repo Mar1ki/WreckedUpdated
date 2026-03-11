@@ -18,6 +18,7 @@ TSubclassOf<AGameSession>* FortGameSessionDedicated::GetGameSessionClass(AFortGa
 }
 
 void* FortGameSessionDedicated::GetServicePermissionsByName(void* Config, FString* Name) {
+	logtofile(Name->ToStr().c_str());
 	static FServicePermissionsMcp* ServicePerms = nullptr;
 	if (!ServicePerms)
 	{
@@ -25,6 +26,10 @@ void* FortGameSessionDedicated::GetServicePermissionsByName(void* Config, FStrin
 	}
 
 	return ServicePerms;
+}
+
+UWorld* FortGameSessionDedicated::GetWorldFromSmth(__int64 Smth) {
+	return GetWorld();
 }
 
 const wchar_t* FortGameSessionDedicated::CommandLineGet()
@@ -49,11 +54,16 @@ void FortGameSessionDedicated::Init() {
 	Hook->Address = 0x788 / 8;
 	Hook->Detour = GetGameSessionClass;
 	Hook->Class = AFortGameMode::StaticClass();
-	UKismetHookingLibrary::Hook(Hook, VFT);
+	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
 	Hook->Address = ImageBase + 0x145D240;
 	Hook->Detour = CommandLineGet;
 	Hook->Original = (void**)&CommandLineGetOG;
+	UKismetHookingLibrary::Hook(Hook, Address);
+
+	Hook->Address = ImageBase + 0x9A10B1C;
+	Hook->Detour = GetWorldFromSmth;
+	Hook->Original = (void**)&GetWorldFromSmthOG;
 	UKismetHookingLibrary::Hook(Hook, Address);
 	
 	delete Hook;

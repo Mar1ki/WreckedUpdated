@@ -6,5 +6,6 @@ namespace FortGameSessionDedicated {
 	TSubclassOf<AGameSession>* GetGameSessionClass(AFortGameMode* GameMode, TSubclassOf<AGameSession>* result);
 	void* GetServicePermissionsByName(void* Config, FString* Name);
 	DefineOriginal(const wchar_t*, CommandLineGet);
+	DefineOriginal(UWorld*, GetWorldFromSmth, __int64 Smth);
 	void Init();
 }

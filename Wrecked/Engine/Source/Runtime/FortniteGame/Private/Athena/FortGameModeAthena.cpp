@@ -84,6 +84,7 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
 	if (CurrentGamemode == EGameModeType::Athena)
 		if (!GameState || !GameState->MapInfo) return false;
+
 	if (GameMode->CurrentPlaylistId == -1)
 	{
 		UFortPlaylistAthena* Playlist = nullptr;

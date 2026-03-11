@@ -325,6 +325,7 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogOnline off", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogFortAscenderZipline none", nullptr); // random logs that pretty much we dont care about 
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogFortChoosePlayerStart VeryVerbose", nullptr);
+    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogOnlineGame VeryVerbose", nullptr);
     
     for (auto& Curie : GetObjectsOfClass<UCurieGlobals>())
        Curie->bEnableCurie = false;
