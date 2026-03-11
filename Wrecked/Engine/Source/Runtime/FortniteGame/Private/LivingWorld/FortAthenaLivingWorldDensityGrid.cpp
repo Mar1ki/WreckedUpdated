@@ -3,8 +3,7 @@
 
 char FortAthenaLivingWorldDensityGrid::AddActor(FFortAthenaLivingWorldDensityGrid* DensityGrid, AActor* InActor, double DensityValue, double DensityRange)
 {
-    auto LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-    auto WorldConfig = LivingWorldManager->GetConfig();
+    auto WorldConfig = GetLivingWorldManager()->GetConfig();
     
     if (DensityGrid->GridBounds.Max.X == 0)
     {

@@ -413,6 +413,16 @@ inline UFortAssetManager* GetAssetManager()
         return FortAssetManager;
 }
 
+inline UFortAthenaLivingWorldManager* GetLivingWorldManager()
+{
+        static UFortAthenaLivingWorldManager* LivingWorldManager = nullptr;
+        if (!LivingWorldManager)
+        {
+                LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
+        }
+        return LivingWorldManager;
+}
+
 #define getCounter() __counter__
 #define __runOnce(_V) static uint32_t _ROnce_##_V = 0; if (++_ROnce_##_V == 1)
 #define _runOnce(_V) __runOnce(_V)
