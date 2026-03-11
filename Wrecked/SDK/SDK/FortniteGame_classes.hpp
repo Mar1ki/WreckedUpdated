@@ -24241,7 +24241,9 @@ public:
 class AFortPlayerStartWarmup : public APlayerStart
 {
 public:
-	uint8                                         Pad_2C0[0x8];                                      // 0x02C0(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	int32_t                                       PlayerClaimedCount;
+    uint8_t                                       ClaimedSquadId;
+    uint8_t                                       Pad_2C5[0x3]; // padding 
 
 public:
 	static class UClass* StaticClass()
