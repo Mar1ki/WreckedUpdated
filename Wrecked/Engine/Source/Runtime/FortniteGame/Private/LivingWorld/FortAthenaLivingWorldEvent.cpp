@@ -82,15 +82,13 @@ FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivin
 {
     auto EventData =  InEvent->EventDatas[0].EventData.Get();
 
-    if (EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains("Athena.Vehicle.SpawnLocation.AlwaysSpawn"))
+    // thats when we detect a ahh alwayspawnevent which is ass and we need to somehow
+    if (EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains("Athena.Vehicle.SpawnLocation.AlwaysSpawn") || EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains(".Base"))
     {
-        UE_LOG(LogLivingWorldManager, Warning, "Found a scuffed always spawn event using the second tag");
+        UE_LOG(LogLivingWorldManager, Warning, "Found a scuffed valet spawn event using the second tag");
         return EventData->ProviderFiltersTagQuery.TagDictionary[1];
-    } else
-    {
-        return EventData->ProviderFiltersTagQuery.TagDictionary[0]; // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
-  
     }
+    return EventData->ProviderFiltersTagQuery.TagDictionary[0]; // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
     //return NpcEvent->EventDatas[0].EventData->ActorDescriptions[0].SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // old way it returned AISpawnerData.Type.JobBoard.Vehicle 
 }
 
