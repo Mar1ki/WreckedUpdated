@@ -210,7 +210,7 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		Url.Port = 7777;
 		GetWorld()->Listen(Url);
 		GameMode->bWorldIsReady = true;
-		if (CurrentGamemode == Athena) {
+		if (CurrentGamemode == Athena && !bLateGame) {
 			TArray<FVector4> Blacklist = {};
 			auto MapCenter = GameState->MapInfo->GetMapCenter();
 			GameState->MapInfo->GenerateSafeZoneLocations(*(TArray<FVector>*)(__int64(GetLogic()) + 0x468), Blacklist, &MapCenter, 0, false);

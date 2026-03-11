@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-
+#include "Engine/Plugins/LateGameLibrary/Public/LateGamelibrary.h"
 #include "Engine/Plugins/TaskLibrary/Public/TaskLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortGameModeAthena.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
@@ -91,9 +91,13 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
     {
         return false;
     }
-    if (GamePhase > EAthenaGamePhase::Warmup)
+    if (GamePhase > EAthenaGamePhase::Warmup && !bLateGame)
     {
         return false;
+    }
+
+    if (bLateGame) {
+        ULateGameLibrary::LateGameStartAircraft();
     }
 
     if (!PlaylistData)
@@ -126,21 +130,6 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
                 Aircrafts_GameState.Add(AicraftWeak);
 
                 Aircraft->StartFlightPath(ServerTime);
-
-                FScriptDelegate OnDropZoneExitedDel;
-                OnDropZoneExitedDel.Object = this;
-                OnDropZoneExitedDel.FunctionName = UKismetStringLibrary::Conv_StringToName(L"OnAircraftExitedDropZone");
-
-                FScriptDelegate OnDropZoneEnteredDel;
-                OnDropZoneEnteredDel.Object = this;
-                OnDropZoneEnteredDel.FunctionName = UKismetStringLibrary::Conv_StringToName(L"OnAircraftEnteredDropZone");
-
-                FScriptDelegate OnFlightEndedDel;
-                OnFlightEndedDel.Object = this;
-                OnFlightEndedDel.FunctionName = UKismetStringLibrary::Conv_StringToName(L"OnAircraftFlightEnded");
-                Aircraft->OnDropZoneEntered.InvocationList.Add(OnDropZoneEnteredDel);
-                Aircraft->OnDropZoneExited.InvocationList.Add(OnDropZoneExitedDel);
-                Aircraft->OnFlightEnded.InvocationList.Add(OnFlightEndedDel);
             }
         }
     }
@@ -150,8 +139,10 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartAircraftPhase() {
     UpdateBotsGamePhase();
     int32 AircraftReadyPlayerCount = 0;
 
-    for (auto Player: GetGameMode()->AlivePlayers)
+    for (auto PlayerState: GetGameState()->PlayerArray)
     {
+
+        auto Player = (AFortPlayerControllerAthena*)PlayerState->GetPlayerController();
         if (!Player)
             continue;
 
@@ -452,6 +443,8 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartWarmupPhase() {
 }
 
 void UFortGameStateComponent_BattleRoyaleGamePhaseLogic::UpdateSafeZonePhase(float Time) {
+    if (bLateGame)
+        return ULateGameLibrary::CustomSafeZoneHandler(Time);
     AFortGameStateAthena* GameState = GetGameState();
     AFortGameModeAthena* GameMode = GetGameMode();
     if (!GameState || !GameState->MapInfo)

@@ -272,16 +272,6 @@ namespace PGHooker
 	}
 }
 
-FRotator VectorToRotatorManual(FVector DirectionVector)
-{
-	float Pitch = RadiansToDegrees(UKismetMathLibrary::asin(DirectionVector.Z));
-
-	float Yaw = RadiansToDegrees(UKismetMathLibrary::Atan2(DirectionVector.Y, DirectionVector.X));
-
-	return FRotator(Pitch, Yaw, 0.0f);
-}
-
-
 void FortLightWeightProjectileManager::ProjectileRequest(AFortLightweightProjectileManager* ProjectileManager, FWeakObjectPtr PawnObject, FWeakObjectPtr WeaponDef, UClass** ProjectileConfigPTR, FVector BuletStartPosition, FVector Direction, ELightweightProjectileRequestType Type, int a8, unsigned int a9) {
 	PGHooker::DisableHookForOnce(ProjectileRequestOG);
 	ProjectileRequestOG(ProjectileManager, PawnObject, WeaponDef, ProjectileConfigPTR, BuletStartPosition, Direction, Type, a8, a9);

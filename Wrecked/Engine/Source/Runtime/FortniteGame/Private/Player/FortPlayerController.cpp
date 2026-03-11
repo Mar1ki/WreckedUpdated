@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Player/FortPlayerController.h"
-
+#include "Engine/Plugins/LateGameLibrary/Public/LateGamelibrary.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Plugins/PapayaManagerLibrary/Private/PapayaManager.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
@@ -213,7 +213,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
         return ClientOnPawnDiedOG(PlayerController, DeathReport);
     }
 
-    if (!GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
+    if (!bLateGame && !GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
     {
         PlayerState->Place = GameState->PlayersLeft;
         PlayerState->OnRep_Place();
@@ -274,6 +274,11 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
             GameState->OnRep_WinningTeam();
             GameState->WinningPlayerState = KillerPlayerState;
             GameState->OnRep_WinningPlayerState();
+        }
+    }
+    else {
+        if (GameState->PlayersLeft == 1) {
+            ULateGameLibrary::RestartSafeZoneIndicator();
         }
     }
 

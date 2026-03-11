@@ -75,7 +75,6 @@ enum EGameModeType
         STW, // Save the world
         Delmar,
         Valkyrie,
-        LateGame
 };
 
 struct FActorSpawnParameters
@@ -668,6 +667,27 @@ inline void UpdateBaseWeaponAmmo(FFortItemEntry* Entry)
                 }
         }
 }
+
+inline FVector GetSafeNormal(FVector v)
+{
+    float sizeSq = v.X * v.X + v.Y * v.Y + v.Z * v.Z;
+    if (sizeSq > KINDA_SMALL_NUMBER)
+    {
+        float inv = 1.f / UKismetMathLibrary::sqrt(sizeSq);
+        return FVector(v.X * inv, v.Y * inv, v.Z * inv);
+    }
+    return FVector(0.f, 0.f, 0.f);
+}
+
+inline FRotator VectorToRotatorManual(FVector DirectionVector)
+{
+    float Pitch = RadiansToDegrees(UKismetMathLibrary::asin(DirectionVector.Z));
+
+    float Yaw = RadiansToDegrees(UKismetMathLibrary::Atan2(DirectionVector.Y, DirectionVector.X));
+
+    return FRotator(Pitch, Yaw, 0.0f);
+}
+constexpr bool bLateGame = true;
 constexpr float WarmupDuration = 500.f;
 inline EGameModeType CurrentGamemode = EGameModeType::Athena;
 #endif //PCH_H
