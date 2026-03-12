@@ -77,19 +77,29 @@ TArray<AFortAthenaPatrolPath*> FortAthenaLivingWorldEvent::GetPatrolPathsFromTag
     return FoundPoints;
 }
 
-
 FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent)
 {
-    auto EventData =  InEvent->EventDatas[0].EventData.Get();
+    auto EventData = InEvent->EventDatas[0].EventData.Get();
+    
+    auto TagNum = EventData->ProviderFiltersTagQuery.TagDictionary.Num();
 
-    // thats when we detect a ahh alwayspawnevent which is ass and we need to somehow
+    if (TagNum == 0)
+        return FGameplayTag();
+
     if (EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains("Athena.Vehicle.SpawnLocation.AlwaysSpawn") || EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains(".Base"))
     {
-        UE_LOG(LogLivingWorldManager, Warning, "Found a scuffed valet spawn event using the second tag");
+        if (TagNum < 2)
+        {
+            UE_LOG(LogLivingWorldManager, Warning, "GetSpawnerTagFromEvent: Returning %s", EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().c_str());
+            return EventData->ProviderFiltersTagQuery.TagDictionary[0];
+        }
+
+        UE_LOG(LogLivingWorldManager, Warning, "GetSpawnerTagFromEvent: Returning %s", EventData->ProviderFiltersTagQuery.TagDictionary[1].TagName.ToString().c_str());
         return EventData->ProviderFiltersTagQuery.TagDictionary[1];
     }
-    return EventData->ProviderFiltersTagQuery.TagDictionary[0]; // new way returns Athena.AI.SpawnLocation.JobBoard.Vehicle // which point providers use :D
-    //return NpcEvent->EventDatas[0].EventData->ActorDescriptions[0].SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // old way it returned AISpawnerData.Type.JobBoard.Vehicle 
+
+    UE_LOG(LogLivingWorldManager, Warning, "GetSpawnerTagFromEvent: Returning %s", EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().c_str());
+    return EventData->ProviderFiltersTagQuery.TagDictionary[0];
 }
 
 std::map<std::string, UEAllocatedString> PatchMap;
