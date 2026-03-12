@@ -339,6 +339,7 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAnalytics none", nullptr); // we hate the api server
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogCreativePlots VeryVerbose", nullptr); // somehow portals are not stripped fully
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortControllerComponentHabanero VeryVerbose", nullptr);
+    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortQuest VeryVerbose", nullptr);
 
 #endif
 #ifdef Client
