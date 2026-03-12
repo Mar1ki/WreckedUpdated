@@ -67,11 +67,17 @@ AFortAthenaLivingWorldStaticPointProvider* FortAthenaLivingWorldStaticPointProvi
 
     for (auto PointProvider : InArray)
     {
-        if (PointProvider->bStartEnabled)
+        if (PointProvider && PointProvider->bStartEnabled)
         {
             RandArray.Add(PointProvider);
         }
     }
+
+    if (RandArray.IsEmpty())
+    {
+        return nullptr;
+    }
+
     return RandArray[FMath::RandHelper(RandArray.Num())];
 }
 
