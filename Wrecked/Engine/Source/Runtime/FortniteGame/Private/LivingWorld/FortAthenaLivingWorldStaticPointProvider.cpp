@@ -85,12 +85,8 @@ void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Obje
 {
     auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
     PointProvider->bStartEnabled = true;
-
-    std::cout << "EnablePointProvider:" << PointProvider->GetFullName().c_str() << std::endl;
-    for (auto tag : PointProvider->FiltersTags.GameplayTags)
-    {
-        std::cout << tag.TagName.ToString().c_str() << std::endl;
-    }
+    UE_LOG(LogLivingWorldStaticPointProvider, Log, "Enabling PointProvider");
+    
     EnablePointProviderOG(Object, Params);
 }
 
@@ -98,12 +94,8 @@ void FortAthenaLivingWorldStaticPointProvider::DisablePointProvider(UObject* Obj
 {
     auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
     PointProvider->bStartEnabled = false;
-
-    std::cout << "DisablePointProvider:" << PointProvider->GetFullName().c_str() << std::endl;
-    for (auto tag : PointProvider->FiltersTags.GameplayTags)
-    {
-        std::cout << tag.TagName.ToString().c_str() << std::endl;
-    }
+    UE_LOG(LogLivingWorldStaticPointProvider, Log, "Disabling PointProvider");
+    
     DisablePointProviderOG(Object, Params);
 }
 void FortAthenaLivingWorldStaticPointProvider::Init()
@@ -118,9 +110,20 @@ void FortAthenaLivingWorldStaticPointProvider::Init()
     Hook->Detour = EnablePointProvider;
     Hook->Original = (void**)&EnablePointProviderOG;
     UKismetHookingLibrary::Hook(Hook, Exec);
-    
+
     Hook->Path = "/Script/LagerRuntime.FortAthenaPatrolPathPointProvider.DisablePointProvider";
     Hook->Detour = DisablePointProvider;
+    Hook->Original = (void**)&EnablePointProviderOG;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+
+    
+    Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldStaticPointProvider.DisablePointProvider";
+    Hook->Detour = DisablePointProvider;
+    Hook->Original = (void**)&DisablePointProviderOG;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+    
+    Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldStaticPointProvider.EnablePointProvider";
+    Hook->Detour = EnablePointProvider;
     Hook->Original = (void**)&DisablePointProviderOG;
     UKismetHookingLibrary::Hook(Hook, Exec);
     
