@@ -344,7 +344,7 @@ DEFINE_LOG_CATEGORY(LogWeaponMods);
 DEFINE_LOG_CATEGORY(LogWeaponModStation);
 DEFINE_LOG_CATEGORY(LogInventoryManagmentLibrary);
 DEFINE_LOG_CATEGORY(LogFortInventoryOwnerInterface);
-
+DEFINE_LOG_CATEGORY(LogLivingWorldStaticPointProvider);
 
 inline bool IsInFrontend()
 {
