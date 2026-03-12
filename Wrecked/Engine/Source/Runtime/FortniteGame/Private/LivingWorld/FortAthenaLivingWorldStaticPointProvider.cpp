@@ -19,10 +19,8 @@ void FortAthenaLivingWorldStaticPointProvider::RegisterToLivingWorldManager(IFor
     NewPoint.ObjectPointer = PointProvider;
     NewPoint.InterfacePointer = PointProviderInterface;
 
-    for (auto& Enabler : GetObjectsOfClass<AFortAthenaLivingWorldPointProvidersEnabler>())
-    {
-        Enabler->LinkedPointProviders.Add(NewPoint);
-    }
+    auto Enabler = GetLivingWorldPointProviderEnabler();
+    Enabler->AvailableLinkedPointProviders.Add(NewPoint);
     
     LivingWorldManager->PointProviders.Add(NewPoint);
     LivingWorldManager->RegisteredPointProvidersCount++;
@@ -31,7 +29,7 @@ void FortAthenaLivingWorldStaticPointProvider::RegisterToLivingWorldManager(IFor
 
 
 
-// i should move these to lwm prob
+// not used right now move it later to the manager
 void FortAthenaLivingWorldStaticPointProvider::LivingWorldManagerDisablePointProvider(AActor* PointProvider)
 {
     auto CastedPointProvider = (AFortAthenaLivingWorldStaticPointProvider*)PointProvider;
@@ -72,7 +70,6 @@ AFortAthenaLivingWorldStaticPointProvider* FortAthenaLivingWorldStaticPointProvi
             RandArray.Add(PointProvider);
         }
     }
-
     if (RandArray.IsEmpty())
     {
         return nullptr;
@@ -83,7 +80,15 @@ AFortAthenaLivingWorldStaticPointProvider* FortAthenaLivingWorldStaticPointProvi
 
 void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Object, FFrame& Params)
 {
+    auto Enabler = GetLivingWorldPointProviderEnabler();
     auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
+
+    TScriptInterface<IFortAthenaLivingWorldPointProviderInterface> PointProviderInterfaceScript{};
+    PointProviderInterfaceScript.ObjectPointer = PointProvider;
+    PointProviderInterfaceScript.InterfacePointer = PointProvider->GetInterfaceAddress<IFortAthenaLivingWorldPointProviderInterface>();
+    
+    Enabler->AvailableLinkedPointProviders.Add(PointProviderInterfaceScript);
+
     PointProvider->bStartEnabled = true;
     UE_LOG(LogLivingWorldStaticPointProvider, Log, "Enabling PointProvider");
     
@@ -92,12 +97,20 @@ void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Obje
 
 void FortAthenaLivingWorldStaticPointProvider::DisablePointProvider(UObject* Object, FFrame& Params)
 {
+    auto Enabler = GetLivingWorldPointProviderEnabler();
     auto PointProvider = (AFortAthenaPatrolPathPointProvider*)Object;
+    
+    TScriptInterface<IFortAthenaLivingWorldPointProviderInterface> PointProviderInterfaceScript{};
+    PointProviderInterfaceScript.ObjectPointer = PointProvider;
+    PointProviderInterfaceScript.InterfacePointer = PointProvider->GetInterfaceAddress<IFortAthenaLivingWorldPointProviderInterface>();
+    
+    Enabler->LinkedPointProviders.Add(PointProviderInterfaceScript);
     PointProvider->bStartEnabled = false;
     UE_LOG(LogLivingWorldStaticPointProvider, Log, "Disabling PointProvider");
     
     DisablePointProviderOG(Object, Params);
 }
+
 void FortAthenaLivingWorldStaticPointProvider::Init()
 {
     UHook* Hook = new UHook();
