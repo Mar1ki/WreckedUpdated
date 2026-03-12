@@ -76,7 +76,40 @@ TArray<AFortAthenaPatrolPath*> FortAthenaLivingWorldEvent::GetPatrolPathsFromTag
     }
     return FoundPoints;
 }
+TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEventsFromTable(UDataTable* CategoryDataTable)
+{
+    TArray<FFortAthenaLivingWorldEvent*> AllEvents;
+    
+    if (!CategoryDataTable)
+    {
+        UE_LOG(LogLivingWorldManager, Warning, "GetAllWorldEventsFromTable: No DataTable provided");
+        return AllEvents;
+    }
 
+    auto& RowMap = CategoryDataTable->RowMap;
+    for (auto& Row : RowMap)
+    {
+        auto* RowData = Row.Value();
+        if (!RowData) continue;
+
+        auto* CategoryRow = (FFortAthenaLivingWorldCategory*)RowData;
+
+        if (auto* EventTable = CategoryRow->EventTable.Table.Get())
+        {
+            auto& EventRowMap = EventTable->RowMap;
+            for (auto& EventRow : EventRowMap)
+            {
+                auto* EventRowData = EventRow.Value();
+                if (!EventRowData) continue;
+
+                auto* Event = (FFortAthenaLivingWorldEvent*)EventRowData;
+                AllEvents.Add(Event);
+            }
+        }
+    }
+    UE_LOG(LogLivingWorldManager, Warning, "Total Events Found: %d", AllEvents.Num());
+    return AllEvents;
+}
 FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent)
 {
     auto EventData = InEvent->EventDatas[0].EventData.Get();

@@ -25,6 +25,8 @@ namespace FortAthenaLivingWorldEvent
     }
 
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager);
+    TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEventsFromTable(UDataTable* CategoryDataTable);
+
     TArray<AFortAthenaPatrolPath*> GetPatrolPathsFromTagQuery(const FGameplayTag& SearchTag);
     FGameplayTag GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent);
 
