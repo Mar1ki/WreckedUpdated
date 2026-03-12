@@ -372,6 +372,20 @@ template<typename T>
         }
         return Objects;
 }
+template<typename T>
+__forceinline T* GetFirstObjectOfClass()
+{
+        for (int i = 0; i < UObject::GObjects->Num(); i++)
+        {
+                T* Object = reinterpret_cast<T*>(UObject::GObjects->GetByIndex(i));
+                if (!Object) continue;
+                if (Object->IsA(T::StaticClass()))
+                {
+                        return Object;
+                }
+        }
+        return nullptr;
+}
 
 inline bool IsValidPointer(void* ptr) {
         return ptr != nullptr && ptr != (void*)0xFFFFFFFFULL && ptr != (void*)0xCCCCCCCCULL && ptr != (void*)0xDDDDDDDDULL && (uintptr_t)ptr > 0x10000;
@@ -421,6 +435,17 @@ inline UFortAthenaLivingWorldManager* GetLivingWorldManager()
         }
         return LivingWorldManager;
 }
+
+inline AFortAthenaLivingWorldPointProvidersEnabler* GetLivingWorldPointProviderEnabler()
+{
+        static AFortAthenaLivingWorldPointProvidersEnabler* LivingWorldPointProviderEnabler = nullptr;
+        if (!LivingWorldPointProviderEnabler)
+        {
+              LivingWorldPointProviderEnabler = GetFirstObjectOfClass<AFortAthenaLivingWorldPointProvidersEnabler>();
+        }
+        return LivingWorldPointProviderEnabler;
+}
+
 
 #define getCounter() __counter__
 #define __runOnce(_V) static uint32_t _ROnce_##_V = 0; if (++_ROnce_##_V == 1)
