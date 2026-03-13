@@ -287,9 +287,9 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
     return ClientOnPawnDiedOG(PlayerController, DeathReport);
 }
 
-void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena* Controller, FCreateBuildingActorData& CreateBuildingData)
+void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena* PlayerController, FCreateBuildingActorData& CreateBuildingData)
 {
-    AFortGameStateAthena* GameState = Cast<AFortGameStateAthena>(UWorld::GetWorld()->GameState);
+    auto GameState = GetGameState();
     TArray<ABuildingActor*> BuildingActors;
 
     for (auto& BuildableClass : GameState->AllPlayerBuildableClassesIndexLookup)
@@ -301,19 +301,11 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
     if (auto BuildingClass = CreateBuildingData.BuildingClassData.BuildingClass)
     {
         EFortBuildPreviewMarkerOptionalAdjustment Adjustment;
-
-        EFortStructuralGridQueryResults QueryResult = GameState->StructuralSupportSystem->CanAddBuildingActorClassToGrid(
-            UWorld::GetWorld(),
-            BuildingClass,
-            CreateBuildingData.BuildLoc,
-            CreateBuildingData.BuildRot,
-            CreateBuildingData.bMirrored,
-            &BuildingActors,
-            &Adjustment,
-            false);
+        EFortStructuralGridQueryResults QueryResult = GameState->StructuralSupportSystem->CanAddBuildingActorClassToGrid(UWorld::GetWorld(), BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, CreateBuildingData.bMirrored, &BuildingActors, &Adjustment, false);
 
         if (QueryResult == EFortStructuralGridQueryResults::CanAdd)
         {
+            // what in the fuck is that 
             for (int32 i = 0; i < BuildingActors.Num(); i++)
             {
                 ABuildingActor* ExistingBuilding = BuildingActors[i];
@@ -322,28 +314,27 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
 
                 ExistingBuilding->K2_DestroyActor();
             }
-
-            static void* (*CanAffordToPlaceBuildableClass)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClass)(
-                ImageBase + 0xA1CABF8);
-            if (!CanAffordToPlaceBuildableClass(Controller, &CreateBuildingData.BuildingClassData))
+ 
+            // move these 2 address calls to the player controller class in the sdk later ok
+            static void* (*CanAffordToPlaceBuildableClass)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClass)(ImageBase + 0xA1CABF8);
+            if (!CanAffordToPlaceBuildableClass(PlayerController, &CreateBuildingData.BuildingClassData))
                 return;
 
-            static void* (*PayBuildableClassPlacementCost)(AFortPlayerController*, FBuildingClassData*) = decltype(PayBuildableClassPlacementCost)(
-                ImageBase + 0xA202570);
-            PayBuildableClassPlacementCost(Controller, &CreateBuildingData.BuildingClassData);
-
-            ABuildingSMActor* BuildingSMActor = UWorld::GetWorld()->SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot);
-            if (BuildingSMActor)
+            static void* (*PayBuildableClassPlacementCost)(AFortPlayerController*, FBuildingClassData*) = decltype(PayBuildableClassPlacementCost)(ImageBase + 0xA202570);
+           // PayBuildableClassPlacementCost(Controller, &CreateBuildingData.BuildingClassData);
+            
+            if (auto BuildingSMActor = GetWorld()->SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot))
             {
                 BuildingSMActor->CurrentBuildingLevel = CreateBuildingData.BuildingClassData.UpgradeLevel = 0;
 
-                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, Controller, true, nullptr, true);
+                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true, nullptr, true);
                 BuildingSMActor->bPlayerPlaced = true;
 
-                AFortPlayerStateAthena* PlayerState = Cast<AFortPlayerStateAthena>(Controller->PlayerState);
-                if (PlayerState)
+                
+                if (auto PlayerState = (AFortPlayerStateAthena*)PlayerController->PlayerState)
                 {
                     BuildingSMActor->Team = EFortTeam(PlayerState->TeamIndex);
+                    BuildingSMActor->TeamIndex = PlayerState->TeamIndex;
                     BuildingSMActor->OnRep_Team();
                     BuildingSMActor->SetTeam(PlayerState->TeamIndex);
                 }
@@ -389,23 +380,32 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
         return;
 
     BuildingActorToEdit->EditingPlayer = nullptr;
+    BuildingActorToEdit->ReplacementDestructionReason = EBuildingReplacementType::BRT_Edited;
 
     static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(
         ImageBase + 0x93CBCD0);
 
     int32 CurrentBuildingLevel = BuildingActorToEdit->CurrentBuildingLevel;
     ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingActorToEdit, 1, BuildingClass, CurrentBuildingLevel, Rot, Mirrored, PlayerController);
-    if (NewBuild) NewBuild->bPlayerPlaced = true;
+    if (NewBuild)
+    {
+        NewBuild->bPlayerPlaced = true;
+        NewBuild->BuildingReplacementType = EBuildingReplacementType::BRT_Edited;
+        NewBuild->SetMirrored(BuildingActorToEdit->bMirrored);
+        NewBuild->SetTeam(BuildingActorToEdit->TeamIndex);
+        NewBuild->OnRep_Team();
+    }
 }
 
 void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit)
 {
-    if (!BuildingActorToEdit ||
-        BuildingActorToEdit->EditingPlayer != PlayerController->PlayerState ||
-        BuildingActorToEdit->bDestroyed || !PlayerController->MyFortPawn)
-        return;
+    if (!BuildingActorToEdit || BuildingActorToEdit->EditingPlayer != PlayerController->PlayerState || BuildingActorToEdit->bDestroyed || !PlayerController->MyFortPawn) return;
+    auto PlayerState = (AFortPlayerState*)PlayerController->PlayerState;
+    auto RepairCost =  PlayerState->AttributeSets.ConstructionSet->RepairCost.CurrentValue;
 
+    
     BuildingActorToEdit->EditingPlayer = nullptr;
+
 
     AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
     if (EditingTool)

@@ -6,7 +6,7 @@ namespace FortPlayerController
 {
     DefineOriginal(void, ServerAcknowledgePossession, AFortPlayerControllerAthena* Controller, AFortPawn* Pawn);
     DefineOriginal(void, ServerExecuteInventoryItem, AFortPlayerController* Controller, FGuid ItemGuid);
-    void ServerCreateBuildingActor(AFortPlayerControllerAthena *Controller, FCreateBuildingActorData &CreateBuildingData);
+    void ServerCreateBuildingActor(AFortPlayerControllerAthena *PlayerController, FCreateBuildingActorData &CreateBuildingData);
     void ServerBeginEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit);
     void ServerEditBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* Building, TSubclassOf<ABuildingSMActor> BuildingClass, uint8 Rot, bool Mirrored);
     void ServerEndEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit);
