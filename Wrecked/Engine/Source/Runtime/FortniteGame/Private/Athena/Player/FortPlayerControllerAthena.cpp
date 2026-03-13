@@ -2,6 +2,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Player/FortPlayerControllerAthena.h"
 
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
+#include "Engine/Plugins/LateGameLibrary/Public/LateGameLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Player/FortPlayerController.h"
@@ -62,7 +63,13 @@ void FortPlayerControllerAthena::ServerAttemptAircraftJump(UFortControllerCompon
         Controller->MyFortPawn->ParachuteDeployTraceForGroundDistance.Curve.CurveTable = nullptr;
         Controller->MyFortPawn->ParachuteDeployTraceForGroundDistance.Curve.RowName = FName();
         Controller->MyFortPawn->BeginSkydiving(true);
-        
+
+        if (bLateGame)
+        {
+            Controller->MyFortPawn->SetShield(100);
+            ULateGameLibrary::GiveRandomLoadoutToPlayer(Controller);
+        }
+        // we should remove that prob
         ForEachMutator<AFortAthenaMutator_InventoryOverride>(
             GetWorld(), 
             AFortAthenaMutator_InventoryOverride::StaticClass(),
