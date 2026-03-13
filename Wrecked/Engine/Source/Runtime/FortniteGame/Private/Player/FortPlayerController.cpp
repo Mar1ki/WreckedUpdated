@@ -398,6 +398,7 @@ void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* 
 
     
     BuildingActorToEdit->EditingPlayer = nullptr;
+    BuildingActorToEdit->OnRep_EditingPlayer();
 
 
     AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
