@@ -17459,7 +17459,7 @@ public:
 	}
 	void PayBuildableClassPlacementCost(FBuildingClassData* Data);
 	void CanAffordToPlaceBuildableClass(FBuildingClassData* Data);
-	void PayBuildingRepairCost(ABuildingSMActor* BuildingActor)
+	void PayBuildingRepairCost(ABuildingSMActor* BuildingActor);
 public:
 	static class UClass* StaticClass()
 	{
