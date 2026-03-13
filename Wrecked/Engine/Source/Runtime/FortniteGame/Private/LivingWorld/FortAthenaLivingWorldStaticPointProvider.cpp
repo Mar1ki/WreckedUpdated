@@ -87,7 +87,9 @@ void FortAthenaLivingWorldStaticPointProvider::EnablePointProvider(UObject* Obje
     PointProviderInterfaceScript.ObjectPointer = PointProvider;
     PointProviderInterfaceScript.InterfacePointer = PointProvider->GetInterfaceAddress<IFortAthenaLivingWorldPointProviderInterface>();
     
-    Enabler->AvailableLinkedPointProviders.Add(PointProviderInterfaceScript);
+    auto ScriptInterface = CreateScriptInterface<IFortAthenaLivingWorldPointProviderInterface>(PointProvider);
+
+    Enabler->AvailableLinkedPointProviders.Add(ScriptInterface);
 
     PointProvider->bStartEnabled = true;
     UE_LOG(LogLivingWorldStaticPointProvider, Log, "Enabling PointProvider");

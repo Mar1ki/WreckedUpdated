@@ -704,6 +704,15 @@ inline FVector GetSafeNormal(FVector v)
     return FVector(0.f, 0.f, 0.f);
 }
 
+template<class InterfaceType>
+TScriptInterface<InterfaceType> CreateScriptInterface(UObject* Object)
+{
+    TScriptInterface<InterfaceType> ScriptInterface{};
+    ScriptInterface.ObjectPointer = Object;
+    ScriptInterface.InterfacePointer = Object->GetInterfaceAddress<InterfaceType>();
+    return ScriptInterface;
+}
+
 inline FRotator VectorToRotatorManual(FVector DirectionVector)
 {
     float Pitch = RadiansToDegrees(UKismetMathLibrary::asin(DirectionVector.Z));

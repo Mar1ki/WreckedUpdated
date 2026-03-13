@@ -40,7 +40,7 @@ public:
 	}
 	
 	template <typename _It>
-inline _It* GetInterfaceAddress()
+    inline _It* GetInterfaceAddress()
 	{
 		return ((_It * (*)(UObject*, UClass*)) (*(uint64_t*)(__readgsqword(0x60) + 0x10) + 0x15AB2B8))(this, _It::StaticClass());
 	}
