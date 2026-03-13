@@ -286,27 +286,6 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
 
     return ClientOnPawnDiedOG(PlayerController, DeathReport);
 }
-bool FortPlayerController::RemoveInventoryItem(IFortInventoryOwnerInterface* Interface, FGuid* ItemGuid, int Count)
-{
-    const AFortPawn* Pawn = ((const AFortPawn* (*)(IFortInventoryOwnerInterface*))(*(void***)Interface)[9])(Interface);
-    if (!Pawn) return false;
-    auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
-    auto Inventory = (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
-
-    if (auto ItemEntry = Inventory->GetItemEntryByGuid(*ItemGuid))
-    {
-        auto ItemClass = ItemEntry->ItemDefinition->Class;
-        if (ItemClass->IsA(UFortAmmoItemDefinition::StaticClass()) && PlayerController->bInfiniteAmmo)
-            return false;
-        if (ItemClass->IsA(UFortResourceItemDefinition::StaticClass()) && PlayerController->bBuildFree)
-            return false;
-
-        ItemEntry->Count -= Count;
-        Inventory->ReplaceEntry(*ItemEntry);
-        return true;
-    }
-    return false;
-}
 
 void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena* Controller, FCreateBuildingActorData& CreateBuildingData)
 {
