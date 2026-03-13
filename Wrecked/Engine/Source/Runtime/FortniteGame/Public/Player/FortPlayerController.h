@@ -18,6 +18,22 @@ namespace FortPlayerController
     void MovingEmoteStopped(UObject* Context, FFrame& Stack);
     void ServerCheat(AFortPlayerControllerAthena* Controller, FString Msg);
     DefineOriginal(void, ClientOnPawnDied, AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport);
-    bool RemoveInventoryItem(IFortInventoryOwnerInterface* Interface, FGuid* ItemGuid, int Count);
     void Init();
+}
+
+inline void AFortPlayerController::PayBuildableClassPlacementCost(FBuildingClassData* Data)
+{
+    static void* (*PayBuildableClassPlacementCostInternal)(AFortPlayerController*, FBuildingClassData*) = decltype(PayBuildableClassPlacementCostInternal)(ImageBase + 0xA202570);
+    PayBuildableClassPlacementCostInternal(this, Data);
+}
+
+inline void AFortPlayerController::CanAffordToPlaceBuildableClass(FBuildingClassData* Data)
+{
+    static void* (*CanAffordToPlaceBuildableClassInternal)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClassInternal)(ImageBase + 0xA1CABF8);
+    CanAffordToPlaceBuildableClassInternal(this, Data);
+}
+inline void AFortPlayerController::PayBuildingRepairCost(ABuildingSMActor* BuildingActor)
+{
+    static void* (*PayBuildingRepairCostInternal)(AFortPlayerController*, ABuildingSMActor*) = decltype(PayBuildingRepairCostInternal)(ImageBase + 0xA202738);
+    PayBuildingRepairCostInternal(this, BuildingActor);
 }

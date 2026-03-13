@@ -17457,6 +17457,9 @@ public:
 	AFortInventory* GetInventory() {
 		return (AFortInventory*)WorldInventory.ObjectPointer;
 	}
+	void PayBuildableClassPlacementCost(FBuildingClassData* Data);
+	void CanAffordToPlaceBuildableClass(FBuildingClassData* Data);
+	void PayBuildingRepairCost(ABuildingSMActor* BuildingActor)
 public:
 	static class UClass* StaticClass()
 	{

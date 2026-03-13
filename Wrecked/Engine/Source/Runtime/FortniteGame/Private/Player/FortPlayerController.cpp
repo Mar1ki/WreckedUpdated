@@ -317,11 +317,10 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
  
             // move these 2 address calls to the player controller class in the sdk later ok
             static void* (*CanAffordToPlaceBuildableClass)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClass)(ImageBase + 0xA1CABF8);
-            if (!CanAffordToPlaceBuildableClass(PlayerController, &CreateBuildingData.BuildingClassData))
+            if (!PlayerController->CanAffordToPlaceBuildableClass(&CreateBuildingData.BuildingClassData))
                 return;
 
-            static void* (*PayBuildableClassPlacementCost)(AFortPlayerController*, FBuildingClassData*) = decltype(PayBuildableClassPlacementCost)(ImageBase + 0xA202570);
-           // PayBuildableClassPlacementCost(Controller, &CreateBuildingData.BuildingClassData);
+            PlayerController->PayBuildableClassPlacementCost(&CreateBuildingData.BuildingClassData);
             
             if (auto BuildingSMActor = GetWorld()->SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot))
             {
@@ -457,6 +456,7 @@ void ServerSetFollowedPlayer_Implementation(AFortLiveSpectatorController* Contro
         Controller->K2_SetActorLocation(*SpectatorLocation, false, nullptr, true);
     }
 }
+
 
 void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, FString Msg) {
     auto PlayerState = Cast<AFortPlayerStateAthena>(Controller->PlayerState);
