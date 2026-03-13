@@ -332,8 +332,9 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
                 {
                     BuildingSMActor->Team = EFortTeam(PlayerState->TeamIndex);
                     BuildingSMActor->TeamIndex = PlayerState->TeamIndex;
-                    BuildingSMActor->OnRep_Team();
                     BuildingSMActor->SetTeam(PlayerState->TeamIndex);
+                    BuildingSMActor->OnRep_Team();
+
                 }
             }
         }
@@ -347,14 +348,14 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
         return;
 
     BuildingActorToEdit->EditingPlayer = PlayerStateZone;
-
-    auto AssetManager = GetAssetManager();
-    static UFortEditToolItemDefinition* EditToolItemDefinition = AssetManager->GameDataCommon->EditToolItem.Get();
+    
+    static UFortEditToolItemDefinition* EditToolItemDefinition = GetAssetManager()->GameDataCommon->EditToolItem.Get();
     if (!EditToolItemDefinition)
     {
-        EditToolItemDefinition = AssetManager->GameDataCommon->EditToolItem.Get();
+        EditToolItemDefinition = GetAssetManager()->GameDataCommon->EditToolItem.Get();
     }
 
+    // clean up whatever this is 
     auto ItemEntry = ((AFortInventory*)PlayerController->WorldInventory.ObjectPointer)->Inventory.ReplicatedEntries.Search([](FFortItemEntry& entry)
         { return entry.ItemDefinition == EditToolItemDefinition; });
     if (ItemEntry &&
@@ -371,7 +372,7 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
     }
 }
 
-void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit, TSubclassOf<ABuildingSMActor> BuildingClass, uint8 Rot, bool Mirrored)
+void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit, TSubclassOf<ABuildingSMActor> NewBuildingClass, uint8 RotationIterations, bool bMirrored)
 {
     if (!PlayerController || !BuildingActorToEdit || !BuildingActorToEdit->IsA(ABuildingSMActor::StaticClass()) || !PlayerController->MyFortPawn)
         return;
@@ -379,16 +380,11 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
     BuildingActorToEdit->EditingPlayer = nullptr;
     BuildingActorToEdit->ReplacementDestructionReason = EBuildingReplacementType::BRT_Edited;
 
-    static auto ReplaceBuildingActor = (ABuildingSMActor * (*)(ABuildingSMActor*, unsigned int, UObject*, unsigned int, int, bool, AFortPlayerController*))(
-        ImageBase + 0x93CBCD0);
-
-    int32 CurrentBuildingLevel = BuildingActorToEdit->CurrentBuildingLevel;
-    ABuildingSMActor* NewBuild = ReplaceBuildingActor(BuildingActorToEdit, 1, BuildingClass, CurrentBuildingLevel, Rot, Mirrored, PlayerController);
-    if (NewBuild)
+   auto NewBuild =  BuildingActorToEdit->ReplaceBuildingActor(EBuildingReplacementType::BRT_Edited, NewBuildingClass, BuildingActorToEdit->CurrentBuildingLevel, RotationIterations, bMirrored, PlayerController);
+   if (NewBuild)
     {
         NewBuild->bPlayerPlaced = true;
         NewBuild->BuildingReplacementType = EBuildingReplacementType::BRT_Edited;
-        NewBuild->SetMirrored(BuildingActorToEdit->bMirrored);
         NewBuild->SetTeam(BuildingActorToEdit->TeamIndex);
         NewBuild->OnRep_Team();
     }
@@ -416,14 +412,11 @@ void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Con
 {
     if (!Controller || !Controller->MyFortPawn) return;
     auto Inventory = (AFortInventory*)Controller->WorldInventory.GetObjectRef();
-    
-    FFortItemEntry* Entry = Inventory->Inventory.ReplicatedEntries.Search([&](FFortItemEntry& entry) {
-        return entry.ItemGuid == ItemGuid;
-    });
+    auto ItemEntry =  Inventory->GetItemEntryByGuid(ItemGuid);
 
-    if (Entry)
+    if (ItemEntry)
     {
-        if (Entry->ItemDefinition->IsA(UFortDecoItemDefinition::StaticClass()))
+      /*  if (Entry->ItemDefinition->IsA(UFortDecoItemDefinition::StaticClass()))
         {
             auto DecoItemDefinition = Cast<UFortDecoItemDefinition>(Entry->ItemDefinition);
             if (!DecoItemDefinition) return;
@@ -434,15 +427,15 @@ void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Con
             if (auto ContextTrap = Cast<AFortDecoTool_ContextTrap>(Controller->MyFortPawn->CurrentWeapon))
                 ContextTrap->SetContextTrapItemDefinition(Cast<UFortContextTrapItemDefinition>(DecoItemDefinition));
             return;
-        }
-        if (Entry->ItemDefinition->IsA(UFortGadgetItemDefinition::StaticClass()))
+        } */
+        if (ItemEntry->ItemDefinition->IsA(UFortGadgetItemDefinition::StaticClass()))
         {
-            auto GadgetItemDefinition = Cast<UFortGadgetItemDefinition>(Entry->ItemDefinition);
-            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)GadgetItemDefinition->WeaponItemDefinition, Entry->ItemGuid, Entry->TrackerGuid, false); 
+            auto GadgetItemDefinition = Cast<UFortGadgetItemDefinition>(ItemEntry->ItemDefinition);
+            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)GadgetItemDefinition->WeaponItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false); 
         }
         else
         {
-            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)Entry->ItemDefinition, Entry->ItemGuid, Entry->TrackerGuid, false); 
+            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)ItemEntry->ItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false); 
         }
     }
 }

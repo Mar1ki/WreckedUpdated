@@ -2989,6 +2989,7 @@ public:
 	float ModifyIncomingDamageForBuildingActorAttachedToMe(const class ABuildingSMActor* AttachedBuildingSMActor, float Damage, const struct FGameplayTagContainer& InTags, const struct FGameplayEffectContextHandle& EffectContext, class AController* EventInstigator, class AActor* DamageCauser) const;
 	bool ShouldUsePhysicalMaterialForFootstep() const;
 	bool WillRegisterWithStructuralGrid() const;
+	ABuildingSMActor* ReplaceBuildingActor(EBuildingReplacementType ReplacementType, TSubclassOf<ABuildingSMActor> ReplacementClass, unsigned int ReplacementUpgradeLevel, int RotationIterations, bool InbMirrored, AFortPlayerController* EditingController);
 
 public:
 	static class UClass* StaticClass()

@@ -8,7 +8,7 @@ namespace FortPlayerController
     DefineOriginal(void, ServerExecuteInventoryItem, AFortPlayerController* Controller, FGuid ItemGuid);
     void ServerCreateBuildingActor(AFortPlayerControllerAthena *PlayerController, FCreateBuildingActorData &CreateBuildingData);
     void ServerBeginEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit);
-    void ServerEditBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* Building, TSubclassOf<ABuildingSMActor> BuildingClass, uint8 Rot, bool Mirrored);
+    void ServerEditBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* Building, TSubclassOf<ABuildingSMActor> ReplacementClass, uint8 Rot, bool Mirrored);
     void ServerEndEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit);
     void ServerAttemptInventoryDrop(AFortPlayerController* Controller, const struct FGuid& ItemGuid, int32 Count, bool bTrash);
     DefineOriginal(void, ServerLoadingScreenDropped, AFortPlayerControllerAthena* PC);
@@ -36,4 +36,10 @@ inline void AFortPlayerController::PayBuildingRepairCost(ABuildingSMActor* Build
 {
     static void* (*PayBuildingRepairCostInternal)(AFortPlayerController*, ABuildingSMActor*) = decltype(PayBuildingRepairCostInternal)(ImageBase + 0xA202738);
     PayBuildingRepairCostInternal(this, BuildingActor);
+}
+// move it where u want pretty much 
+inline ABuildingSMActor* ABuildingSMActor::ReplaceBuildingActor(EBuildingReplacementType ReplacementType, TSubclassOf<ABuildingSMActor> ReplacementClass, unsigned int ReplacementUpgradeLevel, int RotationIterations, bool InbMirrored, AFortPlayerController *EditingController)
+{ 
+    static ABuildingSMActor* (*ReplaceBuildingActorInternal)(ABuildingSMActor* ,EBuildingReplacementType ReplacementType, TSubclassOf<ABuildingSMActor> ReplacementClass, unsigned int ReplacementUpgradeLevel, int RotationIterations, bool InbMirrored,AFortPlayerController *EditingController) = decltype(ReplaceBuildingActorInternal)(ImageBase + 0x93CBCD0);
+    return ReplaceBuildingActorInternal(this, ReplacementType, ReplacementClass, ReplacementUpgradeLevel, RotationIterations, InbMirrored, EditingController);
 }
