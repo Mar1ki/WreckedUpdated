@@ -27,10 +27,10 @@ inline void AFortPlayerController::PayBuildableClassPlacementCost(FBuildingClass
     PayBuildableClassPlacementCostInternal(this, Data);
 }
 
-inline void AFortPlayerController::CanAffordToPlaceBuildableClass(FBuildingClassData* Data)
+inline bool AFortPlayerController::CanAffordToPlaceBuildableClass(FBuildingClassData* Data)
 {
-    static void* (*CanAffordToPlaceBuildableClassInternal)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClassInternal)(ImageBase + 0xA1CABF8);
-    CanAffordToPlaceBuildableClassInternal(this, Data);
+    static bool* (*CanAffordToPlaceBuildableClassInternal)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClassInternal)(ImageBase + 0xA1CABF8);
+    return CanAffordToPlaceBuildableClassInternal(this, Data);
 }
 inline void AFortPlayerController::PayBuildingRepairCost(ABuildingSMActor* BuildingActor)
 {

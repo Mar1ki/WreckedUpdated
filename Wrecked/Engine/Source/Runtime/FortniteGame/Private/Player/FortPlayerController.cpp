@@ -315,11 +315,9 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
                 ExistingBuilding->K2_DestroyActor();
             }
  
-            // move these 2 address calls to the player controller class in the sdk later ok
-            static void* (*CanAffordToPlaceBuildableClass)(AFortPlayerController*, FBuildingClassData*) = decltype(CanAffordToPlaceBuildableClass)(ImageBase + 0xA1CABF8);
             if (!PlayerController->CanAffordToPlaceBuildableClass(&CreateBuildingData.BuildingClassData))
                 return;
-
+            
             PlayerController->PayBuildableClassPlacementCost(&CreateBuildingData.BuildingClassData);
             
             if (auto BuildingSMActor = GetWorld()->SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot))
