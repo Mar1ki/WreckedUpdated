@@ -69,30 +69,6 @@ void FortPlayerControllerAthena::ServerAttemptAircraftJump(UFortControllerCompon
             Controller->MyFortPawn->SetShield(100);
             ULateGameLibrary::GiveRandomLoadoutToPlayer(Controller);
         }
-        // we should remove that prob
-        ForEachMutator<AFortAthenaMutator_InventoryOverride>(
-            GetWorld(), 
-            AFortAthenaMutator_InventoryOverride::StaticClass(),
-            [&](AFortAthenaMutator_InventoryOverride* Mutator)
-            {
-                const auto& Loadout = Mutator->InventoryLoadouts[std::rand() % Mutator->InventoryLoadouts.Num()];
-                for (auto& ItemAndCount : Loadout.LoadoutList)
-                {
-                    int32 Ammo = 0;
-                    if (auto* WeaponDef = Cast<UFortWeaponItemDefinition>(ItemAndCount.Item))
-                        if (WeaponDef->GetStats())
-                            Ammo = WeaponDef->GetStats()->ClipSize;
-                    Inventory->AddItem((UFortItemDefinition*)ItemAndCount.Item, ItemAndCount.Count.Evaluate(), Ammo);
-                }
-                
-                auto AddResource = [&](EFortResourceType Type) {
-                    Inventory->AddItem(UFortKismetLibrary::K2_GetResourceItemDefinition(Type), 500, 0);
-                };
-                AddResource(EFortResourceType::Wood);
-                AddResource(EFortResourceType::Stone);
-                AddResource(EFortResourceType::Metal);
-            }
-        );
     }
 }
 
