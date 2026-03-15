@@ -306,14 +306,14 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
         if (QueryResult == EFortStructuralGridQueryResults::CanAdd)
         {
             // what in the fuck is that 
-            for (int32 i = 0; i < BuildingActors.Num(); i++)
+            /*for (int32 i = 0; i < BuildingActors.Num(); i++)
             {
                 ABuildingActor* ExistingBuilding = BuildingActors[i];
                 if (!ExistingBuilding)
                     continue;
 
                 ExistingBuilding->K2_DestroyActor();
-            }
+            }*/
  
             if (!PlayerController->CanAffordToPlaceBuildableClass(&CreateBuildingData.BuildingClassData))
                 return;
@@ -355,12 +355,9 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
         EditToolItemDefinition = GetAssetManager()->GameDataCommon->EditToolItem.Get();
     }
 
-    // clean up whatever this is 
-    auto ItemEntry = ((AFortInventory*)PlayerController->WorldInventory.ObjectPointer)->Inventory.ReplicatedEntries.Search([](FFortItemEntry& entry)
-        { return entry.ItemDefinition == EditToolItemDefinition; });
-    if (ItemEntry &&
-        EditToolItemDefinition &&
-        PlayerController->MyFortPawn->EquipWeaponDefinition(EditToolItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false))
+    // clean up whatever this is
+    auto ItemEntry = PlayerController->GetInventory()->GetItemEntryByDef(EditToolItemDefinition);
+    if (ItemEntry && EditToolItemDefinition && PlayerController->MyFortPawn->EquipWeaponDefinition(EditToolItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false))
     {
         AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
 
@@ -404,7 +401,7 @@ void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* 
     AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
     if (EditingTool)
     {
-        EditingTool->EditActor = BuildingActorToEdit;
+        EditingTool->EditActor = nullptr;
         EditingTool->OnRep_EditActor();
     }
 }
