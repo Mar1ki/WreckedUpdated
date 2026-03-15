@@ -51,7 +51,7 @@ void something()
 
 void FortControllerComponent_RechargeWeapons::Dummy(__int64 *Component, float DeltaTime)
 {
-
+    something();
     DummyOG(Component, DeltaTime);
 }
 void FortControllerComponent_RechargeWeapons::Init() {
