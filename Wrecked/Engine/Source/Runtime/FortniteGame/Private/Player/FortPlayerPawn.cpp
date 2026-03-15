@@ -271,6 +271,44 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
         }
     }
 }
+
+void ServerHoistDBNOPlayer(UObject* Object, FFrame* Frame)
+{
+    AFortPlayerPawn* InDBNOHoistee;
+    Frame->StepCompiledIn(&InDBNOHoistee);
+    Frame->IncrementCode();
+
+    auto Pawn = (AFortPlayerPawn*)Object;
+    auto previous = Pawn->DBNOHoisterData;
+
+    Pawn->DBNOHoistee = InDBNOHoistee;
+    Pawn->DBNOHoisterData.DBNOCarryEvent = EFortDBNOCarryEvent::PickedUp;
+    Pawn->DBNOHoisterData.DBNOHoister = Pawn;
+
+    Pawn->OnRep_DBNOHoisterData(previous);
+    Pawn->OnRep_DBNOHoistee();
+
+    InDBNOHoistee->bIsBeingDBNOCarried = true;
+}
+
+void ServerThrowCarriedPlayer(UObject* Object, FFrame* Frame)
+{
+
+    auto Pawn = (AFortPlayerPawn*)Object;
+    auto previous = Pawn->DBNOHoisterData;
+
+    auto InDBNOHoistee = Pawn->GetDBNOHoistee();
+    Pawn->DBNOHoistee = InDBNOHoistee;
+    Pawn->DBNOHoisterData.DBNOHoister = Pawn;
+    Pawn->DBNOHoisterData.DBNOCarryEvent = EFortDBNOCarryEvent::Thrown;
+
+    Pawn->LocalThrowCarriedPlayer();
+
+    InDBNOHoistee->bIsBeingDBNOCarried = false;
+
+    Pawn->OnRep_DBNOHoisterData(previous);
+    Pawn->OnRep_DBNOHoistee();
+}
 void FortPlayerPawn::Init() {
 
     UHook* Hook = new UHook();
@@ -292,7 +330,16 @@ void FortPlayerPawn::Init() {
     
     Hook->Address = ImageBase + 0xA149FB8;
     Hook->Detour = TryAutoPickup;
-    UKismetHookingLibrary::Hook(Hook, Address); 
+    UKismetHookingLibrary::Hook(Hook, Address);
+
+
+    Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerHoistDBNOPlayer";
+    Hook->Detour = ServerHoistDBNOPlayer;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+
+    Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerThrowCarriedPlayer";
+    Hook->Detour = ServerThrowCarriedPlayer;
+    UKismetHookingLibrary::Hook(Hook, Exec);
     
     delete Hook;
 }
