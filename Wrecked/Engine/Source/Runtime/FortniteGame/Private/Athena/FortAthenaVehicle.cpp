@@ -4,24 +4,6 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 
-void VHook(void* Base, uintptr_t Index, void* Detour, void** Original = nullptr) {
-    auto VTable = (*(void***)Base);
-    if (!VTable)
-        return;
-
-    if (!VTable[Index])
-        return;
-
-    if (Original)
-        *Original = VTable[Index];
-
-    DWORD dwOld;
-    VirtualProtect(&VTable[Index], 8, PAGE_EXECUTE_READWRITE, &dwOld);
-    VTable[Index] = Detour;
-    DWORD dwTemp;
-    VirtualProtect(&VTable[Index], 8, dwOld, &dwTemp);
-}
-
 void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
     auto VehicleConfigClass = Vehicle->VehicleConfigsClass_BR.Get();
     TArray<FVehicleDamageablePart> Old;
@@ -36,7 +18,7 @@ void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
             New.ShapeName = Config.ShapeName;
             New.ConfigIndex = i;
             New.BoneName = Config.BoneName;
-            New.Health = 100;
+            New.Health = 100; //scuffed it could be better 
             New.bConsideredCriticalHit = Config.bConsideredCriticalHit;
             Vehicle->DamageableParts.Add(New);
         }
@@ -81,7 +63,7 @@ AFortAthenaVehicle* SpawnBossVehicle1(FVector Location, FRotator Rotation) {
 void FortAthenaVehicle::PostInitializeComponents(AFortAthenaVehicle* Vehicle) {
     PostInitializeComponentsOG(Vehicle);
 
-    //UE_LOG(LogVehicles, Log, "Initializing Vehicle Damageable Parts!");
+    //UE_LOG(LogVehicles, Log, "Initializing Vehicle Damageable Parts");
     ApplyDamagableParts(Vehicle);
 }
 void FortAthenaVehicle::SpawnVehicles()
@@ -242,7 +224,8 @@ void FortAthenaVehicle::TryGiveMetalOnHarvest(IFortVehicleInterface *Interface, 
 
         if (FoundEntry->Count == 500)
         {
-            FortKismetLibrary::SpawnPickup(DamageCauser->K2_GetActorLocation(), MetalItemDefinition, EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource::TossedByPlayer, MetalOnHit, 0, Pawn);
+            auto Pickup = FortKismetLibrary::SpawnPickup(DamageCauser->K2_GetActorLocation(), MetalItemDefinition, EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource::TossedByPlayer, MetalOnHit, 0, Pawn);
+            Pickup->SetCombinePickupsWhenTossCompletes(true);
             
         } else
         {
