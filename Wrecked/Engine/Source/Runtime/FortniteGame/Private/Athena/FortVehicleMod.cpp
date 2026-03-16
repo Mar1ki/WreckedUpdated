@@ -4,36 +4,6 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 
-
-
-// not used rn will delete after lwm spawning
-UClass* FortVehicleMod::GetRandomVehicleMod()
-{
-    static const char* ModPaths[] = {
-        "/VehicleMods/Mods/SpikedBumper/VMConfig_FrontBumper_Spiked.VMConfig_FrontBumper_Spiked_C", // spiked cow catcher bro
-        "/VehicleMods/Mods/MachineGunMod/VMConfig_MachineGun_Base.VMConfig_MachineGun_Base_C", // machine gun bro
-        "/VehicleMods/Mods/Mortar/VMConfig_Mortar_Base.VMConfig_Mortar_Base_C", // grenade turret
-        "/CowCatcherMod/Mods/CowCatcher/VehicleModConfig_CowCatcherSmall.VehicleModConfig_CowCatcherSmall_C", // cow catcher
-        "/VehicleMods/Mods/SocketPropDestructor/Tire/VMConfig_SocketPropDestructor_Tire.uasset"
-        // um these 3 mods like window is for the boss car so it "works" on every other car and these sockets idk that needs to be tested
-       // "/VehicleMods/Mods/Window/ArmoredWindow/VMConfig_Window_Armored.VMConfig_Window_Armored_C", 
-       // "/VehicleMods/Mods/SocketPropDestructor/Tire/VMConfig_SocketPropDestructor_Tire.VMConfig_SocketPropDestructor_Tire_C",
-       // "/VehicleMods/Mods/SocketPropDestructor/Turret/VMConfig_SocketPropDestructor_Turret.VMConfig_SocketPropDestructor_Turret_C",
-    };
-    // idk that math works and like idc if its unproper
-    static bool Seeded = false;
-    if (!Seeded)
-    {
-        std::srand(static_cast<unsigned int>(std::time(nullptr)));
-        Seeded = true;
-    }
-
-    int PathCount = sizeof(ModPaths) / sizeof(ModPaths[0]);
-    int Index = std::rand() % PathCount;
-    return StaticLoadObject<UClass>(ModPaths[Index]);
-}
-
-
 void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGameplayTag* ModTag, AFortPlayerController* EventInstigator)
 {
     auto ModConfig = FortVehicleMod::GetVehicleModConfigFromTagInternal(VehicleInterface, ModTag);
@@ -62,13 +32,13 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
                 DagwoodConfig->GrassBehavior = TireInfo->GrassBehavior;
                 DagwoodConfig->MudBehavior = TireInfo->MudBehavior;
                 DagwoodConfig->RoadBehavior = TireInfo->RoadBehavior;
+                DagwoodVehicle->OnRep_VehicleAttributes(); // maybe
 
                 auto OldModifiedProperties = DagwoodVehicle->DagwoodRuntimeModifiedProperties;
                 DagwoodVehicle->OnRep_DagwoodRuntimeModifiers(OldModifiedProperties);
                 DagwoodVehicle->ApplyRuntimeModifiers();
             }
         }  
-        
     } else
     {
         UE_LOG(LogVehicles, Warning, "This vehicle has no interface or modconfig that should not happen");
