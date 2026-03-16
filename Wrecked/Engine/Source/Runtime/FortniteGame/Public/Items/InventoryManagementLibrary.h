@@ -6,5 +6,6 @@
 namespace InventoryManagementLibrary {
 
 	bool RemoveItem(UObject* Object, FFrame& Params, bool* Return);
+	void RemoveItems(UObject* Object, FFrame& Params);
 	void Init();
 }
