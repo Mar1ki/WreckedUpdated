@@ -56,11 +56,32 @@ bool InventoryManagementLibrary::RemoveItem(UObject* Object, FFrame& Params, boo
         *Return = true;
         return true;
     }
-    UE_LOG(LogInventoryManagmentLibrary, Verbose, "InventoryManagmentLibrary::RemoveItem Called");
+    UE_LOG(LogInventoryManagmentLibrary, Verbose, "InventoryManagementLibrary::RemoveItem Called");
     // umm not proper but idc
     *Return = false;
     return false;
 }
+
+void InventoryManagementLibrary::RemoveItems(UObject* Object, FFrame& Params)
+{
+    TScriptInterface<IFortInventoryOwnerInterface> InventoryOwner;
+    Params.StepCompiledIn(&InventoryOwner);
+    const TArray< FItemGuidAndCount> Items = Params.StepCompiledInRef<TArray< FItemGuidAndCount>>();
+    Params.IncrementCode();
+    
+    const AFortPawn* Pawn = ((const AFortPawn * (*)(void*))(*(void***)InventoryOwner.InterfacePointer)[9])(InventoryOwner.InterfacePointer);
+    auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
+    auto Inventory = (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
+    
+    if (!Pawn || !Inventory || !PlayerController)
+    {
+        UE_LOG(LogInventoryManagmentLibrary, Warning, "PlayerContext is nullptr, returning false");
+        return;
+    }
+    // im not gonna add impl here until we make the inv proper
+    std::cout << "InventoryManagementLibrary.RemoveItems Called, add impl pls" << std::endl;
+}
+
 
 void InventoryManagementLibrary::Init() {
 
@@ -68,5 +89,9 @@ void InventoryManagementLibrary::Init() {
     
     Hook->Path = "/Script/FortniteGame.InventoryManagementLibrary.RemoveItem";
     Hook->Detour = RemoveItem;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+
+    Hook->Path = "/Script/FortniteGame.InventoryManagementLibrary.RemoveItems";
+    Hook->Detour = RemoveItems;
     UKismetHookingLibrary::Hook(Hook, Exec);
 }
