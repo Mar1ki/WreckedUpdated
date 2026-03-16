@@ -26,8 +26,6 @@ __int64 FortWeaponModStation::ServerStopInteractWithWorkbenchActor(UFortWeaponMo
 }
 
 // we should name these // oh and prob i need to use them but later ok
-static unsigned __int64* (__fastcall* sub_13DC400)(__int64* noidea, UFortWeaponModItemDefinition* WeaponMod) = decltype(sub_13DC400)(ImageBase + 0x13DC400);
-static __int64(__fastcall* sub_9BA1D68)(FFortItemEntry* ItemEntry, __int64* noidea) = decltype(sub_9BA1D68)(ImageBase + 0x9BA1D68);
 
 void ServerPurchaseWeaponModForWeaponImplementation(UFortWeaponModStationComponent* Component, UFortWeaponModItemDefinition* WeaponMod, AFortWeapon* Weapon)
 {
@@ -87,12 +85,6 @@ void ServerPurchaseWeaponModForWeaponImplementation(UFortWeaponModStationCompone
     }
 
     std::cout << WeaponMod->WeaponModTag.TagName.ToString().c_str() << std::endl;
-
-
-    FFortSavedWeaponModSlot GoofyMod;
-    GoofyMod.bIsDynamic = true;
-   // GoofyMod.WeaponModTemplateID = WeaponMod.
-
     
     ItemEntry->WeaponModSlots.Add(NewSlot);
     //ItemEntry->SavedWeaponModSlots.Add(NewSlot);
