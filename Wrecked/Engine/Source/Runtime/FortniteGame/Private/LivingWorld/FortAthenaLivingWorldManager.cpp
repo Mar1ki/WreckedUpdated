@@ -1,64 +1,7 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldManager.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
-// lot of if statements and for so yh refactor that shit later
-void FortAthenaLivingWorldManager::PerformPointProviderSpawn()
-{
-    auto GameState = GetGameState();
-    auto LWM = (UFortAthenaLivingWorldManager*)GameState->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass());
-
-    for (auto Point : LWM->PointProviders)
-    {
-        auto PointProvider = (AFortAthenaLivingWorldStaticPointProvider*)Point.ObjectPointer;
-
-        if (PointProvider)
-        {
-            bool hasVehicleTag = false;
-
-            for (auto& GTag : PointProvider->FiltersTags.GameplayTags)
-            {
-                // Most bitchy way to find vehicles but works 
-                if (GTag.TagName.GetRawString().contains("Athena.Vehicle"))
-                {
-                    hasVehicleTag = true;
-                    break;
-                }
-            }
-            if (hasVehicleTag)
-            {
-                auto New = (AFortAthenaLivingWorldVehiclePointProvider*)PointProvider;
-                for (auto& GTag : New->ForceMods.GameplayTags)
-                {
-                    std::cout << GTag.TagName.GetRawString().c_str() << " ";
-                }
-                std::cout << "Point: " << PointProvider->GetName().c_str() << std::endl;
-                std::cout << "Vehicle Tags: ";
-                for (auto& GTag : PointProvider->FiltersTags.GameplayTags)
-                {
-                    std::cout << GTag.TagName.GetRawString().c_str() << " ";
-                }
-                std::cout << std::endl << std::endl;
-            }
-            if (PointProvider->Name.ToString().contains("JobBoard"))
-            {
-                std::cout << "found shit" << std::endl;
-                static auto BGAClass = StaticFindObject<UClass>("/Script/Engine.BlueprintGeneratedClass");
-                static auto VehicleClass = StaticLoadObject<UClass>("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_Bounty.BP_StationProp_JobBoard_Experimental_Bounty_C", BGAClass);
-                auto Location = PointProvider->K2_GetActorLocation();
-                auto Rotation = PointProvider->K2_GetActorRotation();
-                auto SpawnedVehicle = GetWorld()->SpawnActor(VehicleClass, Location, Rotation);
-            }
-        }
-    }
-}
-
-inline void logtofile2(const std::string& message) {
-    std::ofstream file("log.txt", std::ios::app);
-    if (file.is_open()) {
-        file << message << std::endl;
-    }
-}
-
+#include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
 
 static bool NeedsLoadForClient() {
     return true;
@@ -80,10 +23,10 @@ void FortAthenaLivingWorldManager::TrySpawnEvent(UObject* Object, FFrame* Frame)
 
 void FortAthenaLivingWorldManager::HandleGamePhaseStepChanged(UObject* Object, FFrame* Frame)
 {
-   // auto InGamePhaseStep = Frame->StepCompiledInRef<EAthenaGamePhaseStep>();
-    //rame->IncrementCode();
-    std::cout << "gamephase step changed" << std::endl;
+    auto Logic = (UFortGameStateComponent_BattleRoyaleGamePhaseLogic*)Object;
 
+    auto GamePhaseStep =  Logic->GamePhaseStep;
+    
     HandleGamePhaseStepChangedOG(Object, Frame);
 }
 void FortAthenaLivingWorldManager::Hook()
