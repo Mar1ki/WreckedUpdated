@@ -331,8 +331,7 @@ void FortPlayerPawn::Init() {
     Hook->Address = ImageBase + 0xA149FB8;
     Hook->Detour = TryAutoPickup;
     UKismetHookingLibrary::Hook(Hook, Address);
-
-
+    
     Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerHoistDBNOPlayer";
     Hook->Detour = ServerHoistDBNOPlayer;
     UKismetHookingLibrary::Hook(Hook, Exec);

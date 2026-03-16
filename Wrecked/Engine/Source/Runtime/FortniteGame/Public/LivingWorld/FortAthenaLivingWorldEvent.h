@@ -23,6 +23,10 @@ namespace FortAthenaLivingWorldEvent
         if (Pair == PatchMap.end()) return nullptr;
         return StaticLoadObject<UClass>(Pair->second.c_str());
     }
+    inline UFortAthenaLivingWorldEventData* GetEventData(FFortAthenaLivingWorldEvent* Event)
+    {
+        return Event->EventDatas[0].EventData.Get();
+    }
 
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager);
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEventsFromTable(UDataTable* CategoryDataTable);
