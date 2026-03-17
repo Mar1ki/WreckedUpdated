@@ -221,6 +221,7 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		bFirst = true;
 	}
 
+	//add  check if all bots are spawned + lwm events that are in warmup phase spawened
 	if (GameMode->AlivePlayers.Num() > 0)
 	{
 		auto& AlivePlayers = GameMode->AlivePlayers;
@@ -241,8 +242,11 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	{
 		SpawnFloorLoot();
 		SpawnCactuses();
-		FortAthenaVehicle::SpawnVehicles();
+		//FortAthenaVehicle::SpawnVehicles();
 	}
+	std::cout << "Chosen StartSpot:" << NewPlayer->WarmupPlayerStart->Name.ToString().c_str() << std::endl;
+	std::cout << "StartSpot Player Claimed Count:" << NewPlayer->WarmupPlayerStart->PlayerClaimedCount << std::endl;
+	std::cout << "StartSpot ClaimedSquadId:" << NewPlayer->WarmupPlayerStart->ClaimedSquadId << std::endl;
 	FTransform Transform;
 	if (GetLogic()->GamePhase == EAthenaGamePhase::Warmup)
 	{
@@ -253,7 +257,7 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	}
 	auto Pawn = (AFortPlayerPawnAthena*)GameMode->SpawnDefaultPawnAtTransform(NewPlayer, Transform);
 	
-	AFortInventory* Inventory = (AFortInventory*)NewPlayer->WorldInventory.GetObjectRef();
+	AFortInventory* Inventory = NewPlayer->GetInventory();
 	for (int i = 0; i < GameMode->StartingItems.Num(); i++)
 	{
 		auto Item = GameMode->StartingItems[i];
@@ -296,7 +300,6 @@ void FortGameModeAthena::HandleMatchHasStarted(AFortGameModeAthena* GameMode)
 }
 
 void FortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer) {
-	std::cout << "called handle player" << std::endl;
 	auto PlayerState = Cast<AFortPlayerStateAthena>(NewPlayer->PlayerState);
 	auto GameState = Cast<AFortGameStateAthena>(GameMode->GameState);
 	if (CurrentGamemode == Athena) {
@@ -322,7 +325,7 @@ void FortGameModeAthena::HandleStartingNewPlayer(AFortGameModeAthena* GameMode, 
 	}
 
 	// tuff 
-	for (auto MutatorIG : 	GameMode->MutatorListComponent->Mutators)
+	for (auto MutatorIG : GameMode->MutatorListComponent->Mutators)
 	{
 		if (MutatorIG->IsA(AJunoCoreMutators::StaticClass()))
 		{
