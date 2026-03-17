@@ -23060,6 +23060,7 @@ public:
 	bool ShouldDriverHaveReticle() const;
 	bool UseSlipperyMovementOverrideData() const;
 	bool WantsToGoFromVehicleToZipline() const;
+	void HandleZiplineStateChanged();
 
 public:
 	static class UClass* StaticClass()

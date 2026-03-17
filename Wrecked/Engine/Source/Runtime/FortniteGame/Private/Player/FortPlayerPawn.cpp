@@ -43,9 +43,7 @@ void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
     auto Zipline = Pawn->GetActiveZipline();
 
     Pawn->ZiplineState = State;
-
-    static void (*HandleZiplineStateChanged)(AFortPlayerPawn*) = decltype(HandleZiplineStateChanged)(ImageBase + 0xA12F5D8);
-    HandleZiplineStateChanged(Pawn);
+    Pawn->HandleZiplineStateChanged();
 
     if (State.bIsZiplining && Zipline)
     {

@@ -10,3 +10,10 @@ namespace FortPlayerPawn {
 
 	void Init();
 }
+
+inline void AFortPlayerPawn::HandleZiplineStateChanged()
+{
+	void (*HandleZiplineStateChangedInternal)(AFortPlayerPawn*) = reinterpret_cast<void(*)(AFortPlayerPawn*)>(ImageBase + 0xA12F5D8);
+
+	HandleZiplineStateChangedInternal(this);
+}
