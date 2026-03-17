@@ -15,7 +15,7 @@ void FortAthenaAISpawnerData::AIBotSkillsetOnSpawned(UFortAthenaAISpawnerDataCom
 		InitializeSkills(AIBotController, &Skill, &SkillSets);
 		for (auto SkillSet : SkillSets) {
 			//AIBotController->SetSkillSet(SkillSet);
-			UE_LOG(LogAI, Log, "Initializing Skillset: %s", SkillSet.Get()->GetName().c_str());
+			UE_LOG(LogAI, Verbose, "Initializing Skillset: %s", SkillSet.Get()->GetName().c_str());
 			unsigned int WtfIsThis = 0;
 			auto DigestSkillset = GetOrCreateDigestedSkillSetInternal(AIBotController, &SkillSet, true, &WtfIsThis);
 			if (DigestSkillset) {
@@ -133,8 +133,13 @@ void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAIS
 	Component->GetLoadout(&Loadout);
 	Loadout.Backpack = GetRandomObjectOfClass<UAthenaBackpackItemDefinition>();
 	Loadout.Character = GetRandomObjectOfClass<UAthenaCharacterItemDefinition>();
-	Loadout.Pickaxe = GetRandomObjectOfClass<UAthenaPickaxeItemDefinition>();
+	//Loadout.Pickaxe = GetRandomObjectOfClass<UAthenaPickaxeItemDefinition>(); // its useless bc inventory is called before this 
 	Loadout.Glider = GetRandomObjectOfClass<UAthenaGliderItemDefinition>();
+	const auto NumOfDances = FMath::FRandRange(0.f, 6.f);
+	for (int i = 0; i < NumOfDances; i++)
+	{
+		Loadout.Dances.Add(GetRandomObjectOfClass<UAthenaDanceItemDefinition>());
+	}
 
 		
 	AIBotController->CosmeticLoadoutBC.GetTyped() = Loadout;
@@ -226,7 +231,7 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 		AIBotController->SlotItems[CurrentSlot] = BotInfo;
 		CurrentSlot++;
 	}
-	/*
+	
 	if (AIBotController->IsPlayerBot()) {
 		AFortGameModeAthena* GameMode = GetGameMode();
 		if (!GameMode)
@@ -239,11 +244,9 @@ void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDa
 				AIBotController->SetUpInventorySlot(ItemInst);
 			}
 		}
-		static auto PickaxeDef = StaticFindObject<UFortItemDefinition>("/Game/Athena/Items/Weapons/WID_Harvest_Pickaxe_Athena_C_T01.WID_Harvest_Pickaxe_Athena_C_T01");
-		auto ItemInst = Pawn->Inventory->AddItemInst((UFortItemDefinition*)PickaxeDef, 1, 0);
+		auto ItemInst = Pawn->Inventory->AddItemInst((UFortItemDefinition*)GetRandomObjectOfClass<UAthenaPickaxeItemDefinition>()->WeaponDefinition, 1, 0);
 		AIBotController->SetUpInventorySlot(ItemInst);
 	}
-	*/
 	
 	AIBotInventoryBaseOnSpawnedOG(Component, Pawn);
 }
@@ -297,7 +300,8 @@ void FortAthenaAISpawnerData::AIBotConversationOnSpawned(UFortAthenaAISpawnerDat
 	// we should actually setup special actor diffrently and make impl for ch5 
 	if (bUseSpecialActor && !bBlockSpecialActorUntilOutsideTheLoop)
 	{
-		(UAthenaSpecialActorComponent*)Pawn->AddComponentByClass(Component->SpecialActorComponentClass, false, FTransform(), false);
+		auto comp = (UAthenaSpecialActorComponent*)Pawn->AddComponentByClass(Component->SpecialActorComponentClass, false, FTransform(), false);
+		comp->Activate(false);
 	} 
 	
 	ConversationParticipantComponent->bCanStartConversation = true;
