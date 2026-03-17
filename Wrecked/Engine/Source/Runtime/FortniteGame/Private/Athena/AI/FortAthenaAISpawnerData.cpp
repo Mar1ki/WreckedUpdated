@@ -117,9 +117,36 @@ void FortAthenaAISpawnerData::AIBotCosmeticLoadoutOnSpawned(UFortAthenaAISpawner
 void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAISpawnerDataComponent_CosmeticLibrary* Component, AFortAIPawn* Pawn)
 {
 	std::cout << "Phoebe Cosmetics Called" << std::endl;
-	auto ChosenCosmeticLibrary = Component->CosmeticLibraries[GetRandomCosmeticLibrary(Component)].Get();
-	std::cout << ChosenCosmeticLibrary->CharactersDataTable.Get()->Name.ToString().c_str() << std::endl;
-	auto IDK = ChosenCosmeticLibrary->RetrieveDataTables(); // not stripped prob
+
+	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
+	if (!Component || !Pawn) return;
+
+	auto Controller = (AFortAthenaAIBotController*)Pawn->Controller;
+	if (!Controller) return;
+
+	auto BotState = (AFortPlayerStateAthena*)Controller->PlayerState;
+	if (!BotState) return;
+
+	auto Casted = (AFortPlayerPawn*)Pawn;
+	if (!Casted) return;
+	FFortAthenaLoadout Loadout;
+	Component->GetLoadout(&Loadout);
+	Loadout.Backpack = GetRandomObjectOfClass<UAthenaBackpackItemDefinition>();
+	Loadout.Character = GetRandomObjectOfClass<UAthenaCharacterItemDefinition>();
+	Loadout.Pickaxe = GetRandomObjectOfClass<UAthenaPickaxeItemDefinition>();
+	Loadout.Glider = GetRandomObjectOfClass<UAthenaGliderItemDefinition>();
+
+		
+	AIBotController->CosmeticLoadoutBC.GetTyped() = Loadout;
+	Casted->CosmeticLoadout = Loadout;
+	BotState->OnRep_CharacterData(); 
+
+	if (Loadout.Character)
+	{
+		ApplyCharacterCustomization(BotState, Casted);
+		UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(BotState);
+	}
+
 
 	AIBotPhoebeCosmeticLibraryOnSpawnedOG(Component, Pawn);
 }
@@ -151,12 +178,14 @@ void FFortBotInventoryInfo::SetItem(UFortWorldItem* NewItem) {
 bool AFortAthenaAIBotController::IsPlayerBot() {
 	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
 
-	for (auto Bot : AIServicePlayerBots->PlayerBots)
+	if (this->IsA(ABP_PhoebePlayerController_C::StaticClass())) return true;
+/*	for (auto Bot : AIServicePlayerBots->PlayerBots)
 	{
 		if (Bot.BotController == this)
 			return true;
 	}
 	return false;
+	*/
 }
 
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
@@ -308,11 +337,11 @@ void FortAthenaAISpawnerData::Init() {
 	Hook->Original = (void**)&AIBotConversationOnSpawnedOG;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
-	/*Hook->Address = 0x59;
+	Hook->Address = 0x59;
 	Hook->Class = UFortAthenaAISpawnerDataComponent_CosmeticLibrary::StaticClass();
 	Hook->Detour = AIBotPhoebeCosmeticLibraryOnSpawned;
 	Hook->Original = (void**)&AIBotPhoebeCosmeticLibraryOnSpawnedOG;
-	UKismetHookingLibrary::Hook(Hook, EveryVFT); */
+	UKismetHookingLibrary::Hook(Hook, EveryVFT); 
 
 	Hook->Address = 0x59;
 	Hook->Class = UFortAthenaAISpawnerDataComponent_GameplayAbilityBase::StaticClass();

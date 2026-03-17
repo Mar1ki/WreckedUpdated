@@ -582,21 +582,21 @@ __forceinline T* GetRandomObjectOfClass()
         for (int i = 0; i < UObject::GObjects->Num(); i++)
         {
                 T* Object = reinterpret_cast<T*>(UObject::GObjects->GetByIndex(i));
-                if (!Object) continue;
-                if (Object->IsA(T::StaticClass()))
-                {
+                if (Object && Object->IsA(T::StaticClass()))
                         Objects.push_back(Object);
-                }
         }
-    
         if (Objects.empty())
                 return nullptr;
     
         static std::random_device rd;
         static std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, Objects.size() - 1);
-    
-        return Objects[dis(gen)];
+
+        T* Result = nullptr;
+        while (!Result)
+                Result = Objects[dis(gen)];
+
+        return Result;
 }
 // here we need to check max ammo so it spawns with the full mag not the default full mag
 inline void ApplyWeaponModset(AFortPickupAthena* Pickup, UFortWeaponModSetData* Modset) {
