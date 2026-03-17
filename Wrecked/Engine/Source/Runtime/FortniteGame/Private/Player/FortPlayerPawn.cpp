@@ -307,6 +307,11 @@ void ServerThrowCarriedPlayer(UObject* Object, FFrame* Frame)
     Pawn->OnRep_DBNOHoisterData(previous);
     Pawn->OnRep_DBNOHoistee();
 }
+void FortPlayerPawn::test(__int64* a1, __int64* a2)
+{
+    std::cout << "helo" << std::endl;
+    testOG(a1, a2);
+}
 void FortPlayerPawn::Init() {
 
     UHook* Hook = new UHook();
@@ -337,6 +342,12 @@ void FortPlayerPawn::Init() {
     Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerThrowCarriedPlayer";
     Hook->Detour = ServerThrowCarriedPlayer;
     UKismetHookingLibrary::Hook(Hook, Exec);
+
+    Hook->Address = 3224 / 8;
+    Hook->Class = AFortPlayerPawn::StaticClass();
+    Hook->Detour = test;
+    Hook->Original = (void**)&testOG;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
     
     delete Hook;
 }
