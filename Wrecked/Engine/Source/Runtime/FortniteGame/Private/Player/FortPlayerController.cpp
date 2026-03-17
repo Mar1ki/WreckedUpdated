@@ -12,25 +12,6 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
-
-void VHook3(void* Base, uintptr_t Index, void* Detour, void** Original = nullptr) {
-    auto VTable = (*(void***)Base);
-    if (!VTable)
-        return;
-
-    if (!VTable[Index])
-        return;
-
-    if (Original)
-        *Original = VTable[Index];
-
-    DWORD dwOld;
-    VirtualProtect(&VTable[Index], 8, PAGE_EXECUTE_READWRITE, &dwOld);
-    VTable[Index] = Detour;
-    DWORD dwTemp;
-    VirtualProtect(&VTable[Index], 8, dwOld, &dwTemp);
-}
-
 void FortPlayerController::ServerAcknowledgePossession(AFortPlayerControllerAthena* Controller, AFortPawn* Pawn)
 {
     auto PlayerState = (AFortPlayerStateZone*)Controller->PlayerState;
