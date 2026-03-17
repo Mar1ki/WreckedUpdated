@@ -110,13 +110,14 @@ void FortProjectileAthena::ServerNotifyPawnHit(
     }
 
     if (auto CrashPad = Cast<ABuildingGameplayActorCrashpad>(Actor)) {
-        float Damage = WeaponStats->EnvDmgPB;
+        CrashPad->DestroyCrashpad();
+       /* float Damage = WeaponStats->EnvDmgPB;
         SendCue(Damage);
 
         float HealthLeft = CrashPad->GetHealth() - Damage;
         CrashPad->SetHealth(HealthLeft);
         if (HealthLeft <= 0)
-            CrashPad->K2_DestroyActor();
+            CrashPad->K2_DestroyActor();*/
     }
 
     if (auto Balloon = Cast<ABuildingGameplayActorBalloon>(Actor)) {
