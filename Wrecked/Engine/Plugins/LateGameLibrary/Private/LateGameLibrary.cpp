@@ -9,6 +9,9 @@ TArray<FItemAndCount> Shotguns;
 TArray<FItemAndCount> WhiteHeals;
 TArray<FItemAndCount> BlueHeals;
 
+TArray<FItemAndCount> RotationItems;
+
+
 void Init()
 {
     FItemAndCount CombatRifle;
@@ -60,6 +63,23 @@ void Init()
     FItemAndCount Shield;
     Shield.Item = StaticLoadObject<UItemDefinitionBase>("/PaprikaConsumables/Gameplay/ShieldRefresh/WID_Paprika_ShieldPot.WID_Paprika_ShieldPot");
     Shield.Count = 3;
+
+
+    FItemAndCount NitroGloves;
+    Shield.Item = StaticLoadObject<UItemDefinitionBase>("/NitroGauntletsGameplay/Gameplay/WID_Moonflax_NitroGauntlet_Mythic.WID_Moonflax_NitroGauntlet_Mythic");
+    Shield.Count = 1;
+
+    FItemAndCount NitroSplash;
+    Shield.Item = StaticLoadObject<UItemDefinitionBase>("/MoonflaxNitroSplash/Gameplay/WID_Moonflax_NitroSplash.WID_Moonflax_NitroSplash");
+    Shield.Count = 4;
+
+    FItemAndCount Shockwave;
+    Shield.Item = StaticLoadObject<UItemDefinitionBase>("/Game/Athena/Items/Consumables/ShockwaveGrenade/Athena_ShockGrenade.Athena_ShockGrenade");
+    Shield.Count = 4;
+
+    RotationItems.Add(Shockwave);
+    RotationItems.Add(NitroSplash);
+    RotationItems.Add(NitroGloves);
 
     BlueHeals.Add(SmallShield);
     BlueHeals.Add(Fizz);
@@ -114,6 +134,13 @@ void ULateGameLibrary::GiveRandomLoadoutToPlayer(AFortPlayerControllerAthena* Pl
     {
         auto idk = (UFortWeaponItemDefinition*)RandomBlueHeal.Item;
         Inventory->AddItem((UFortItemDefinition*)RandomBlueHeal.Item, RandomBlueHeal.Count, idk->GetStats()->ClipSize);
+    }
+
+    auto RandomRotation = RotationItems[rand() % RotationItems.Num()];
+    if (RandomRotation.Item)
+    {
+        auto idk = (UFortWeaponItemDefinition*)RandomRotation.Item;
+        Inventory->AddItem((UFortItemDefinition*)RandomRotation.Item, RandomRotation.Count, idk->GetStats()->ClipSize);
     }
 
     auto GameDataCommon = GetAssetManager()->GameDataCommon;
