@@ -38,6 +38,22 @@ const wchar_t* FortGameSessionDedicated::CommandLineGet()
 	return Command.c_str();
 }
 
+char FortGameSessionDedicated::GetSquadIdForCurrentPlayer(AFortGameSessionDedicatedAthena* GameSession, FUniqueNetIdRepl UniqueId)
+{
+	for (auto Player : GetGameMode()->AlivePlayers)
+	{
+		if (Player && Player->PlayerState)
+		{
+			auto PlayerState = (AFortPlayerStateAthena*)Player->PlayerState;
+			if (PlayerState->AreUniqueIDsIdentical(PlayerState->UniqueID, UniqueId))
+			{
+				return PlayerState->TeamIndex - 3;
+			}
+		}
+	}
+	return 0;
+}
+
 void FortGameSessionDedicated::Init() {
 
 	UHook* Hook = new UHook();
@@ -64,6 +80,10 @@ void FortGameSessionDedicated::Init() {
 	Hook->Address = ImageBase + 0x9A10B1C;
 	Hook->Detour = GetWorldFromSmth;
 	Hook->Original = (void**)&GetWorldFromSmthOG;
+	UKismetHookingLibrary::Hook(Hook, Address);
+	
+	Hook->Address = ImageBase + 0x9E6CDF0;
+	Hook->Detour = GetSquadIdForCurrentPlayer;
 	UKismetHookingLibrary::Hook(Hook, Address);
 	
 	delete Hook;
