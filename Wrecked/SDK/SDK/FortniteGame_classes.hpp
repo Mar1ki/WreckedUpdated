@@ -33056,7 +33056,7 @@ public:
 	struct FScalableFloat                         UseSpecialActorComponent;                          // 0x0BD0(0x0028)(Edit, NativeAccessSpecifierPrivate)
 	TSubclassOf<class UAthenaSpecialActorComponent> SpecialActorComponentClass;                      // 0x0BF8(0x0008)(Edit, ZeroConstructor, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
 	class UWidget*                                CustomInteractionWidget;                           // 0x0C00(0x0008)(ExportObject, ZeroConstructor, Transient, InstancedReference, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	uint8                                         Pad_C08[0x10];                                     // 0x0C08(0x0010)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	class TWeakObjectPtr<class UFortNonPlayerConversationParticipantComponent>  OwnerConversationComponent;
 
 public:
 	static class UClass* StaticClass()
