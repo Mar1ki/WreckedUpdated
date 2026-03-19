@@ -3,6 +3,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaMarkerComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/FortControllerComponent_RechargeWeapons.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Building/BuildingProp_ConversationCompatible.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/FortniteAI/FortAthenaPatrolPath.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldDensityGrid.h"
@@ -216,6 +217,7 @@ void Main()
     FortAthenaBTService_PickUpLoot::Init();
     FortAthenaLivingWorldDensityGrid::Hook();
     FortControllerComponent_RechargeWeapons::Init();
+    BuildingProp_ConversationCompatible::Init();
 
     UHook* Hook = new UHook();
 
@@ -289,7 +291,8 @@ void Main()
     *(int*)(ImageBase + 0x12BD3B70) = 7; // lwm log of some sort
     *(int*)(ImageBase + 0x12BCB0A8) = 7;
     *(int*)(ImageBase + 0x12CEABC0) = 7; // recharge weapon log
-    *(bool*)(ImageBase + 0x12D84D92) = false; 
+    *(bool*)(ImageBase + 0x12D84D92) = false;
+    *(int*)(ImageBase + 0x12BCFF68) = 7; // something with phoebe ais
 
     if (CurrentGamemode == EGameModeType::Papaya)
     {

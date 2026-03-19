@@ -184,6 +184,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerControllerAthena.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerPawn.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingContainer.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingProp_ConversationCompatible.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Conversation\ConversationLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\AthenaAIServicePlayerBots.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\FortAthenaBTService_PickUpLoot.h" />
@@ -304,6 +305,7 @@
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingContainer.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingProp_ConversationCompatible.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Conversation\ConversationLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\AthenaAIServicePlayerBots.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\FortniteAI\FortAthenaBTService_PickUpLoot.cpp" />
