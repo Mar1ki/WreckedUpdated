@@ -15,7 +15,7 @@ void FortAthenaAISpawnerData::AIBotSkillsetOnSpawned(UFortAthenaAISpawnerDataCom
 		InitializeSkills(AIBotController, &Skill, &SkillSets);
 		for (auto SkillSet : SkillSets) {
 			//AIBotController->SetSkillSet(SkillSet);
-			UE_LOG(LogAI, Verbose, "Initializing Skillset: %s", SkillSet.Get()->GetName().c_str());
+		//	UE_LOG(LogAI, Verbose, "Initializing Skillset: %s", SkillSet.Get()->GetName().c_str());
 			unsigned int WtfIsThis = 0;
 			auto DigestSkillset = GetOrCreateDigestedSkillSetInternal(AIBotController, &SkillSet, true, &WtfIsThis);
 			if (DigestSkillset) {
@@ -116,7 +116,7 @@ void FortAthenaAISpawnerData::AIBotCosmeticLoadoutOnSpawned(UFortAthenaAISpawner
 
 void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAISpawnerDataComponent_CosmeticLibrary* Component, AFortAIPawn* Pawn)
 {
-	std::cout << "Phoebe Cosmetics Called" << std::endl;
+	//std::cout << "Phoebe Cosmetics Called" << std::endl;
 
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
 	if (!Component || !Pawn) return;
