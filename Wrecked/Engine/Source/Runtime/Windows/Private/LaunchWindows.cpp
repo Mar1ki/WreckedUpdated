@@ -4,6 +4,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/FortControllerComponent_RechargeWeapons.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Building/BuildingProp_ConversationCompatible.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Building/BuildingSMActor.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/FortniteAI/FortAthenaPatrolPath.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldDensityGrid.h"
@@ -218,6 +219,7 @@ void Main()
     FortAthenaLivingWorldDensityGrid::Hook();
     FortControllerComponent_RechargeWeapons::Init();
     BuildingProp_ConversationCompatible::Init();
+    BuildingSMActor::Init();
 
     UHook* Hook = new UHook();
 

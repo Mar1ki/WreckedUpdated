@@ -30,7 +30,7 @@ void AthenaAIServicePlayerBots::InitializeMMRInfos() {
 	FMMRSpawningInfo NewSpawningInfo{};
 	NewSpawningInfo.BotSpawningDataInfoTargetELO = 1000.f;
 	NewSpawningInfo.BotSpawningDataInfoWeight = 100.f;
-	NewSpawningInfo.NumBotsToSpawn = 50;
+	NewSpawningInfo.NumBotsToSpawn = 0;
 	NewSpawningInfo.AISpawnerData = AIServicePlayerBots->DefaultBotAISpawnerData;
 
 	AIServicePlayerBots->DefaultAISpawnerDataComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(AIServicePlayerBots->DefaultBotAISpawnerData, UWorld::GetWorld());
