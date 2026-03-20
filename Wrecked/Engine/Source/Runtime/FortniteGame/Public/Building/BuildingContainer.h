@@ -4,6 +4,5 @@
 namespace BuildingContainer
 {
 	DefineOriginal(bool, SpawnLoot, ABuildingContainer* Container);
-	DefineOriginal(void, OnDamageServer, ABuildingSMActor* BuildingActor, float Damage, FGameplayTagContainer& DamageTags, FVector& Momentum, FHitResult& HitInfo, AFortPlayerControllerAthena* InstigatedBy, AActor* DamageCauser, FGameplayEffectContextHandle& EffectContext);
 	void Setup();
 }

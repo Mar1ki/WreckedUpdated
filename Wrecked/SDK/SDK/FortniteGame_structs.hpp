@@ -48323,8 +48323,12 @@ public:
 struct alignas(0x08) FBuildingSMActorAttemptSpawnResourcesParams final
 {
 public:
-	TWeakObjectPtr<class AFortPlayerPawn>         InstigatorPawn;                                    // 0x0000(0x0008)(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         Pad_8[0x30];                                       // 0x0008(0x0030)(Fixing Struct Size After Last Property [ Dumper-7 ])
+    TWeakObjectPtr<class AFortPlayerPawn>         InstigatorPawn;                                    // 0x0000(0x0008)(ZeroConstructor, Transient, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPublic)
+    FGameplayTagContainer                          Tags;
+    float                                          ActualDamageDealt;
+    bool                                          bJustHitWeakspot;
+    uint8_t Pad[0x3];
+    FFortGameplayEffectContext* FortEffectContext;
 };
 
 // ScriptStruct FortniteGame.BuildingPoolHarvestResourceSpawnsData
