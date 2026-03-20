@@ -646,6 +646,13 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Controller->bBuildFree = !Controller->bBuildFree;
             Controller->bInfiniteAmmo = !Controller->bInfiniteAmmo;
         }
+        if (Command == "vend")
+        {
+            auto loc = Controller->MyFortPawn->K2_GetActorLocation();
+            auto newloc = FVector(loc.X + 250.0f, loc.Y, loc.Z);
+            auto vending = StaticLoadObject<UClass>("/Game/Building/ActorBlueprints/Stations/BP_StationProp_VendingMachine_E_Assault.BP_StationProp_VendingMachine_E_Assault_C");
+            GetWorld()->SpawnActor(vending, newloc, Pawn->K2_GetActorRotation(), nullptr);
+        }
         if (Command == "getmmeinfo") {
             auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
             Controller->ClientMessage(L"ActiveLayeredMovementModeRuntimeData", FName(), 1);
