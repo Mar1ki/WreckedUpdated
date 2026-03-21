@@ -33,7 +33,7 @@ namespace FortAthenaLivingWorldEvent
 
     TArray<AFortAthenaPatrolPath*> GetPatrolPathsFromTagQuery(const FGameplayTag& SearchTag);
     FGameplayTag GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent);
-
+    bool ComputeRuntimeEvent(FFortAthenaLivingWorldEvent* InEvent, ELagerEventType EventType, UClass*);
     void TrySpawnEvents();
     void Hook();
 }
