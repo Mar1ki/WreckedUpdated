@@ -136,12 +136,12 @@ void ULateGameLibrary::GiveRandomLoadoutToPlayer(AFortPlayerControllerAthena* Pl
         Inventory->AddItem((UFortItemDefinition*)RandomBlueHeal.Item, RandomBlueHeal.Count, idk->GetStats()->ClipSize);
     }
 
-    auto RandomRotation = RotationItems[rand() % RotationItems.Num()];
+  /*  auto RandomRotation = RotationItems[rand() % RotationItems.Num()];
     if (RandomRotation.Item)
     {
         auto idk = (UFortWeaponItemDefinition*)RandomRotation.Item;
         Inventory->AddItem((UFortItemDefinition*)RandomRotation.Item, RandomRotation.Count, idk->GetStats()->ClipSize);
-    }
+    }*/
 
     auto GameDataCommon = GetAssetManager()->GameDataCommon;
     Inventory->AddItem(GameDataCommon->WoodItemDefinition.Get(), 500, 0);
