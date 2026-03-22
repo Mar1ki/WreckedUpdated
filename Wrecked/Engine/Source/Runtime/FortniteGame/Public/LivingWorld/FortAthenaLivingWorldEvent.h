@@ -15,8 +15,14 @@ enum class ELagerEventType : uint8
     Misc                                     = 6,
     ELagerEventType_MAX                      = 7,
 };
+struct FFortLivingWorldEventGroup
+{
+    FFortAthenaLivingWorldEvent* Event;
+    ELagerEventType EventType;
+};
 namespace FortAthenaLivingWorldEvent
 {
+    static inline TArray<FFortLivingWorldEventGroup> AllEvents;
     inline UClass* GetClassFromPatchMap(const std::map<std::string, UEAllocatedString>& PatchMap, const FName& TagName)
     {
         auto Pair = PatchMap.find(TagName.ToString().c_str());
@@ -28,6 +34,10 @@ namespace FortAthenaLivingWorldEvent
         return Event->EventDatas[0].EventData.Get();
     }
 
+    inline EAthenaGamePhaseStep GetSpawnGamePhaseStepFromEvent(FFortAthenaLivingWorldEvent* Event)
+    {
+        return Event->ActivationGamePhaseStep;
+    }
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager);
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEventsFromTable(UDataTable* CategoryDataTable);
 

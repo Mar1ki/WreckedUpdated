@@ -111,6 +111,7 @@ TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEven
     UE_LOG(LogLivingWorldManager, Warning, "Total Events Found: %d", AllEvents.Num());
     return AllEvents;
 }
+// second refactor
 FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent)
 {
     auto EventData = InEvent->EventDatas[0].EventData.Get();
@@ -119,6 +120,11 @@ FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivin
 
     if (TagNum == 0)
         return FGameplayTag();
+    // we will do a scuffed way and just a check for only challenges these ch5 s3 ones
+    if (EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains("Athena.AI.SpawnLocation.Challenge"))
+    {
+       return EventData->ActorDescriptions[0].SpawnerDataTagQuery.TagDictionary[0];
+    }
 
     if (EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains("Athena.Vehicle.SpawnLocation.AlwaysSpawn") || EventData->ProviderFiltersTagQuery.TagDictionary[0].TagName.ToString().contains(".Base"))
     {
@@ -140,7 +146,6 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
 {
     auto LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass()); // ig we can use cached lwm
     auto EventArray = GetAllWorldEvents(LivingWorldManager);
-    TMap<TArray<FFortAthenaLivingWorldEvent*>, ELagerEventType> AllEvents;
 
 
     auto SuvEventTable = StaticLoadObject<UDataTable>("/BasicSUV/LWSpawner/LagerDataTable/Lager_CategoryTable_BasicSUV.Lager_CategoryTable_BasicSUV");
@@ -170,8 +175,10 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
     PatchMap.insert({"Athena.AI.SpawnLocation.JobBoard.SupplyDrop", UEAllocatedString("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_SupplyDropGeneric.BP_StationProp_JobBoard_Experimental_SupplyDropGeneric_C")});
 
     // These Challenges
-    PatchMap.insert({"Athena.AI.SpawnLocation.Challenge", UEAllocatedString("/JobBoardExperimental/ActorBlueprints/BP_StationProp_JobBoard_Experimental_SupplyDropGeneric.BP_StationProp_JobBoard_Experimental_SupplyDropGeneric_C")});
-
+    PatchMap.insert({"AISpawnerData.Type.Challenge.01", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_01.BP_StationProp_ChallengeQuests_01_C")});
+    PatchMap.insert({"AISpawnerData.Type.Challenge.02", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_02.BP_StationProp_ChallengeQuests_02_C")});
+    PatchMap.insert({"AISpawnerData.Type.Challenge.03", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_03.BP_StationProp_ChallengeQuests_03_C")});
+    PatchMap.insert({"AISpawnerData.Type.Challenge.04", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_04.BP_StationProp_ChallengeQuests_04_C")});
 
     // valet
     PatchMap.insert({"Athena.Vehicle.SpawnLocation.Valet.SportsCar.Base", UEAllocatedString("/Valet/SportsCar/Valet_SportsCar_Vehicle.Valet_SportsCar_Vehicle_C")}); // alwaysspawn event
@@ -184,8 +191,6 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
     PatchMap.insert({"Athena.Vehicle.SpawnLocation.Valet.MoonflaxBossVehicles.MegaToof", UEAllocatedString("/MoonflaxBossVehicle/Gameplay/Vehicles/Valet_BossSUV_Moonflax_Vehicle_POISpawned.Valet_BossSUV_Moonflax_Vehicle_POISpawned_C")});
     PatchMap.insert({"Athena.Vehicle.SpawnLocation.Valet.MoonflaxBossVehicles.PrairieSkip", UEAllocatedString("/MoonflaxBossVehicle/Gameplay/Vehicles/Valet_BossSUV_Moonflax_Vehicle_POISpawned.Valet_BossSUV_Moonflax_Vehicle_POISpawned_C")});
     PatchMap.insert({"Athena.Vehicle.SpawnLocation.Valet.MoonflaxBossVehicles.StrategicSpur", UEAllocatedString("/MoonflaxBossVehicle/Gameplay/Vehicles/Valet_BossSportsCar_Moonflax_Vehicle_StrategicSpur_POISpawned.Valet_BossSportsCar_Moonflax_Vehicle_StrategicSpur_POISpawned_C")});
-
-
 
     
     
@@ -201,27 +206,31 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
                if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is npcs and specialists are some sort of npcs idk 
                {
                    NpcEvents.Add(Event);
+                   AllEvents.Add({Event, ELagerEventType::Misc});
                }
                else if (SpawnerTag.contains("Valet"))
                {
                    ValetEvents.Add(Event);
+                   AllEvents.Add({Event, ELagerEventType::Valet});
+
                }
                else if (SpawnerTag.contains("JobBoard"))
                {
                    JobBoardEvents.Add(Event);
+                   AllEvents.Add({Event, ELagerEventType::Misc});
                } else if (SpawnerTag.contains("Challenge"))
                {
                    ChallengeEvents.Add(Event);
+                   AllEvents.Add({Event, ELagerEventType::Misc});
                }
            }
        }
     }
-    
-     for (auto JobBoardEvent : JobBoardEvents)
+   /*for (auto JobBoardEvent : JobBoardEvents)
      {
          ComputeRuntimeEvent(JobBoardEvent, ELagerEventType::Misc, nullptr);
      }
-    std::cout << "Challenge: " << ChallengeEvents.Num() << std::endl;
+    std::cout << "Challenge: " << ChallengeEvents.Num() << std::endl;*/
     
 
     /*for (auto NpcEvent : NpcEvents)
@@ -252,7 +261,7 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
            }
         } 
     } */
-    for (auto ChallengeEvent : ChallengeEvents)
+ /*   for (auto ChallengeEvent : ChallengeEvents)
     {
         ComputeRuntimeEvent(ChallengeEvent, ELagerEventType::Misc, nullptr);
     }
@@ -260,7 +269,7 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
     for (auto ValetEvent : ValetEvents)
     {
         ComputeRuntimeEvent(ValetEvent, ELagerEventType::Valet, nullptr);
-    }
+    }*/
 }
 bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent* InEvent, ELagerEventType EventType, UClass* OptionalActorClass = nullptr)
 {

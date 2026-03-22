@@ -24,9 +24,20 @@ void FortAthenaLivingWorldManager::TrySpawnEvent(UObject* Object, FFrame* Frame)
 void FortAthenaLivingWorldManager::HandleGamePhaseStepChanged(UObject* Object, FFrame* Frame)
 {
     auto Logic = (UFortGameStateComponent_BattleRoyaleGamePhaseLogic*)Object;
-
     auto GamePhaseStep =  Logic->GamePhaseStep;
-    
+
+    if (GamePhaseStep == EAthenaGamePhaseStep::Warmup)
+    {
+        FortAthenaLivingWorldEvent::TrySpawnEvents();
+    }
+    std::cout << "GamePhaseStep Changed:" << (int*)GamePhaseStep << std::endl;
+    for (auto EventGroup : FortAthenaLivingWorldEvent::AllEvents)
+    {
+        if (EventGroup.Event->ActivationGamePhaseStep == GamePhaseStep)
+        {
+            FortAthenaLivingWorldEvent::ComputeRuntimeEvent(EventGroup.Event, EventGroup.EventType, nullptr);
+        }
+    }
     HandleGamePhaseStepChangedOG(Object, Frame);
 }
 void FortAthenaLivingWorldManager::Hook()
