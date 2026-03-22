@@ -38,22 +38,40 @@ void FortProjectileAthena::ServerNotifyPawnHit(
 
         Owner->MyFortPawn->NetMulticast_Athena_BatchedDamageCues(SharedCue, NonSharedCue);
     };
+    
+    auto SendCueNew = [&](float Damage) {
+        if (Actor->IsA(AFortPlayerPawn::StaticClass()))
+        {
+            float Multiplier = (Hit.BoneName.ToString() == "head") ? WeaponStats->DamageZone_Critical : 1.f;
+            Damage = WeaponStats->DmgPB * Multiplier;
+        }
+        FAthenaBatchedDamageGameplayCues_Shared SharedCue{};
+        SharedCue.Location = (FVector_NetQuantize10)Hit.ImpactPoint;
+        SharedCue.Normal = Hit.ImpactNormal;
+        SharedCue.Magnitude = Damage;
+        SharedCue.bWeaponActivate = true;
+        SharedCue.bIsBallistic = true;
+        if (Actor->IsA(AFortPlayerPawn::StaticClass()))
+        {
+            auto Pawn = (AFortPlayerPawn*)Actor;
+            auto Shield = Pawn->GetShield();
+            SharedCue.bIsCritical = Hit.BoneName.ToString() == "head";
+            SharedCue.bIsShield = Shield > 0;
+            SharedCue.bIsShieldDestroyed = Shield > 0 && Shield <= Damage;
+        }
+        SharedCue.bIsValid = true;
+
+        FAthenaBatchedDamageGameplayCues_NonShared NonSharedCue{};
+        NonSharedCue.HitActor = Actor;
+
+        Owner->MyFortPawn->NetMulticast_Athena_BatchedDamageCues(SharedCue, NonSharedCue);
+    };
 
     if (bUseExperimentalDamaging)
     {
-        if (auto BuildingActor = Cast<ABuildingSMActor>(Actor)) {
-
-            SendCue(WeaponStats->EnvDmgPB);
-            auto one = FGameplayTagContainer();
-            auto two  = FGameplayEffectSpec();
-            auto three = FGameplayEffectContextHandle();
-           auto idk =  Hit.HitObjectHandle.Manager.Get();
-
-            using FuncType = void*(*)(ABuildingSMActor*, double, const FGameplayTagContainer*, const FGameplayEffectSpec*, const FGameplayEffectContextHandle*, AController*, AActor*);
-            auto Func = reinterpret_cast<FuncType>(ImageBase + 0x93C488C);
-            Func(BuildingActor, WeaponStats->EnvDmgPB, &one, &two, &three, Owner, projectile);
-            
-        }
+           auto a =  (UFortMovementComp_Character*)Owner->MyFortPawn->CharacterMovement;
+            SendCueNew(WeaponStats->EnvDmgPB);
+            UGameplayStatics::ApplyPointDamage(Actor, WeaponStats->EnvDmgPB, Hit.Location, Hit, Owner, OwnerWeapon, a->ImpactDamageTypeClass);
     } else
     {
         if (auto BuildingActor = Cast<ABuildingSMActor>(Actor)) {

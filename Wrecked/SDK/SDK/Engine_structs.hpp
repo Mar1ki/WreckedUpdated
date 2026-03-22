@@ -7831,8 +7831,7 @@ struct alignas(0x08) FActorInstanceHandle final
 {
 public:
 	TWeakObjectPtr<class UObject>                 Actor;                                   // 0x0000(0x0008)(ZeroConstructor, IsPlainOldData, NoDestructor, UObjectWrapper, HasGetValueTypeHash, NativeAccessSpecifierPrivate)
-	TWeakObjectPtr<class ALightWeightInstanceManager> Manager;
-	uint8                                         Pad_8[0x16];                                       // 0x0008(0x0018)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	uint8                                         Pad_8[0x18];                                       // 0x0008(0x0018)(Fixing Struct Size After Last Property [ Dumper-7 ])
 };
 
 // ScriptStruct Engine.HitResult
