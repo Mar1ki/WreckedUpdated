@@ -423,6 +423,11 @@ public:
 		return ClassPtr;
 	}
 
+	inline bool IsValid() const
+	{
+		return ClassPtr != nullptr;
+	}
+	
 	inline operator UClass*() const
 	{
 		return ClassPtr;
