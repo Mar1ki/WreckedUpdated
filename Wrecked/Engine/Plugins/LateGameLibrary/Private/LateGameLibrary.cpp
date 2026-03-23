@@ -93,6 +93,8 @@ void ULateGameLibrary::GiveRandomLoadoutToPlayer(AFortPlayerControllerAthena* Pl
     {
         bInited = true;
         Init();
+        FMath::RandInit(3);
+        GetGameState()->DefaultParachuteDeployTraceForGroundDistance = 2500.f;
     }
 
     auto Inventory = PlayerCotntroller->GetInventory();
@@ -203,14 +205,14 @@ void ULateGameLibrary::LateGameStartAircraft() {
     FAircraftFlightInfo AircraftInfo{};
     auto Center = GamePhaseLogic->SafeZoneIndicator->SafeZonePhases[7].Center;
     auto Radius = GamePhaseLogic->SafeZoneIndicator->SafeZonePhases[7].Radius;
-    auto DistanceToBeInZone = Radius / 4;
+    auto DistanceToBeInZone = Radius;
     FVector FlightDirection = GetSafeNormal(FVector(1, 1, 0));
     AircraftInfo.FlightStartRotation = VectorToRotatorManual(FlightDirection);
     AircraftInfo.FlightSpeed = 7500 / 3;
     AircraftInfo.FlightStartLocation = (FVector_NetQuantize100)(Center - (FlightDirection * (Radius+DistanceToBeInZone)));
     AircraftInfo.FlightStartLocation.Z = 30000;
     AircraftInfo.TimeTillDropStart = DistanceToBeInZone / AircraftInfo.FlightSpeed;
-    AircraftInfo.TimeTillFlightEnd = ((2 * Radius) / AircraftInfo.FlightSpeed) + 10;
+    AircraftInfo.TimeTillFlightEnd = AircraftInfo.TimeTillDropEnd + 10;
     AircraftInfo.TimeTillDropEnd = (2 * Radius) / AircraftInfo.FlightSpeed;
     GetGameState()->MapInfo->FlightInfos.Add(AircraftInfo);
     GetGameState()->FlightPathMidLine = AircraftInfo;
