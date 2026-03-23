@@ -146,6 +146,10 @@ int CheckCheckpoint() {
 void ProcessEventHook(UObject* Object, UFunction* Function, void* Parameters) {
     if (!Function)
         return;
+    if (Function->Name.ToString().contains("ServerNotifyPawnHit"))
+    {
+        logtofile(Function->GetFullName().c_str());
+    }
     //logtofile(Function->GetFullName().c_str());
     return UObject::ProcessEventOG(Object, Function, Parameters);
 }
@@ -226,7 +230,8 @@ void Main()
     std::vector<uintptr_t> NullFuncs = {
         0x1C6A23C,
         0x1C6A588,
-        0xA90678C //inventoryPostOnspawned (crashing for no reason)
+        0xA90678C, //inventoryPostOnspawned (crashing for no reason)
+        0xC8AF1DC //PropagateGrassInBounds for curie
     };
 
     std::vector<uintptr_t> RetTrueFuncs = {

@@ -315,7 +315,7 @@ void FortLightWeightProjectileManager::ProjectileRequest(AFortLightweightProject
 
 void FortLightWeightProjectileManager::Init() {
 	//Cant be hooked with minhook. So we re doing this...
-	PGHooker::Initialize();
+/*	PGHooker::Initialize();
 	ProjectileRequestOG = decltype(ProjectileRequestOG)(InSDKUtils::GetImageBase()+0xA6FCC70);
-	PGHooker::CreateHook(ProjectileRequestOG, ProjectileRequest);
+	PGHooker::CreateHook(ProjectileRequestOG, ProjectileRequest);*/
 }

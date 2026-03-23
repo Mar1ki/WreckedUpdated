@@ -22,7 +22,7 @@ struct FFortLivingWorldEventGroup
 };
 namespace FortAthenaLivingWorldEvent
 {
-    static TArray<FFortLivingWorldEventGroup> AllEvents;
+    extern TArray<FFortLivingWorldEventGroup> AllEvents;
     inline UClass* GetClassFromPatchMap(const std::map<std::string, UEAllocatedString>& PatchMap, const FName& TagName)
     {
         auto Pair = PatchMap.find(TagName.ToString().c_str());

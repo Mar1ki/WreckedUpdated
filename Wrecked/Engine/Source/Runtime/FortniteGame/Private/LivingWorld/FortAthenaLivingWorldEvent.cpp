@@ -142,8 +142,11 @@ FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivin
     return EventData->ProviderFiltersTagQuery.TagDictionary[0];
 }
 std::map<std::string, UEAllocatedString> PatchMap;
+TArray<FFortLivingWorldEventGroup> FortAthenaLivingWorldEvent::AllEvents;
 void FortAthenaLivingWorldEvent::TrySpawnEvents()
 {
+
+
     auto LivingWorldManager = (UFortAthenaLivingWorldManager*)GetGameState()->GetComponentByClass(UFortAthenaLivingWorldManager::StaticClass()); // ig we can use cached lwm
     auto EventArray = GetAllWorldEvents(LivingWorldManager);
 
@@ -179,7 +182,10 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
     PatchMap.insert({"AISpawnerData.Type.Challenge.02", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_02.BP_StationProp_ChallengeQuests_02_C")});
     PatchMap.insert({"AISpawnerData.Type.Challenge.03", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_03.BP_StationProp_ChallengeQuests_03_C")});
     PatchMap.insert({"AISpawnerData.Type.Challenge.04", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_04.BP_StationProp_ChallengeQuests_04_C")});
+    PatchMap.insert({"AISpawnerData.Type.Challenge.05", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_05.BP_StationProp_ChallengeQuests_05_C")});
+    PatchMap.insert({"AISpawnerData.Type.Challenge.06", UEAllocatedString("/ChallengeQuests/ActorBlueprints/BP_StationProp_ChallengeQuests_06.BP_StationProp_ChallengeQuests_06_C")});
 
+    
     // valet
     PatchMap.insert({"Athena.Vehicle.SpawnLocation.Valet.SportsCar.Base", UEAllocatedString("/Valet/SportsCar/Valet_SportsCar_Vehicle.Valet_SportsCar_Vehicle_C")}); // alwaysspawn event
     PatchMap.insert({"Athena.Vehicle.SpawnLocation.Valet.SportsCar.Upgraded", UEAllocatedString("/Valet/SportsCar/Valet_SportsCar_Vehicle_Upgrade.Valet_SportsCar_Vehicle_Upgrade_C")}); // upgraded event
@@ -205,22 +211,21 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
 
                if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is npcs and specialists are some sort of npcs idk 
                {
-                   NpcEvents.Add(Event);
-                   AllEvents.Add({Event, ELagerEventType::Misc});
+                //   NpcEvents.Add(Event);
+                   AllEvents.Add({Event, ELagerEventType::Tandem});
                }
                else if (SpawnerTag.contains("Valet"))
                {
-                   ValetEvents.Add(Event);
+                   //ValetEvents.Add(Event);
                    AllEvents.Add({Event, ELagerEventType::Valet});
-
                }
                else if (SpawnerTag.contains("JobBoard"))
                {
-                   JobBoardEvents.Add(Event);
+                 //  JobBoardEvents.Add(Event);
                    AllEvents.Add({Event, ELagerEventType::Misc});
                } else if (SpawnerTag.contains("Challenge"))
                {
-                   ChallengeEvents.Add(Event);
+                   //ChallengeEvents.Add(Event);
                    AllEvents.Add({Event, ELagerEventType::Misc});
                }
            }
@@ -261,7 +266,7 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
            }
         } 
     } */
- /*   for (auto ChallengeEvent : ChallengeEvents)
+  /*  for (auto ChallengeEvent : ChallengeEvents)
     {
         ComputeRuntimeEvent(ChallengeEvent, ELagerEventType::Misc, nullptr);
     }
