@@ -275,14 +275,7 @@ namespace PGHooker
 void FortLightWeightProjectileManager::ProjectileRequest(AFortLightweightProjectileManager* ProjectileManager, FWeakObjectPtr PawnObject, FWeakObjectPtr WeaponDef, UClass** ProjectileConfigPTR, FVector BuletStartPosition, FVector Direction, ELightweightProjectileRequestType Type, int a8, unsigned int a9) {
 	PGHooker::DisableHookForOnce(ProjectileRequestOG);
 	ProjectileRequestOG(ProjectileManager, PawnObject, WeaponDef, ProjectileConfigPTR, BuletStartPosition, Direction, Type, a8, a9);
-	auto Pawn = (APlayerPawn_Athena_C*)PawnObject.Get();
-	if (!Pawn)
-		return;
-
-	auto PC = (AFortPlayerControllerAthena*)Pawn->GetController();
-	if (!PC)
-		return;
-
+	
 	auto WeaponData = WeaponDef.Get();
 	if (!WeaponData)
 		return;
@@ -290,32 +283,18 @@ void FortLightWeightProjectileManager::ProjectileRequest(AFortLightweightProject
 	auto WeaponRanged = Cast<AFortWeaponRanged>(WeaponData);
 	if (!WeaponRanged)
 		return;
-
-	auto ProjectileConfig = (AFortLightweightProjectileConfig*)(*ProjectileConfigPTR)->DefaultObject;
-	if (!ProjectileConfig)
-		return;
-
-	UE_LOG(LogProjectileManager, VeryVerbose, "FortLightWeightProjectileManager::ProjectileRequest: WeaponData %s, ProjectileConfig %s", WeaponData->GetName().c_str(), ProjectileConfig->GetName().c_str());
-
-	auto ProjectileSpawn = FSpawnProjectileParams();
-	ProjectileSpawn.SpawnLocation = BuletStartPosition;
-	ProjectileSpawn.SpawnDirection = VectorToRotatorManual(Direction);
-	ProjectileSpawn.OptionalAssociatedItemDef = (UFortWorldItemDefinition*)WeaponRanged->WeaponData;
-	ProjectileSpawn.InitialSpeed = ProjectileConfig->Speed.Evaluate();
-	ProjectileSpawn.MaxSpeed = ProjectileSpawn.InitialSpeed;
-	ProjectileSpawn.GravityScale = ProjectileConfig->GravityScale.Evaluate();
 	
-	static __int64(__fastcall * sub_997FB4C)(TSubclassOf<AFortProjectileAthena>*, AActor* ReuestedBy, FSpawnProjectileParams *a3) = decltype(sub_997FB4C)(InSDKUtils::GetImageBase()+0x997FB4C);
-	static UClass* (__fastcall * ProjectileStaticClass)() = decltype(ProjectileStaticClass)(InSDKUtils::GetImageBase() + 0x23B739C);
-	TSubclassOf<AFortProjectileAthena> Cl = ProjectileStaticClass();
-	auto Projectile = (AFortProjectileAthena*)sub_997FB4C(&Cl, WeaponRanged, &ProjectileSpawn);
-	if (!Projectile)
-		UE_LOG(LogProjectileManager, VeryVerbose, "Failed to spawn projectile!");
+
+	FFortLightweightProjectileRequest_Net ProjectileMultiCast;
+	ProjectileMultiCast.StartDirection = (FVector_NetQuantizeNormal)Direction;
+	ProjectileMultiCast.StartPosition = (FVector_NetQuantize10)BuletStartPosition;
+	ProjectileMultiCast.Timestamp = UFortKismetLibrary::GetServerWorldTimeSeconds(GetWorld());
+	WeaponRanged->MulticastProjectileRequestUnreliable(ProjectileMultiCast);
 }
 
 void FortLightWeightProjectileManager::Init() {
 	//Cant be hooked with minhook. So we re doing this...
-/*	PGHooker::Initialize();
+	PGHooker::Initialize();
 	ProjectileRequestOG = decltype(ProjectileRequestOG)(InSDKUtils::GetImageBase()+0xA6FCC70);
-	PGHooker::CreateHook(ProjectileRequestOG, ProjectileRequest);*/
+	PGHooker::CreateHook(ProjectileRequestOG, ProjectileRequest);
 }

@@ -215,10 +215,10 @@ void FortProjectileAthena::ServerNotifyPawnHit(
 void FortProjectileAthena::Init() {
 	UHook* Hook = new UHook();
 
-	Hook->Address = ImageBase + 0x910F4D4;
+	/*Hook->Address = ImageBase + 0x910F4D4;
 	Hook->Detour = ServerNotifyPawnHit;
 	Hook->Original = (void**)&ServerNotifyPawnHitOG;
-	UKismetHookingLibrary::Hook(Hook, EHook::Address);
+	UKismetHookingLibrary::Hook(Hook, EHook::Address);*/
 
 	delete Hook;
 }
