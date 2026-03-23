@@ -38,6 +38,7 @@
 #include "SDK/SDK/InfernoRuntime_classes.hpp"
 #include "Engine/Source/Runtime/FortniteGame/Public/Conversation/ConversationLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Online/FortGameSessionDedicated.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Weapons/FortWeaponRanged.h"
 #endif
 //#define Client
 inline __int64 (*SendRequestNowOG)(UMcpProfileGroup* Group, void* HttpRequest, int a3);
@@ -220,6 +221,7 @@ void Main()
     FortControllerComponent_RechargeWeapons::Init();
     BuildingProp_ConversationCompatible::Init();
     BuildingSMActor::Init();
+    FortWeaponRanged::Init();
 
     UHook* Hook = new UHook();
 

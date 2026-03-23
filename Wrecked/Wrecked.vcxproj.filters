@@ -58,6 +58,10 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\Components\FortControllerComponent_RechargeWeapons.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldDensityGrid.cpp" />
     <ClCompile Include="Engine\Plugins\LateGameLibrary\Private\LateGameLibrary.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingProp_ConversationCompatible.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Building\BuildingSMActor.cpp" />
+    <ClCompile Include="SDK\SDK\LagerRuntime_functions.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponRanged.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\Plugins\HookingLibrary\Public\HookingLibrary.h" />
@@ -105,5 +109,8 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Components\FortControllerComponent_RechargeWeapons.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldDensityGrid.h" />
     <ClInclude Include="Engine\Plugins\LateGameLibrary\Public\LateGameLibrary.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingProp_ConversationCompatible.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingSMActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponRanged.h" />
   </ItemGroup>
 </Project>
