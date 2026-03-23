@@ -372,12 +372,9 @@ void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* 
 {
     if (!BuildingActorToEdit || BuildingActorToEdit->EditingPlayer != PlayerController->PlayerState || BuildingActorToEdit->bDestroyed || !PlayerController->MyFortPawn) return;
     auto PlayerState = (AFortPlayerState*)PlayerController->PlayerState;
-    auto RepairCost =  PlayerState->AttributeSets.ConstructionSet->RepairCost.CurrentValue;
-
     
     BuildingActorToEdit->EditingPlayer = nullptr;
     BuildingActorToEdit->OnRep_EditingPlayer();
-
 
     AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
     if (EditingTool)
@@ -385,6 +382,13 @@ void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* 
         EditingTool->EditActor = nullptr;
         EditingTool->OnRep_EditActor();
     }
+}
+
+void FortPlayerController::ServerRepairBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToRepair)
+{
+    PlayerController->PayBuildingRepairCost(BuildingActorToRepair);
+    std::cout << "repair" << std::endl;
+    BuildingActorToRepair->RepairBuilding(PlayerController, BuildingActorToRepair->GetCostToRepair(PlayerController));
 }
 
 void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Controller, FGuid ItemGuid)
@@ -738,7 +742,12 @@ void FortPlayerController::Init()
     Hook->Class = AFortPlayerController::StaticClass();
     Hook->Detour = ServerEndEditingBuildingActor;
     UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
-
+    
+    Hook->Address = 0x1260 / 8;
+    Hook->Class = AFortPlayerController::StaticClass();
+    Hook->Detour = ServerRepairBuildingActor;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+    
     Hook->Address = 0x1FB;
     Hook->Class = AFortPlayerController::StaticClass();
     Hook->Detour = ServerPlayEmoteItem;

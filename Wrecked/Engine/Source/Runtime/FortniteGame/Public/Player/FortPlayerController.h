@@ -43,3 +43,8 @@ inline ABuildingSMActor* ABuildingSMActor::ReplaceBuildingActor(EBuildingReplace
     static ABuildingSMActor* (*ReplaceBuildingActorInternal)(ABuildingSMActor* ,EBuildingReplacementType ReplacementType, TSubclassOf<ABuildingSMActor> ReplacementClass, unsigned int ReplacementUpgradeLevel, int RotationIterations, bool InbMirrored,AFortPlayerController *EditingController) = decltype(ReplaceBuildingActorInternal)(ImageBase + 0x93CBCD0);
     return ReplaceBuildingActorInternal(this, ReplacementType, ReplacementClass, ReplacementUpgradeLevel, RotationIterations, InbMirrored, EditingController);
 }
+inline int ABuildingSMActor::GetCostToRepair(AFortPlayerController *Controller)
+{ 
+    static int (*GetCostToRepairInternal)(ABuildingSMActor*, AFortPlayerController *EditingController) = decltype(GetCostToRepairInternal)(this->VTable[0xE58]);
+    return GetCostToRepairInternal(this,Controller);
+}

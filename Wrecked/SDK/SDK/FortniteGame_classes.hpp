@@ -2990,6 +2990,7 @@ public:
 	bool ShouldUsePhysicalMaterialForFootstep() const;
 	bool WillRegisterWithStructuralGrid() const;
 	ABuildingSMActor* ReplaceBuildingActor(EBuildingReplacementType ReplacementType, TSubclassOf<ABuildingSMActor> ReplacementClass, unsigned int ReplacementUpgradeLevel, int RotationIterations, bool InbMirrored, AFortPlayerController* EditingController);
+	int GetCostToRepair(AFortPlayerController* Controller);
 
 public:
 	static class UClass* StaticClass()
