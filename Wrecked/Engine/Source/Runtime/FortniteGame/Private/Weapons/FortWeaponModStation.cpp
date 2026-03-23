@@ -138,4 +138,6 @@ void FortWeaponModStation::Init()
     Hook->Detour = ServerPurchaseRemoveModImplementation;
     Hook->Original = (void**)&ServerPurchaseRemoveModImplementationOG;
     UKismetHookingLibrary::Hook(Hook, Address);
+
+    delete Hook;
 }

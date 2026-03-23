@@ -205,6 +205,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Kismet\FortKismetLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Player\FortPlayerController.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponModStation.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponRanged.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\Projectiles\FortLightWeightProjectileManager.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\Projectiles\FortProjectileAthena.h" />
     <ClInclude Include="Engine\Source\Runtime\GameplayAbilities\Public\AbilitySystemComponent.h" />
@@ -329,6 +330,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Player\FortPlayerPawn.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponModFunctionLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponModStation.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\FortWeaponRanged.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\Projectiles\FortLightWeightProjectileManager.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Weapons\Projectiles\FortProjectileAthena.cpp" />
     <ClCompile Include="Engine\Source\Runtime\GameplayAbilities\Private\AbilitySystemComponent.cpp" />
