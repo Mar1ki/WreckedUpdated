@@ -653,6 +653,18 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             auto vending = StaticLoadObject<UClass>("/Game/Building/ActorBlueprints/Stations/BP_StationProp_VendingMachine_E_Assault.BP_StationProp_VendingMachine_E_Assault_C");
             GetWorld()->SpawnActor(vending, newloc, Pawn->K2_GetActorRotation(), nullptr);
         }
+        if (Command == "points")
+        {
+            auto objs = GetObjectsOfClass<AFortAthenaLivingWorldStaticPointProvider>();
+            for (auto obj : objs)
+            {
+                std::cout << obj->Name.ToString().c_str() << std::endl;
+                for (auto tag : obj->FiltersTags.GameplayTags)
+                {
+                    std::cout << tag.TagName.ToString().c_str() << std::endl;
+                }
+            }
+        }
         if (Command == "getmmeinfo") {
             auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
             Controller->ClientMessage(L"ActiveLayeredMovementModeRuntimeData", FName(), 1);
