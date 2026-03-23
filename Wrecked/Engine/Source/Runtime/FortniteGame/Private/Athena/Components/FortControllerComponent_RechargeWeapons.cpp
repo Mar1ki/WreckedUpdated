@@ -3,7 +3,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/FortControllerComponent_RechargeWeapons.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 
-void something()
+void FortControllerComponent_RechargeWeapons::TickComponent()
 {
     auto Controllers = 	UFortKismetLibrary::GetAllFortPlayerControllers(GetWorld(), true, false);
     for (auto Controller : Controllers)
@@ -48,10 +48,9 @@ void something()
     }
 }
 
-
 void FortControllerComponent_RechargeWeapons::Dummy(__int64 *Component, float DeltaTime)
 {
-    something();
+    TickComponent();
     DummyOG(Component, DeltaTime);
 }
 void FortControllerComponent_RechargeWeapons::Init() {

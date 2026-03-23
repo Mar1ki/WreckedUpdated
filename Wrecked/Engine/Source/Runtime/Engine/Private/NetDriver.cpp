@@ -2,6 +2,8 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/Engine/Classes/Engine/NetDriver.h"
 
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/FortControllerComponent_RechargeWeapons.h"
+
 void NetDriver::SendClientMoveAdjustments(UNetDriver* Driver)
 {
 	static void (*SendClientAdjustment)(INetworkPredictionInterface*) = decltype(SendClientAdjustment)(ImageBase + 0x6A3F8A8);
@@ -46,6 +48,7 @@ void NetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 		FSendUpdateParams Params;
 		Params.DeltaSeconds = DeltaSeconds;
 		PreSendUpdate(ReplicationSystem, Params);
+		FortControllerComponent_RechargeWeapons::TickComponent();
 	}
 	
     return TickFlushOriginal(NetDriver, DeltaSeconds);
