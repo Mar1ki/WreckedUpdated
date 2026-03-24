@@ -191,6 +191,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\FortAthenaBTService_PickUpLoot.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\FortniteAI\FortAthenaPatrolPath.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortInventoryOwnerInterface.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortPickup.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortPlayerAugmentItemDefinition.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\InventoryManagementLibrary.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Items\FortWorldItem.h" />
@@ -317,6 +318,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortInventoryOwnerInterface.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortPlayerAugmentItemDefinition.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FotPickup.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldDensityGrid.cpp" />
