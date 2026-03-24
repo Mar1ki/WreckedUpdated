@@ -224,6 +224,9 @@ void Main()
     FortAthenaBTService_PickUpLoot::Init();
     FortAthenaLivingWorldDensityGrid::Hook();
     FortControllerComponent_RechargeWeapons::Init();
+    BuildingProp_ConversationCompatible::Init();
+    BuildingSMActor::Init();
+    FortWeaponRanged::Init();
 
     UHook* Hook = new UHook();
 
