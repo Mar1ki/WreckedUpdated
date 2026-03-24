@@ -111,5 +111,8 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Components\FortControllerComponent_RechargeWeapons.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\LivingWorld\FortAthenaLivingWorldDensityGrid.h" />
     <ClInclude Include="Engine\Plugins\LateGameLibrary\Public\LateGameLibrary.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingProp_ConversationCompatible.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Building\BuildingSMActor.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Weapons\FortWeaponRanged.h" />
   </ItemGroup>
 </Project>
