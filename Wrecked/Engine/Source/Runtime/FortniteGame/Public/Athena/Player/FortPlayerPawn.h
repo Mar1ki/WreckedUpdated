@@ -7,6 +7,8 @@ namespace FortPlayerPawn {
 	static void ServerSendZiplineState(UObject* Context, FFrame& Params);
 	DefineOriginal(void, TryAutoPickup, AFortPlayerPawn* Pawn, AFortPickupAthena* Pickup);
 	DefineOriginal(void, test, __int64* a1, __int64* a2);
+	DefineOriginal(void, ServerReviveFromDBNO, AFortPlayerPawn* DbnoPawn, AFortPlayerControllerAthena* EventInstigator);
+	void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, AFortPickup* Pickup, FFortPickupRequestInfo& Params);
 
 	void Init();
 }
