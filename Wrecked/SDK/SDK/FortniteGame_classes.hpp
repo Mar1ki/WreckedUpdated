@@ -35760,6 +35760,8 @@ public:
 	bool IsSkeletalMeshComponent() const;
 	bool PickedUp() const;
 	UFortWeaponModSetData* GetWeaponModsetData();
+	void SetPickupTarget(AFortPlayerPawn* PlayerPawn, float FlyTime, FVector Direction);
+
 
 public:
 	static class UClass* StaticClass()

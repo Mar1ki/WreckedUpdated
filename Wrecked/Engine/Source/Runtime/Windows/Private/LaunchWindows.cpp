@@ -319,8 +319,8 @@ void Main()
     {
         UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(),  L"open DelMar_Tutorials_SeamlessTutorialRun", nullptr);
     } 
-    else if (CurrentGamemode == EGameModeType::Valkyrie) {
-        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"open /Game/TestMap/TestMap.TestMap", nullptr);
+    else if (CurrentGamemode == EGameModeType::BlastBerry) {
+        UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"open /Game/BlastBerryMap/NewWorld.NewWorld", nullptr);
     }
     else
     {

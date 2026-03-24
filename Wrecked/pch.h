@@ -74,7 +74,7 @@ enum EGameModeType
         Creative, // creative
         STW, // Save the world
         Delmar,
-        Valkyrie,
+        BlastBerry,
 };
 
 struct FActorSpawnParameters

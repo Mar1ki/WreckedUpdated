@@ -8,27 +8,7 @@
 
 void FortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, AFortPickup* Pickup, FFortPickupRequestInfo& Params)
 {
-    if (!Pickup || Pickup->bPickedUp)
-        return;
-
-    auto PlayerController = (AFortPlayerControllerAthena*)Pawn->GetController();
-
-    if (!PlayerController || !Pickup->PrimaryPickupItemEntry.ItemDefinition)
-        return;
-
-    Pawn->IncomingPickups.Add(Pickup);
-
-    Pickup->PickupLocationData.bPlayPickupSound = Params.bPlayPickupSound;
-    Pickup->PickupLocationData.FlyTime = 0.40f;
-    Pickup->PickupLocationData.ItemOwner = Pawn;
-    Pickup->PickupLocationData.PickupGuid = Pickup->PrimaryPickupItemEntry.ItemGuid;
-    Pickup->PickupLocationData.PickupTarget = Pawn;
-    Pickup->PickupLocationData.StartDirection = (FVector_NetQuantizeNormal)Params.Direction;
-    Pickup->OnRep_PickupLocationData();
-
-    Pickup->bPickedUp = true;
-    Pickup->OnRep_bPickedUp();
-    return ServerHandlePickupInfoOG(Pawn, Pickup, Params);
+    Pickup->SetPickupTarget(Pawn, Params.FlyTime / Pawn->PickupSpeedMultiplier, Params.Direction);
 }
 
 void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
