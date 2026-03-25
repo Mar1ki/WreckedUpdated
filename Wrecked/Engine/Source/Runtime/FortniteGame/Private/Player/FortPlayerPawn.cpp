@@ -299,7 +299,6 @@ void FortPlayerPawn::Init() {
     Hook->Address = 0x24B;
     Hook->Class = AFortPlayerPawn::StaticClass();
     Hook->Detour = ServerHandlePickupInfo;
-    Hook->Original = (void**)&ServerHandlePickupInfoOG;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
     Hook->Address = ImageBase + 0x2784A48;
