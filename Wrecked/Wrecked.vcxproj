@@ -318,7 +318,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortInventoryOwnerInterface.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortPlayerAugmentItemDefinition.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortWorldItem.cpp" />
-    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FotPickup.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\FortPickup.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Items\InventoryManagementLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Kismet\FortKismetLibrary.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\LivingWorld\FortAthenaLivingWorldDensityGrid.cpp" />
