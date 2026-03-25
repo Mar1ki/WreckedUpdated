@@ -25,7 +25,7 @@ void FortPlayerController::ServerAcknowledgePossession(AFortPlayerControllerAthe
     
     reinterpret_cast<void(*)(void*)>(ImageBase + 0x993F158)(PlayerState->GetInterfaceAddress<IAbilitySystemInterface>()); // ability stuff
 
-    if (CurrentGamemode == EGameModeType::Athena) {
+    if (CurrentGamemode == EGameModeType::Athena || CurrentGamemode == EGameModeType::BlastBerry) {
         Controller->XPComponent->bRegisteredWithQuestManager = true;
         Controller->XPComponent->OnRep_bRegisteredWithQuestManager();
         Controller->GetQuestManager(ESubGame::Athena)->InitializeQuestAbilities(Pawn);
@@ -304,18 +304,19 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
             if (auto BuildingSMActor = GetWorld()->SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot))
             {
                 BuildingSMActor->CurrentBuildingLevel = CreateBuildingData.BuildingClassData.UpgradeLevel = 0;
+                BuildingSMActor->OnRep_CurrentBuildingLevel();
 
-                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true, nullptr, true);
+                BuildingSMActor->SetMirrored(CreateBuildingData.bMirrored);
                 BuildingSMActor->bPlayerPlaced = true;
+                
+                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true, nullptr, false);
 
                 
                 if (auto PlayerState = (AFortPlayerStateAthena*)PlayerController->PlayerState)
                 {
-                    BuildingSMActor->Team = EFortTeam(PlayerState->TeamIndex);
                     BuildingSMActor->TeamIndex = PlayerState->TeamIndex;
                     BuildingSMActor->SetTeam(PlayerState->TeamIndex);
                     BuildingSMActor->OnRep_Team();
-
                 }
             }
         }
@@ -329,6 +330,7 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
         return;
 
     BuildingActorToEdit->EditingPlayer = PlayerStateZone;
+    BuildingActorToEdit->OnRep_EditingPlayer();
     
     static UFortEditToolItemDefinition* EditToolItemDefinition = GetAssetManager()->GameDataCommon->EditToolItem.Get();
     if (!EditToolItemDefinition)
@@ -355,7 +357,6 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
     if (!PlayerController || !BuildingActorToEdit || !BuildingActorToEdit->IsA(ABuildingSMActor::StaticClass()) || !PlayerController->MyFortPawn)
         return;
 
-    BuildingActorToEdit->EditingPlayer = nullptr;
     BuildingActorToEdit->ReplacementDestructionReason = EBuildingReplacementType::BRT_Edited;
 
    auto NewBuild =  BuildingActorToEdit->ReplaceBuildingActor(EBuildingReplacementType::BRT_Edited, NewBuildingClass, BuildingActorToEdit->CurrentBuildingLevel, RotationIterations, bMirrored, PlayerController);
@@ -372,23 +373,27 @@ void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* 
 {
     if (!BuildingActorToEdit || BuildingActorToEdit->EditingPlayer != PlayerController->PlayerState || BuildingActorToEdit->bDestroyed || !PlayerController->MyFortPawn) return;
     auto PlayerState = (AFortPlayerState*)PlayerController->PlayerState;
+
     
     BuildingActorToEdit->EditingPlayer = nullptr;
+    BuildingActorToEdit->ForceNetUpdate();
     BuildingActorToEdit->OnRep_EditingPlayer();
 
     AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
     if (EditingTool)
     {
         EditingTool->EditActor = nullptr;
+        EditingTool->ForceNetUpdate();
         EditingTool->OnRep_EditActor();
     }
 }
 
 void FortPlayerController::ServerRepairBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToRepair)
 {
+    auto aa = BuildingActorToRepair->GetCostToRepair(PlayerController);
     PlayerController->PayBuildingRepairCost(BuildingActorToRepair);
     std::cout << "repair" << std::endl;
-    BuildingActorToRepair->RepairBuilding(PlayerController, BuildingActorToRepair->GetCostToRepair(PlayerController));
+    BuildingActorToRepair->RepairBuilding(PlayerController, aa);
 }
 
 void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Controller, FGuid ItemGuid)
