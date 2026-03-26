@@ -276,6 +276,10 @@ FFortItemEntry FortKismetLibrary::ConstructItemEntry(UFortItemDefinition* ItemDe
 }
 
 int FortKismetLibrary::GetMaxStackSize(UFortItemDefinition* Item) {
+	// yes that like ass but the items return 500
+	if (Item->ItemType == EFortItemType::WorldResource)
+		return 500;
+	
 	static auto MaxStackSizeClass = (UClass*)SDK::UObject::FindObjectFast("ItemComponentData_MaxStackSize", EClassCastFlags::Struct);
 	for (auto Struct : Item->DataList) {
 		auto StructType = (UScriptStruct*)Struct.ScriptStruct.ObjectPtr.Handle.pointerOrRef;
