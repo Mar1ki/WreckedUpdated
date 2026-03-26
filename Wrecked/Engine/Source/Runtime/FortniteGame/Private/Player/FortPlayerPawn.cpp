@@ -139,6 +139,7 @@ void ServerThrowCarriedPlayer(UObject* Object, FFrame* Frame)
     Pawn->OnRep_DBNOHoisterData(previous);
     Pawn->OnRep_DBNOHoistee();
 }
+// thats startdbno i think
 void FortPlayerPawn::test(__int64* a1, __int64* a2)
 {
     std::cout << "helo" << std::endl;
@@ -160,14 +161,15 @@ void FortPlayerPawn::Init() {
     Hook->Address = ImageBase + 0xA149FB8;
     Hook->Detour = TryAutoPickup;
     UKismetHookingLibrary::Hook(Hook, Address);
-    
-    Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerHoistDBNOPlayer";
+
+    // broken rn
+   /* Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerHoistDBNOPlayer";
     Hook->Detour = ServerHoistDBNOPlayer;
     UKismetHookingLibrary::Hook(Hook, Exec);
 
     Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerThrowCarriedPlayer";
     Hook->Detour = ServerThrowCarriedPlayer;
-    UKismetHookingLibrary::Hook(Hook, Exec);
+    UKismetHookingLibrary::Hook(Hook, Exec);*/
 
     Hook->Address = 3224 / 8;
     Hook->Class = AFortPlayerPawn::StaticClass();
