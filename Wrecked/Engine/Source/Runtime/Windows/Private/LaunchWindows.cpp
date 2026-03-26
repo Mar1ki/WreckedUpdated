@@ -227,6 +227,7 @@ void Main()
     BuildingProp_ConversationCompatible::Init();
     BuildingSMActor::Init();
     FortWeaponRanged::Init();
+    FortPickup::Init();
 
     UHook* Hook = new UHook();
 

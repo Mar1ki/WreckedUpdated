@@ -113101,6 +113101,7 @@ public:
 class IFortInventoryOwnerInterface final
 {
 public:
+	const AFortPawn* GetPawn();
 	static class UClass* StaticClass()
 	{
 		return StaticClassImpl<"FortInventoryOwnerInterface">();

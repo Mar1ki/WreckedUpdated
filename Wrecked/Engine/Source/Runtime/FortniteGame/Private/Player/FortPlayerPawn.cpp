@@ -8,7 +8,8 @@
 
 void FortPlayerPawn::ServerHandlePickupInfo(AFortPlayerPawn* Pawn, AFortPickup* Pickup, FFortPickupRequestInfo& Params)
 {
-    Pickup->SetPickupTarget(Pawn, Params.FlyTime / Pawn->PickupSpeedMultiplier, Params.Direction);
+    auto FlyTime = Params.FlyTime / Pawn->PickupSpeedMultiplier;
+    Pickup->SetPickupTarget(Pawn, FlyTime, Params.Direction);
 }
 
 void FortPlayerPawn::ServerSendZiplineState(UObject* Context, FFrame& Params) {
@@ -301,10 +302,10 @@ void FortPlayerPawn::Init() {
     Hook->Detour = ServerHandlePickupInfo;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
-    Hook->Address = ImageBase + 0x2784A48;
+    /*Hook->Address = ImageBase + 0x2784A48;
     Hook->Detour = OnAboutToEnterBackpack;
     Hook->Original = (void**)&OnAboutToEnterBackpackOG;
-    UKismetHookingLibrary::Hook(Hook, Address);
+    UKismetHookingLibrary::Hook(Hook, Address);*/
 
     Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerSendZiplineState";
     Hook->Detour = ServerSendZiplineState;
