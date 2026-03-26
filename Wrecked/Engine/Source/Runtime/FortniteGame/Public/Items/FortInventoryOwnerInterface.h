@@ -11,7 +11,3 @@ namespace FortInventoryOwnerInterface {
 
 	void Init();
 }
-inline const AFortPawn* IFortInventoryOwnerInterface::GetPawn()
-{
-	return ((const AFortPawn* (*)(IFortInventoryOwnerInterface*))(*(void***)this)[9])(this);
-}

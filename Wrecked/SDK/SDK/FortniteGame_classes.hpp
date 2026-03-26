@@ -113101,7 +113101,10 @@ public:
 class IFortInventoryOwnerInterface final
 {
 public:
-	const AFortPawn* GetPawn();
+	inline const AFortPawn* GetPawn()
+	{
+	    return ((const AFortPawn* (*)(IFortInventoryOwnerInterface*))(*(void***)this)[9])(this);
+    }
 	static class UClass* StaticClass()
 	{
 		return StaticClassImpl<"FortInventoryOwnerInterface">();
