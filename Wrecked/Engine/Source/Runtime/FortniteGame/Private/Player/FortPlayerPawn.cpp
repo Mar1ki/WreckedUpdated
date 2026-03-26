@@ -230,6 +230,15 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
     auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
     auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
 
+    FFortPickupRequestInfo PickupInfo;
+    PickupInfo.bIsAutoPickup = true;
+    PickupInfo.bIsVisualOnlyPickup = false;
+    PickupInfo.bPlayPickupSound = true;
+    PickupInfo.bTrySwapWithWeapon = false;
+    PickupInfo.bUseRequestedSwap = false;
+    PickupInfo.FlyTime = Pickup->PickupLocationData.FlyTime;
+    PickupInfo.Direction = Pickup->PickupLocationData.StartDirection;
+    
     if (!Pawn->IsA(AFortPlayerPawnAthena::StaticClass())) return;
     
     if (Pickup->PawnWhoDroppedPickup != Pawn)
@@ -241,12 +250,24 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
             auto ItemToStack = Inventory->GetItemEntryByDef(ItemDefinition);
             if (ItemToStack && ItemToStack->Count < MaxStack)
             {
-                Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
+                Pawn->ServerHandlePickupInfo(Pickup, PickupInfo);
             }
         }
-        if (Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortAmmoItemDefinition::StaticClass()) || Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortResourceItemDefinition::StaticClass())) 
+        if (Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortResourceItemDefinition::StaticClass()))
         {
-            Pawn->ServerHandlePickup(Pickup, Pickup->PickupLocationData.FlyTime, Pickup->PickupLocationData.StartDirection, Pickup->PickupLocationData.bPlayPickupSound);
+            if (ItemDefinition->ItemType == EFortItemType::WorldResource)
+            {
+                auto MaxStack = FortKismetLibrary::GetMaxStackSize(ItemDefinition);
+                auto ItemToStack = Inventory->GetItemEntryByDef(ItemDefinition);
+                if (ItemToStack && ItemToStack->Count < MaxStack)
+                {
+                    Pawn->ServerHandlePickupInfo(Pickup, PickupInfo);
+                }
+            }
+        }
+        if (Pickup->PrimaryPickupItemEntry.ItemDefinition->IsA(UFortAmmoItemDefinition::StaticClass())) 
+        {
+            Pawn->ServerHandlePickupInfo(Pickup, PickupInfo);
         }
     }
 }
