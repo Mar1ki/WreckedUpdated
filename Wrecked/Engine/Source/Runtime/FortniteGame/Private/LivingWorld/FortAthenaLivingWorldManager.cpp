@@ -23,6 +23,7 @@ void FortAthenaLivingWorldManager::TrySpawnEvent(UObject* Object, FFrame* Frame)
 
 void FortAthenaLivingWorldManager::HandleGamePhaseStepChanged(UObject* Object, FFrame* Frame)
 {
+    if (!bEnableLWM) return;
     auto Logic = (UFortGameStateComponent_BattleRoyaleGamePhaseLogic*)Object;
     auto GamePhaseStep =  Logic->GamePhaseStep;
 

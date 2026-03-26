@@ -723,6 +723,7 @@ inline FRotator VectorToRotatorManual(FVector DirectionVector)
 }
 constexpr bool bLateGame = false;
 constexpr bool bUseExperimentalDamaging = true;
+constexpr bool bEnableLWM = true;
 constexpr float WarmupDuration = 500.f;
 inline EGameModeType CurrentGamemode = EGameModeType::Athena;
 #endif //PCH_H
