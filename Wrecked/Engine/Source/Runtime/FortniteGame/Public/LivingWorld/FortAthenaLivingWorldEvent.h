@@ -38,6 +38,25 @@ namespace FortAthenaLivingWorldEvent
     {
         return Event->ActivationGamePhaseStep;
     }
+    inline UFortAthenaAISpawnerDataComponentList* GetSpawnerDataListFromTandemEvent(FFortAthenaLivingWorldEvent* Event)
+    {
+        auto TandemTag = Event->EventDatas[0].EventData.Get()->ProviderFiltersTagQuery.TagDictionary[0];
+        FString LastPart;
+        UKismetStringLibrary::Split(UKismetStringLibrary::Conv_NameToString(TandemTag.TagName), TEXT("."), nullptr, &LastPart, ESearchCase::IgnoreCase, ESearchDir::FromEnd);
+        auto SpawnerDataFullName = "BP_AIBotSpawnerData_NPC_" + LastPart.ToString() + ".BP_AIBotSpawnerData_NPC_" + LastPart.ToString() + "_C";
+        auto Path = "/NPCLibrary/NPCs/" + LastPart.ToString() + "/" + SpawnerDataFullName;
+        std::cout << Path << std::endl;
+        
+        auto Obj = StaticLoadObject<UClass>(Path);
+        if (Obj)
+        {
+            return UFortAthenaAISpawnerData::CreateComponentListFromClass(Obj, UWorld::GetWorld());
+        } else
+        {
+            return nullptr;
+        }
+        
+    }
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager);
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEventsFromTable(UDataTable* CategoryDataTable);
 
