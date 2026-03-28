@@ -17,6 +17,23 @@ void FortAthenaPatrolPath::GetPatrolPoints(UObject* Object, FFrame& Params)
 }
 
 
+AFortAthenaPatrolPoint* FortAthenaPatrolPath::GetRandomPatrolPointFromPatrolPath(AFortAthenaPatrolPath* PatrolPath)
+{
+    TArray<AFortAthenaPatrolPoint*> RandArray;   
+
+    for (auto PatrolPoint : PatrolPath->PatrolPoints)
+    {
+        if (PatrolPoint)
+        {
+            RandArray.Add(PatrolPoint);
+        }
+    }
+    if (RandArray.IsEmpty())
+    {
+        return nullptr;
+    }
+    return RandArray[FMath::RandHelper(RandArray.Num())];
+}
 
 void FortAthenaPatrolPath::Init()
 {

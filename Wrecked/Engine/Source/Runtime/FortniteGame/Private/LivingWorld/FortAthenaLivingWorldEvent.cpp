@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
 
+#include "Engine/Source/Runtime/FortniteGame/Public/FortniteAI/FortAthenaPatrolPath.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
 
 
@@ -191,70 +192,26 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
 
                if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is npcs and specialists are some sort of npcs idk 
                {
-                //   NpcEvents.Add(Event);
                    AllEvents.Add({Event, ELagerEventType::Tandem});
                }
                else if (SpawnerTag.contains("Valet"))
                {
-                   //ValetEvents.Add(Event);
                    AllEvents.Add({Event, ELagerEventType::Valet});
                }
                else if (SpawnerTag.contains("JobBoard"))
                {
-                 //  JobBoardEvents.Add(Event);
                    AllEvents.Add({Event, ELagerEventType::Misc});
                } else if (SpawnerTag.contains("Challenge"))
                {
-                   //ChallengeEvents.Add(Event);
                    AllEvents.Add({Event, ELagerEventType::Misc});
+               }
+               else if (SpawnerTag.contains("MoonFlax"))
+               {
+                   AllEvents.Add({Event, ELagerEventType::Boss});
                }
            }
        }
     }
-   /*for (auto JobBoardEvent : JobBoardEvents)
-     {
-         ComputeRuntimeEvent(JobBoardEvent, ELagerEventType::Misc, nullptr);
-     }
-    std::cout << "Challenge: " << ChallengeEvents.Num() << std::endl;*/
-    
-
-    /*for (auto NpcEvent : NpcEvents)
-    {
-        for (auto EventData : NpcEvent->EventDatas)
-        {
-           for (auto ActorDesc : EventData.EventData->ActorDescriptions)
-           {
-               // if u have a better way for making this whole ass path then do it
-               auto SpawnerTagFull = ActorDesc.SpawnerDataTagQuery.TagDictionary[0].TagName.ToString();
-               size_t lastDot = SpawnerTagFull.find_last_of('.');
-               UEAllocatedString npcName = (lastDot != UEAllocatedString::npos) ? SpawnerTagFull.substr(lastDot + 1) : SpawnerTagFull;
-
-               UEAllocatedString result = "/NPCLibrary/NPCs/" + npcName + "/BP_AIBotSpawnerData_NPC_" + npcName + ".BP_AIBotSpawnerData_NPC_" + npcName + "_C";
-               auto SpawnerClass = StaticLoadObject<UClass>(result);
-
-               if (SpawnerClass)
-               {
-                   auto ComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(SpawnerClass, UWorld::GetWorld());
-                   auto PatrolPaths =  GetPatrolPathsFromTagQuery(ActorDesc.SpawnerDataTagQuery.TagDictionary[0]); // some npcs have more paths we will need to test it
-                   auto RandomPath = PatrolPaths[rand() % PatrolPaths.Num()];
-                   auto RandomPatrolPoint = RandomPath->PatrolPoints[rand() % RandomPath->PatrolPoints.Num()];
-                   ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, RandomPatrolPoint->GetTransform(), true);
-                   
-                   // auto Loc = RandomPatrolPoint->K2_GetActorLocation();
-                   //std::cout << "Spawned at: X=" << Loc.X << " Y=" << Loc.Y << " Z=" << Loc.Z << std::endl;
-               }
-           }
-        } 
-    } */
-  /*  for (auto ChallengeEvent : ChallengeEvents)
-    {
-        ComputeRuntimeEvent(ChallengeEvent, ELagerEventType::Misc, nullptr);
-    }
-
-    for (auto ValetEvent : ValetEvents)
-    {
-        ComputeRuntimeEvent(ValetEvent, ELagerEventType::Valet, nullptr);
-    }*/
 }
 bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent* InEvent, ELagerEventType EventType, UClass* OptionalActorClass = nullptr)
 {
@@ -303,6 +260,19 @@ bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent
         auto PatrolPoint = PatrolPath->GetPatrolPoint(1);
         ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(idk, PatrolPoint->GetTransform(), false);
           
+        return true;
+    } else if (EventType == ELagerEventType::Boss)
+    {
+        auto PatrolPath = GetPatrolPathFromEvent(InEvent);
+        if (PatrolPath->bUseRandomStartupPatrolPoint)
+        {
+            auto PatrolPoint = FortAthenaPatrolPath::GetRandomPatrolPointFromPatrolPath(PatrolPath);
+        } else
+        {
+            auto PatrolPoint = PatrolPath->GetPatrolPoint(1);
+        }
+
+        
         return true;
     }
     else

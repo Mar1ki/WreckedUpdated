@@ -228,6 +228,9 @@ void Main()
     BuildingSMActor::Init();
     FortWeaponRanged::Init();
     FortPickup::Init();
+    std::random_device rd;
+    FMath::RandInit(rd());
+
 
     UHook* Hook = new UHook();
 

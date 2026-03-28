@@ -93,7 +93,6 @@ void ULateGameLibrary::GiveRandomLoadoutToPlayer(AFortPlayerControllerAthena* Pl
     {
         bInited = true;
         Init();
-        FMath::RandInit(3);
         GetGameState()->DefaultParachuteDeployTraceForGroundDistance = 2500.f;
     }
 

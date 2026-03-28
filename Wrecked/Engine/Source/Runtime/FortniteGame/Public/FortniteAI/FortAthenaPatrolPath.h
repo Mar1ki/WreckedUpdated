@@ -5,5 +5,6 @@
 namespace FortAthenaPatrolPath
 {
     void GetPatrolPoints(UObject* Object, FFrame& Params);
+    AFortAthenaPatrolPoint* GetRandomPatrolPointFromPatrolPath(AFortAthenaPatrolPath* PatrolPath);
     void Init();
 }
