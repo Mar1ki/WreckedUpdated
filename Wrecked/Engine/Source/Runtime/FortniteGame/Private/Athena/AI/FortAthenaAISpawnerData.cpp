@@ -140,8 +140,7 @@ void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAIS
 	{
 		Loadout.Dances.Add(GetRandomObjectOfClass<UAthenaDanceItemDefinition>());
 	}
-
-		
+	
 	AIBotController->CosmeticLoadoutBC.GetTyped() = Loadout;
 	Casted->CosmeticLoadout = Loadout;
 	BotState->OnRep_CharacterData(); 
@@ -151,8 +150,7 @@ void FortAthenaAISpawnerData::AIBotPhoebeCosmeticLibraryOnSpawned(UFortAthenaAIS
 		ApplyCharacterCustomization(BotState, Casted);
 		UFortKismetLibrary::UpdatePlayerCustomCharacterPartsVisualization(BotState);
 	}
-
-
+	
 	AIBotPhoebeCosmeticLibraryOnSpawnedOG(Component, Pawn);
 }
 
@@ -184,6 +182,7 @@ bool AFortAthenaAIBotController::IsPlayerBot() {
 	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
 
 	if (this->IsA(ABP_PhoebePlayerController_C::StaticClass())) return true;
+	else return false;
 /*	for (auto Bot : AIServicePlayerBots->PlayerBots)
 	{
 		if (Bot.BotController == this)
@@ -258,7 +257,23 @@ void FortAthenaAISpawnerData::AIBotGameplayAbilityOnSpawned(UFortAthenaAISpawner
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
 	auto ASC = Pawn->AbilitySystemComponent;
 	if (!Component || !Pawn || !AIBotController || !ASC) return;
-	reinterpret_cast<void(*)(void*)>(ImageBase + 0x993F158)(Pawn->GetInterfaceAddress<IAbilitySystemInterface>());
+
+	for (auto Effect : Component->InitialGameplayEffect)
+	{
+		auto EffectHandle = FGameplayEffectContextHandle();
+		ASC->BP_ApplyGameplayEffectToSelf(Effect.GameplayEffect, Effect.Level, EffectHandle);
+	}
+
+	for (auto AbilitySet : Component->InitialGameplayAbilitiesSet)
+	{
+		auto Interface = Pawn->PlayerState->GetInterfaceAddress<IAbilitySystemInterface>();
+		TScriptInterface<IAbilitySystemInterface> ScriptInterface;
+		ScriptInterface.ObjectPointer = Pawn->AbilitySystemComponent->GetOwner();
+		ScriptInterface.InterfacePointer = Interface;
+		
+		UFortKismetLibrary::EquipFortAbilitySet(ScriptInterface, AbilitySet, nullptr);
+	}
+	reinterpret_cast<void(*)(void*)>(ImageBase + 0x993F158)(Pawn->GetInterfaceAddress<IAbilitySystemInterface>()); // sets up the default ones
 }
 
 
