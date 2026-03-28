@@ -55,12 +55,34 @@ namespace FortAthenaLivingWorldEvent
         {
             return nullptr;
         }
-        
+    }
+    inline AFortAthenaPatrolPath* GetPatrolPathFromEvent(FFortAthenaLivingWorldEvent* InEvent)
+    {
+        if (!InEvent || InEvent->EventDatas.IsEmpty())
+            return nullptr;
+
+        auto EventData = InEvent->EventDatas[0].EventData.Get();
+        if (!EventData || EventData->ProviderFiltersTagQuery.TagDictionary.IsEmpty())
+            return nullptr;
+
+        auto EventTag = EventData->ProviderFiltersTagQuery.TagDictionary[0];
+
+        auto AllPatrolPaths = GetObjectsOfClass<AFortAthenaPatrolPath>();
+        for (auto PatrolPath : AllPatrolPaths)
+        {
+            if (!PatrolPath || PatrolPath->GameplayTags.GameplayTags.IsEmpty())
+                continue;
+
+            auto InputTag = PatrolPath->GameplayTags.GameplayTags[0];
+            if (UBlueprintGameplayTagLibrary::EqualEqual_GameplayTag(EventTag, InputTag))
+                return PatrolPath;
+        }
+
+        return nullptr;
     }
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEvents(UFortAthenaLivingWorldManager* LivingWorldManager);
     TArray<FFortAthenaLivingWorldEvent*> GetAllWorldEventsFromTable(UDataTable* CategoryDataTable);
 
-    TArray<AFortAthenaPatrolPath*> GetPatrolPathsFromTagQuery(const FGameplayTag& SearchTag);
     FGameplayTag GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent);
     bool ComputeRuntimeEvent(FFortAthenaLivingWorldEvent* InEvent, ELagerEventType EventType, UClass*);
     void TrySpawnEvents();
