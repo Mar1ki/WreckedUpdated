@@ -358,6 +358,7 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
         return;
 
     BuildingActorToEdit->ReplacementDestructionReason = EBuildingReplacementType::BRT_Edited;
+    auto Pawn = (AFortPlayerPawnAthena*)PlayerController->MyFortPawn;
 
    auto NewBuild =  BuildingActorToEdit->ReplaceBuildingActor(EBuildingReplacementType::BRT_Edited, NewBuildingClass, BuildingActorToEdit->CurrentBuildingLevel, RotationIterations, bMirrored, PlayerController);
    if (NewBuild)
@@ -366,6 +367,7 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
         NewBuild->BuildingReplacementType = EBuildingReplacementType::BRT_Edited;
         NewBuild->SetTeam(BuildingActorToEdit->TeamIndex);
         NewBuild->OnRep_Team();
+        Pawn->NetMulticast_SuccessfulBuildingEdit();
     }
 }
 
@@ -501,6 +503,29 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Comp->DiscoverAllAreas();
             Comp->DiscoverAllPois();
             Comp->DiscoveredData.MarkArrayDirty();
+        }
+        if (Command == "augment")
+        {
+            auto con = (AFortPlayerControllerGameplay*)Controller;
+            std::cout << con->AppliedInGameModifierAbilitySetHandles.Num() << std::endl;
+        }
+        if (Command == "mmetest")
+        {
+            auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
+           auto array =  Comp->ActiveLayeredMovementModeRuntimeData;
+            std::cout << "num of these: " << array.Num() << std::endl;
+            for (auto idk : array)
+            {
+                std::cout << idk->Class->Name.ToString().c_str() << std::endl;
+            }
+        }
+        if (Command == "forcemmeoff")
+        {
+            for (auto what: Pawn->RegisteredMovementModeExtentionLogic)
+            {
+                //what.Second->BP_OnExtensionDeactivate();
+                ///what.Second->BP_OnExtensionEnd();
+            }
         }
         if (Command == "testdiscover2") {
             auto Comp = (UFortControllerComponent_MapDiscoverability*)Controller->GetComponentByClass(UFortControllerComponent_MapDiscoverability::StaticClass());
