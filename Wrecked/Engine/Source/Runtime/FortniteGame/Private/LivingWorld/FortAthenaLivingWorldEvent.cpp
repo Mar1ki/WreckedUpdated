@@ -56,26 +56,6 @@ FGameplayTag FixTandemTag(const FGameplayTag& Tag)
     return Tag;
 }
 
-TArray<AFortAthenaPatrolPath*> FortAthenaLivingWorldEvent::GetPatrolPathsFromTagQuery(const FGameplayTag& SearchTag)
-{
-    auto SearchTagFixed = FixTandemTag(SearchTag);
-    TArray<AFortAthenaPatrolPath*> FoundPoints;
-    
-    for (auto PatrolPath : GetObjectsOfClass<AFortAthenaPatrolPath>())
-    {
-        for (auto tag : PatrolPath->GameplayTags.GameplayTags)
-        {
-            auto PatrolTagFixed = FixTandemTag(FGameplayTag{tag.TagName});
-            
-            if (PatrolTagFixed == SearchTagFixed)
-            {
-                FoundPoints.Add(PatrolPath);
-                break;
-            }
-        }
-    }
-    return FoundPoints;
-}
 TArray<FFortAthenaLivingWorldEvent*> FortAthenaLivingWorldEvent::GetAllWorldEventsFromTable(UDataTable* CategoryDataTable)
 {
     TArray<FFortAthenaLivingWorldEvent*> AllEvents;
@@ -313,6 +293,16 @@ bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent
                 UE_LOG(LogLivingWorldManager, Log, "Successfully spawned a actor with name: %s", ActorToSpawn->Name.ToString().c_str());
             }
         }
+        return true;
+    }
+    else if (EventType == ELagerEventType::Tandem)
+    {
+        auto idk = GetSpawnerDataListFromTandemEvent(InEvent);
+        if (idk == nullptr) return false;
+        auto PatrolPath = GetPatrolPathFromEvent(InEvent);
+        auto PatrolPoint = PatrolPath->GetPatrolPoint(1);
+        ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(idk, PatrolPoint->GetTransform(), false);
+          
         return true;
     }
     else
