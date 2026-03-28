@@ -57,7 +57,7 @@ void AthenaMarkerComponent::ServerAddMapMarker(UObject* Context, FFrame& Stack)
         auto TeamMemberMarkerComponent = TeamMemberAthena->MarkerComponent;
  
         if (TeamMemberMarkerComponent == nullptr)
-            continue;
+            return;
 
         LocalPlaceMapMarker(TeamMemberMarkerComponent, &MarkerData);
  

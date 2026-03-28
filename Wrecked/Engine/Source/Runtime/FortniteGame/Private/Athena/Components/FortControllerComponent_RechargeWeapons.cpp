@@ -42,7 +42,6 @@ void FortControllerComponent_RechargeWeapons::TickComponent()
                     std::cout << "ChargeRate: " << NoIdea.Second.ChargeRate << std::endl;
                     UpdateItemEntryWithServerChargeTime(Comp, &NoIdea.First);
                     Comp->ClientItemStartedRecharging(NoIdea.First, CurrentTime);
-                    Inventory->Update(ItemEntry);
                 }
             }
         }
