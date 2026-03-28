@@ -40,22 +40,27 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const struct F
         SharedCue.bIsValid = true;
 
         FAthenaBatchedDamageGameplayCues_NonShared NonSharedCue{};
-        NonSharedCue.HitActor = Actor;
+
+        if (!Actor->IsA(AFortPlayerPawn::StaticClass()))
+        {
+            NonSharedCue.NonPlayerHitActor = Actor;
+            Owner->MyFortPawn->NetMulticast_Athena_BatchedDamageCues(SharedCue, NonSharedCue);
+        }
 
         if (Actor->IsA(AFortPlayerPawn::StaticClass()))
         {
+            NonSharedCue.HitActor = Actor;
             if (!UFortKismetLibrary::OnSameSquad((AFortPlayerPawnAthena*)Owner->MyFortPawn, (AFortPlayerPawnAthena*)Actor))
             {
                 Owner->MyFortPawn->NetMulticast_Athena_BatchedDamageCues(SharedCue, NonSharedCue);
             }   
         }
     };
-
     if (bUseExperimentalDamaging)
     {
-        auto a =  (UFortMovementComp_Character*)Owner->MyFortPawn->CharacterMovement;
+        auto MovementComp =  (UFortMovementComp_Character*)Owner->MyFortPawn->CharacterMovement;
         SendCueNew(WeaponStats->EnvDmgPB);
-        UGameplayStatics::ApplyPointDamage(Actor, WeaponStats->EnvDmgPB, Hit.Location, Hit, Owner, Weapon, a->ImpactDamageTypeClass);
+        UGameplayStatics::ApplyPointDamage(Actor, WeaponStats->EnvDmgPB, Hit.Location, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
         Actor->ForceNetUpdate();
     }
 }
