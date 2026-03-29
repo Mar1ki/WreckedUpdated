@@ -10,7 +10,7 @@ static bool NeedsLoadForClient() {
 
 void FortAthenaLivingWorldManager::RequestEventGeneration(UObject* Object, FFrame* Frame)
 {
-    std::cout << "One of the event exec is called" << std::endl;
+    std::cout << "RequestEventGeneration" << std::endl;
     RequestEventGenerationOG(Object, Frame);
 }
 
@@ -23,7 +23,7 @@ void FortAthenaLivingWorldManager::TrySpawnEvent(UObject* Object, FFrame* Frame)
 
 void FortAthenaLivingWorldManager::HandleGamePhaseStepChanged(UObject* Object, FFrame* Frame)
 {
-    if (!bEnableLWM) return;
+    if (!bEnableLWM || bLateGame) return;
     auto Logic = (UFortGameStateComponent_BattleRoyaleGamePhaseLogic*)Object;
     auto GamePhaseStep =  Logic->GamePhaseStep;
 
