@@ -24,8 +24,10 @@ void FortPickup::GivePickupTo(AFortPickup* Pickup, IFortInventoryOwnerInterface*
         if (GetQuickbar(I->ItemEntry.ItemDefinition) == EFortQuickBars::Primary &&
             ((UFortItemDefinition*)I->ItemEntry.ItemDefinition)->bInventorySizeLimited)
             ItemCount++;
-
-    bool bShouldSwap = (ItemCount - 6) >= 5;
+    int (*CountInventoryOverflow)(IFortInventoryOwnerInterface*, FFortItemEntry*, bool, bool) = decltype(CountInventoryOverflow)((*(void***)(InventoryOwner))[0x1C0/8]);
+    auto Overflow = CountInventoryOverflow(InventoryOwner, &PickupEntry, true, true);
+    bool bShouldSwap = ItemCount >= 5;
+    UE_LOG(LogInventory, Log, "Attemptry To Pickup: %s ItemCount %i Overflow %i", Def->GetName().c_str(), ItemCount, Overflow);
     bool bIsStackable = Def->IsStackable();
 
     if (bIsStackable) {
@@ -106,7 +108,9 @@ void FortPickup::GivePickupTo(AFortPickup* Pickup, IFortInventoryOwnerInterface*
                         EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::Unset, Pawn, Overflow, true, false, true);
             }
             else {
-                if (bShouldSwap && GetQuickbar(Def) == EFortQuickBars::Primary) {
+
+                if (bShouldSwap && GetQuickbar(Def) == EFortQuickBars::Primary ) {
+                    UE_LOG(LogInventory, Log, "Check passed!");
                     auto CW = Pawn->CurrentWeapon;
                     if (CW && GetQuickbar(CW->GetWeaponData()) == EFortQuickBars::Primary) {
                         FGuid CWGuid = CW->ItemEntryGuid;
@@ -132,7 +136,9 @@ void FortPickup::GivePickupTo(AFortPickup* Pickup, IFortInventoryOwnerInterface*
         }
     }
     else {
+
         if (ItemCount == 5 && GetQuickbar(Def) == EFortQuickBars::Primary) {
+            UE_LOG(LogInventory, Log, "Checkpassed!");
             auto CW = Pawn->CurrentWeapon;
             if (CW && GetQuickbar(CW->GetWeaponData()) == EFortQuickBars::Primary) {
                 FGuid CWGuid = CW->ItemEntryGuid;
