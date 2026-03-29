@@ -212,6 +212,10 @@ void FortAthenaLivingWorldEvent::TrySpawnEvents()
            }
        }
     }
+    for (auto ValetEvent : ValetEvents)
+    {
+        AllEvents.Add({ValetEvent, ELagerEventType::Valet});
+    }
 }
 bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent* InEvent, ELagerEventType EventType, UClass* OptionalActorClass = nullptr)
 {
@@ -252,7 +256,7 @@ bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent
         }
         return true;
     }
-    else if (EventType == ELagerEventType::Tandem)
+    if (EventType == ELagerEventType::Tandem)
     {
         auto idk = GetSpawnerDataListFromTandemEvent(InEvent);
         if (idk == nullptr) return false;
