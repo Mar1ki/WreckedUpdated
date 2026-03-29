@@ -261,7 +261,7 @@ bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent
         ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(idk, PatrolPoint->GetTransform(), false);
           
         return true;
-    } else if (EventType == ELagerEventType::Boss)
+    } /*else if (EventType == ELagerEventType::Boss)
     {
         auto PatrolPath = GetPatrolPathFromEvent(InEvent);
         if (PatrolPath->bUseRandomStartupPatrolPoint)
@@ -274,7 +274,7 @@ bool FortAthenaLivingWorldEvent::ComputeRuntimeEvent(FFortAthenaLivingWorldEvent
 
         
         return true;
-    }
+    }*/
     else
     {
         return false;

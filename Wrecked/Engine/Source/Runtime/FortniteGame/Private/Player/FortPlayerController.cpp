@@ -119,7 +119,7 @@ void FortPlayerController::ServerAttemptInventoryDrop(AFortPlayerController* Con
     Inventory->ReplaceEntry(*Entry);
     if (Entry->ItemDefinition->IsA(UFortPlayerAugmentItemDefinition::StaticClass()))
     {
-        FortPlayerAugmentItemDefinition::OnItemInstanceRemoved((UFortPlayerAugmentItemDefinition*)Entry->ItemDefinition, Controller->MyFortPawn->GetInterfaceAddress<IFortInventoryOwnerInterface>(), 1);
+        FortPlayerAugmentItemDefinition::OnItemInstanceRemoved((UFortPlayerAugmentItemDefinition*)Entry->ItemDefinition, Controller->GetInterfaceAddress<IFortInventoryOwnerInterface>(), 1);
     }
 }
 
@@ -148,6 +148,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
 
     auto KillerPlayerState = (AFortPlayerStateAthena*)DeathReport.KillerPlayerState;
     auto KillerPawn = (AFortPlayerPawnAthena*)DeathReport.KillerPawn.Get();
+    auto KillerPlayerController = (AFortPlayerControllerAthena*)KillerPawn->GetController();
 
     PlayerState->PawnDeathLocation = PlayerController->MyFortPawn ? PlayerController->MyFortPawn->K2_GetActorLocation() : FVector();
     //PlayerState->DeathInfo.bDBNO = PlayerController->MyFortPawn ? PlayerController->MyFortPawn->IsDBNO() : false;
@@ -192,6 +193,13 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
             DamageCauser = Weapon;
 
         return ClientOnPawnDiedOG(PlayerController, DeathReport);
+    }
+    if (bLateGame)
+    {
+        auto GoldNum = GameState->GetOverridenSiphonGoldValue(KillerPawn);
+        auto MetalNum = GameState->GetOverridenSiphonMetalValue(KillerPawn);
+        auto StoneNum = GameState->GetOverridenSiphonStoneValue(KillerPawn);
+        auto WoodNum = GameState->GetOverridenSiphonWoodValue(KillerPawn);
     }
 
     if (!bLateGame && !GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
@@ -287,14 +295,14 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
         if (QueryResult == EFortStructuralGridQueryResults::CanAdd)
         {
             // what in the fuck is that 
-            /*for (int32 i = 0; i < BuildingActors.Num(); i++)
+            for (int32 i = 0; i < BuildingActors.Num(); i++)
             {
                 ABuildingActor* ExistingBuilding = BuildingActors[i];
                 if (!ExistingBuilding)
                     continue;
 
                 ExistingBuilding->K2_DestroyActor();
-            }*/
+            }
  
             if (!PlayerController->CanAffordToPlaceBuildableClass(&CreateBuildingData.BuildingClassData))
                 return;
@@ -329,6 +337,8 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
     if (!PlayerStateZone || !BuildingActorToEdit || !PlayerController->MyFortPawn)
         return;
 
+    BuildingActorToEdit->SetNetDormancy(ENetDormancy(2 - (PlayerStateZone != nullptr)));
+    BuildingActorToEdit->ForceNetUpdate();
     BuildingActorToEdit->EditingPlayer = PlayerStateZone;
     BuildingActorToEdit->OnRep_EditingPlayer();
     
@@ -347,6 +357,7 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
         if (EditingTool)
         {
             EditingTool->EditActor = BuildingActorToEdit;
+            EditingTool->ForceNetUpdate();
             EditingTool->OnRep_EditActor();
         }
     }
@@ -357,17 +368,12 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
     if (!PlayerController || !BuildingActorToEdit || !BuildingActorToEdit->IsA(ABuildingSMActor::StaticClass()) || !PlayerController->MyFortPawn)
         return;
 
-    BuildingActorToEdit->ReplacementDestructionReason = EBuildingReplacementType::BRT_Edited;
-    auto Pawn = (AFortPlayerPawnAthena*)PlayerController->MyFortPawn;
+   // BuildingActorToEdit->ReplacementDestructionReason = EBuildingReplacementType::BRT_Edited;
 
    auto NewBuild =  BuildingActorToEdit->ReplaceBuildingActor(EBuildingReplacementType::BRT_Edited, NewBuildingClass, BuildingActorToEdit->CurrentBuildingLevel, RotationIterations, bMirrored, PlayerController);
    if (NewBuild)
     {
         NewBuild->bPlayerPlaced = true;
-        NewBuild->BuildingReplacementType = EBuildingReplacementType::BRT_Edited;
-        NewBuild->SetTeam(BuildingActorToEdit->TeamIndex);
-        NewBuild->OnRep_Team();
-        Pawn->NetMulticast_SuccessfulBuildingEdit();
     }
 }
 
@@ -679,6 +685,18 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         {
             Controller->bBuildFree = !Controller->bBuildFree;
             Controller->bInfiniteAmmo = !Controller->bInfiniteAmmo;
+        }
+
+        if (Command == "idkbro")
+        {
+            auto objs = GetObjectsOfClass<AFortAthenaPatrolPath>();
+            for (auto obj : objs)
+            {
+                for (auto tag : obj->GameplayTags.GameplayTags)
+                {
+                   std::cout <<  tag.TagName.ToString().c_str() << std::endl;
+                }
+            }
         }
         if (Command == "vend")
         {
