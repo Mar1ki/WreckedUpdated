@@ -45,15 +45,20 @@ void NetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 
 		UpdateReplicationViews(NetDriver);
 		SendClientMoveAdjustments(NetDriver);
+		
 		FSendUpdateParams Params;
 		Params.DeltaSeconds = DeltaSeconds;
 		PreSendUpdate(ReplicationSystem, Params);
-		FortControllerComponent_RechargeWeapons::TickComponent();
+		//FortControllerComponent_RechargeWeapons::TickComponent(); // idk it might be making it slow too but im not sure
 	}
 	
     return TickFlushOriginal(NetDriver, DeltaSeconds);
 }
 
+float GetMaxTickRate(UEngine* Engine, float DeltaTime, bool bAllowFrameRateSmoothing)
+{
+	return 120.f;
+}
 void NetDriver::Init()
 {
 	UHook* Hook = new UHook();
@@ -61,6 +66,10 @@ void NetDriver::Init()
 	Hook->Address = ImageBase + 0x1E66424;
 	Hook->Original = (void**)&TickFlushOriginal;
 	Hook->Detour = TickFlush;
+	UKismetHookingLibrary::Hook(Hook, Address);
+	
+	Hook->Address = ImageBase + 0x1E65D44;
+	Hook->Detour = GetMaxTickRate;
 	UKismetHookingLibrary::Hook(Hook, Address);
 
 	delete Hook;
