@@ -193,13 +193,25 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 			GameMode->AISettings = Playlist->AISettings.Get();
 		}
 		
+		
 		if (!GameMode->AIDirector)
 			GameMode->AIDirector = (AFortAIDirector*)GetWorld()->SpawnActor(AFortAIDirector::StaticClass(), {}, {}, GameMode);
 
 		GameMode->AIDirector->Activate();
+		GameMode->AISettings->bAllowAIDirector = true;
 
 		if (!GameMode->AIGoalManager)
 			GameMode->AIGoalManager = (AFortAIGoalManager*)GetWorld()->SpawnActor(AFortAIGoalManager::StaticClass(), {}, {}, GameMode);
+
+		GameMode->AISettings->bAllowAIGoalManager = true;
+
+		if (!GameMode->SpawningPolicyManager)
+			GameMode->SpawningPolicyManager = (AFortAthenaSpawningPolicyManager*)GetWorld()->SpawnActor(AFortAthenaSpawningPolicyManager::StaticClass(), {}, {}, GameMode);
+
+		GameMode->SpawningPolicyManager->GameModeAthena = GameMode;
+		GameMode->SpawningPolicyManager->GameStateAthena = GameState;
+
+		
 
 	}
 
@@ -250,6 +262,10 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	FTransform Transform;
 	if (GetLogic()->GamePhase == EAthenaGamePhase::Warmup)
 	{
+		if (NewPlayer->WarmupPlayerStart->PlayerClaimedCount > 1)
+		{
+			GameMode->ChoosePlayerStart(NewPlayer);
+		}
 		Transform = NewPlayer->WarmupPlayerStart->GetTransform();
 	} else
 	{
