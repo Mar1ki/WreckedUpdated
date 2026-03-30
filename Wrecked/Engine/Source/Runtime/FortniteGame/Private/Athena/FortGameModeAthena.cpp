@@ -42,7 +42,7 @@ void SpawnCactuses() {
 							FBox CellBounds = RuntimeCelData->ContentBounds;
 							FVector Pos = UKismetMathLibrary::RandomPointInBoundingBox_Box(CellBounds);
 							FVector ContentCenter = UFortKismetLibrary::FindGroundLocationAt(GetWorld(), nullptr, Pos, -1000, 2500, UKismetStringLibrary::Conv_StringToName(L"FortDynamicMeshPhysics"));
-							UE_LOG(LogGameMode, Log, "Spawning Cactus at (%d, %d, %d)", ContentCenter.X, ContentCenter.Y, ContentCenter.Z);
+						//	UE_LOG(LogGameMode, Log, "Spawning Cactus at (%d, %d, %d)", ContentCenter.X, ContentCenter.Y, ContentCenter.Z);
 							GetWorld()->SpawnActor(CactusClass, ContentCenter);
 						}
 					}
@@ -254,11 +254,7 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	{
 		SpawnFloorLoot();
 		SpawnCactuses();
-		//FortAthenaVehicle::SpawnVehicles();
 	}
-	std::cout << "Chosen StartSpot:" << NewPlayer->WarmupPlayerStart->Name.ToString().c_str() << std::endl;
-	std::cout << "StartSpot Player Claimed Count:" << NewPlayer->WarmupPlayerStart->PlayerClaimedCount << std::endl;
-	std::cout << "StartSpot ClaimedSquadId:" << NewPlayer->WarmupPlayerStart->ClaimedSquadId << std::endl;
 	FTransform Transform;
 	if (GetLogic()->GamePhase == EAthenaGamePhase::Warmup)
 	{
