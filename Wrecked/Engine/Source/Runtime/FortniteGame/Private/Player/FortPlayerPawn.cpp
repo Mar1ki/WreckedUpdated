@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Player/FortPlayerPawn.h"
 
+#include <SDK/SDK/BP_PhoebePlayerController_classes.hpp>
 #include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
@@ -59,6 +60,12 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
     auto ItemDefinition = (UFortItemDefinition*)Pickup->PrimaryPickupItemEntry.ItemDefinition;
     auto Controller  = (AFortPlayerControllerAthena*)Pawn->Controller;
     auto Inventory =  (AFortInventory*)Controller->WorldInventory.ObjectPointer;
+
+    if (Controller->IsA(ABP_PhoebePlayerController_C::StaticClass()))
+    {
+        // actual logic for phoebe later
+        return;
+    }
 
     FFortPickupRequestInfo PickupInfo;
     PickupInfo.bIsAutoPickup = true;

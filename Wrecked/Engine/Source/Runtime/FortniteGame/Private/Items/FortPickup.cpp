@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPickup.h"
 
+#include <SDK/SDK/BP_PhoebePlayerController_classes.hpp>
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Kismet/FortKismetLibrary.h"
 
@@ -11,11 +12,17 @@ void FortPickup::GivePickupTo(AFortPickup* Pickup, IFortInventoryOwnerInterface*
     const auto Pawn = (AFortPlayerPawn*)InventoryOwner->GetPawn();
     auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
     auto Inventory = PlayerController->GetInventory();
-
+    if (PlayerController->IsA(ABP_PhoebePlayerController_C::StaticClass()))
+    {
+        // actual logic for phoebe later
+        return;
+    }
     auto& PickupEntry = Pickup->PrimaryPickupItemEntry;
     auto Def = (UFortWorldItemDefinition*)PickupEntry.ItemDefinition;
     auto MaxStack = FortKismetLibrary::GetMaxStackSize(Def);
     auto& Items = Inventory->Inventory.ItemInstances;
+
+    if (!Items) return;
 
     int LoadedAmmo = PickupEntry.LoadedAmmo;
     int PhantomAmmo = PickupEntry.PhantomReserveAmmo;
