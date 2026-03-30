@@ -196,10 +196,12 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
     }
     if (bLateGame)
     {
-        auto GoldNum = GameState->GetOverridenSiphonGoldValue(KillerPawn);
-        auto MetalNum = GameState->GetOverridenSiphonMetalValue(KillerPawn);
-        auto StoneNum = GameState->GetOverridenSiphonStoneValue(KillerPawn);
-        auto WoodNum = GameState->GetOverridenSiphonWoodValue(KillerPawn);
+        auto GoldDef = GetAssetManager()->GameDataBR->DefaultGlobalCurrencyItemDefinition.Get();
+        auto MetalDef = GetAssetManager()->GameDataCommon->MetalItemDefinition.Get();
+        auto StoneDef = GetAssetManager()->GameDataCommon->StoneItemDefinition.Get();
+        auto WoodDef = GetAssetManager()->GameDataCommon->WoodItemDefinition.Get();
+        
+        FortKismetLibrary::SpawnPickup(PlayerController->MyFortPawn->K2_GetActorLocation(), GoldDef, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, 25, 0);
     }
 
     if (!bLateGame && !GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
@@ -367,9 +369,7 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
 {
     if (!PlayerController || !BuildingActorToEdit || !BuildingActorToEdit->IsA(ABuildingSMActor::StaticClass()) || !PlayerController->MyFortPawn)
         return;
-
-   // BuildingActorToEdit->ReplacementDestructionReason = EBuildingReplacementType::BRT_Edited;
-
+    
    auto NewBuild =  BuildingActorToEdit->ReplaceBuildingActor(EBuildingReplacementType::BRT_Edited, NewBuildingClass, BuildingActorToEdit->CurrentBuildingLevel, RotationIterations, bMirrored, PlayerController);
    if (NewBuild)
     {
@@ -559,10 +559,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
 
             auto idkclass = StaticLoadObject<UClass>("/WeaponModStation/Gameplay/Actors/BP_WeaponModStation_v2.BP_WeaponModStation_v2_C");
             GetWorld()->SpawnActor(idkclass, newloc, Pawn->K2_GetActorRotation());
-        }
-        if (Command == "bruh")
-        {
-            FortAthenaLivingWorldEvent::TrySpawnEvents();
         }
         if (Command == "testmme") {
             auto Comp = (UFortMovementComp_Character*)Pawn->CharacterMovement;
