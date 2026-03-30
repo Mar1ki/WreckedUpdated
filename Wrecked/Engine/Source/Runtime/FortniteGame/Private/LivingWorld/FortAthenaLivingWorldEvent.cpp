@@ -124,7 +124,7 @@ FGameplayTag FortAthenaLivingWorldEvent::GetSpawnerTagFromEvent(FFortAthenaLivin
 }
 std::map<std::string, UEAllocatedString> PatchMap;
 TArray<FFortLivingWorldEventGroup> FortAthenaLivingWorldEvent::AllEvents;
-void FortAthenaLivingWorldEvent::TrySpawnEvents()
+void FortAthenaLivingWorldEvent::CollectAllEvents()
 {
 
 

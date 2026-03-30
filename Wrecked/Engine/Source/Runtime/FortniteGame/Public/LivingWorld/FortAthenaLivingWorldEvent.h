@@ -85,6 +85,6 @@ namespace FortAthenaLivingWorldEvent
 
     FGameplayTag GetSpawnerTagFromEvent(FFortAthenaLivingWorldEvent* InEvent);
     bool ComputeRuntimeEvent(FFortAthenaLivingWorldEvent* InEvent, ELagerEventType EventType, UClass*);
-    void TrySpawnEvents();
+    void CollectAllEvents();
     void Hook();
 }

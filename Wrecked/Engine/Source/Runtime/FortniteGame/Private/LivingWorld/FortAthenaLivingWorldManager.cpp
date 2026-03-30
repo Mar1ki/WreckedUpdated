@@ -7,13 +7,13 @@ static bool NeedsLoadForClient() {
     return true;
 }
 
-
+// this is aids
 void FortAthenaLivingWorldManager::RequestEventGeneration(UObject* Object, FFrame* Frame)
 {
     std::cout << "RequestEventGeneration" << std::endl;
     RequestEventGenerationOG(Object, Frame);
 }
-
+// that ez to spawn
 void FortAthenaLivingWorldManager::TrySpawnEvent(UObject* Object, FFrame* Frame)
 {
     std::cout << "TrySpawnEvent" << std::endl;
@@ -29,7 +29,7 @@ void FortAthenaLivingWorldManager::HandleGamePhaseStepChanged(UObject* Object, F
 
     if (GamePhaseStep == EAthenaGamePhaseStep::Warmup)
     {
-        FortAthenaLivingWorldEvent::TrySpawnEvents();
+        FortAthenaLivingWorldEvent::CollectAllEvents();
     }
     std::cout << "GamePhaseStep Changed:" << (int*)GamePhaseStep << std::endl;
     for (auto EventGroup : FortAthenaLivingWorldEvent::AllEvents)
@@ -56,8 +56,7 @@ void FortAthenaLivingWorldManager::Hook()
     Hook->Detour = NeedsLoadForClient;
     Hook->Address = 0x108 / 8;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
-
-
+    
     Hook->Path = "/Script/LagerRuntime.FortAthenaLivingWorldManager.TrySpawnEvent";
     Hook->Detour = TrySpawnEvent;
     Hook->Detour = (void**)&TrySpawnEventOG;
