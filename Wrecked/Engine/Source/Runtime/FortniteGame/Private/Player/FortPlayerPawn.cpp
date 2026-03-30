@@ -99,6 +99,9 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
                 if (ItemToStack && ItemToStack->Count < MaxStack)
                 {
                     Pawn->ServerHandlePickupInfo(Pickup, PickupInfo);
+                } else if (ItemToStack->Count < MaxStack)
+                {
+                    Pawn->ServerHandlePickupInfo(Pickup, PickupInfo);
                 }
             }
         }
