@@ -37,9 +37,6 @@ void FortControllerComponent_RechargeWeapons::TickComponent()
 
                     void (*UpdateItemEntryWithServerChargeTime)(UFortControllerComponent_RechargeWeapons*, FGuid*) = decltype(UpdateItemEntryWithServerChargeTime)(ImageBase + 0x954E170);
                     NoIdea.Second.ServerStartTime = CurrentTime;
-                    std::cout << "Recharge Done Starting next recharge" << std::endl;
-                    std::cout << "ServerStartTime: " << NoIdea.Second.ServerStartTime << std::endl;
-                    std::cout << "ChargeRate: " << NoIdea.Second.ChargeRate << std::endl;
                     UpdateItemEntryWithServerChargeTime(Comp, &NoIdea.First);
                     Comp->ClientItemStartedRecharging(NoIdea.First, CurrentTime);
                 }

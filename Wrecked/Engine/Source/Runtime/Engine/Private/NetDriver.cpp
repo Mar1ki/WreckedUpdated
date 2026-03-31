@@ -49,7 +49,7 @@ void NetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 		FSendUpdateParams Params;
 		Params.DeltaSeconds = DeltaSeconds;
 		PreSendUpdate(ReplicationSystem, Params);
-		//FortControllerComponent_RechargeWeapons::TickComponent(); // idk it might be making it slow too but im not sure
+		FortControllerComponent_RechargeWeapons::TickComponent(); // idk it might be making it slow too but im not sure
 	}
 	
     return TickFlushOriginal(NetDriver, DeltaSeconds);
