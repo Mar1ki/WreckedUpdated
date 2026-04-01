@@ -285,11 +285,16 @@ void FortLightWeightProjectileManager::ProjectileRequest(AFortLightweightProject
 		return;
 	
 
+	// type is always 1 so Single
+	std::cout <<  "Type: " << (int)Type << std::endl;
 	FFortLightweightProjectileRequest_Net ProjectileMultiCast;
+	
 	ProjectileMultiCast.StartDirection = (FVector_NetQuantizeNormal)Direction;
 	ProjectileMultiCast.StartPosition = (FVector_NetQuantize10)BuletStartPosition;
-	ProjectileMultiCast.Timestamp = UFortKismetLibrary::GetServerWorldTimeSeconds(GetWorld());
+	
+	ProjectileMultiCast.Timestamp = GetWorld()->GetTimeSeconds();
 	WeaponRanged->MulticastProjectileRequestUnreliable(ProjectileMultiCast);
+	WeaponRanged->MulticastStopProjectileRequestUnreliable();
 }
 
 void FortLightWeightProjectileManager::Init() {

@@ -61,7 +61,7 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResu
         std::cout << "FinalDamage:" << FinalDamage << std::endl;
         auto MovementComp =  (UFortMovementComp_Character*)Owner->MyFortPawn->CharacterMovement;
         SendCue(FinalDamage);
-        UGameplayStatics::ApplyPointDamage(Actor, FinalDamage, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+        UGameplayStatics::ApplyPointDamage(Actor, FinalDamage / 2, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
     }
 }
 
