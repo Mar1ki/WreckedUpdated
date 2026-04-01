@@ -1,8 +1,7 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Weapons/FortWeaponRanged.h"
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
-
-void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const struct FHitResult& Hit, const struct FVector& ProjectileOriginPosition, float ProjectileStartTimestamp, const TArray<uint8>& Context, const struct FVector& LocalSpaceImpactPoint, const struct FVector& LocalSpaceImpactNormal, const bool bWasTargetingWhenProjectileFired, UObject* HitEntity)
+void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResult& Hit, const FVector& ProjectileOriginPosition, float ProjectileStartTimestamp, const TArray<uint8>& Context, const FVector& LocalSpaceImpactPoint, const FVector& LocalSpaceImpactNormal, const bool bWasAimingDownSights, UObject* HitEntity)
 {
     auto Owner = Weapon->GetPlayerController();
     auto Component = Hit.Component.Get();
@@ -13,55 +12,56 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const struct F
 
     auto WeaponStats = Weapon->WeaponData->GetStats();
     if (!WeaponStats) return;
+    
+    // the main thing is we dont calculate the damage here okay 
+    auto SendCue = [&](float Damage) {
+        bool bIsPlayer = Actor->IsA(AFortPlayerPawn::StaticClass());
 
-  //  if (Actor->IsActorBeingDestroyed()) return; // ig that can help with the crash
-    //if (Actor->bCanBeDamaged != 1) return; // random crash here
-
-    auto SendCueNew = [&](float Damage) {
-        if (Actor->IsA(AFortPlayerPawn::StaticClass()))
-        {
-            float Multiplier = (Hit.BoneName.ToString() == "head") ? WeaponStats->DamageZone_Critical : 1.f;
-            Damage = WeaponStats->DmgPB * Multiplier;
-        }
+        if (bIsPlayer && UFortKismetLibrary::OnSameSquad((AFortPlayerPawnAthena*)Owner->MyFortPawn, (AFortPlayerPawnAthena*)Actor))return;
+        
         FAthenaBatchedDamageGameplayCues_Shared SharedCue{};
         SharedCue.Location = (FVector_NetQuantize10)Hit.ImpactPoint;
         SharedCue.Normal = Hit.ImpactNormal;
+        SharedCue.LocalSpaceImpactPoint = (FVector_NetQuantize10)LocalSpaceImpactPoint;
+        SharedCue.LocalSpaceImpactNormal = (FVector_NetQuantizeNormal)LocalSpaceImpactNormal;
         SharedCue.Magnitude = Damage;
         SharedCue.bWeaponActivate = true;
         SharedCue.bIsBallistic = true;
-        if (Actor->IsA(AFortPlayerPawn::StaticClass()))
+        SharedCue.bIsValid = true;
+        if (bIsPlayer)
         {
             auto Pawn = (AFortPlayerPawn*)Actor;
             auto Shield = Pawn->GetShield();
-            SharedCue.bIsCritical = Hit.BoneName.ToString() == "head";
+            SharedCue.bIsCritical = Hit.BoneName.ToString() == "Head";
             SharedCue.bIsShield = Shield > 0;
             SharedCue.bIsShieldDestroyed = Shield > 0 && Shield <= Damage;
         }
-        SharedCue.bIsValid = true;
-
+        // this is prob the best way u can do it
         FAthenaBatchedDamageGameplayCues_NonShared NonSharedCue{};
-
-        if (!Actor->IsA(AFortPlayerPawn::StaticClass()))
-        {
-            NonSharedCue.NonPlayerHitActor = Actor;
-            Owner->MyFortPawn->NetMulticast_Athena_BatchedDamageCues(SharedCue, NonSharedCue);
-        }
-
-        if (Actor->IsA(AFortPlayerPawn::StaticClass()))
-        {
-            NonSharedCue.HitActor = Actor;
-            if (!UFortKismetLibrary::OnSameSquad((AFortPlayerPawnAthena*)Owner->MyFortPawn, (AFortPlayerPawnAthena*)Actor))
-            {
-                Owner->MyFortPawn->NetMulticast_Athena_BatchedDamageCues(SharedCue, NonSharedCue);
-            }   
-        }
+        NonSharedCue.HitActor = bIsPlayer ? Actor : nullptr;
+        NonSharedCue.NonPlayerHitActor = bIsPlayer ? nullptr : Actor;
+        
+        Owner->MyFortPawn->NetMulticast_Athena_BatchedDamageCues(SharedCue, NonSharedCue);
     };
+    // it is alr but i think we need to make it a bit better ngl
+    // we could prob check if its a player if not we will use the env dmg 
+    auto CalculateDamage = [&](const FHitResult& Hit, const FFortRangedWeaponStats* WeaponStats) -> float
+    {
+        auto BoneName = Hit.BoneName.ToString();
+    
+        if (BoneName == "Head")
+            return WeaponStats->DmgPB * WeaponStats->DamageZone_Critical;
+    
+        return WeaponStats->DmgPB * WeaponStats->DamageZone_Normal;
+    };
+    
     if (bUseExperimentalDamaging)
     {
+        auto FinalDamage = CalculateDamage(Hit, WeaponStats);
+        std::cout << "FinalDamage:" << FinalDamage << std::endl;
         auto MovementComp =  (UFortMovementComp_Character*)Owner->MyFortPawn->CharacterMovement;
-        SendCueNew(WeaponStats->EnvDmgPB);
-        UGameplayStatics::ApplyPointDamage(Actor, WeaponStats->EnvDmgPB, Hit.Location, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
-        Actor->ForceNetUpdate();
+        SendCue(FinalDamage);
+        UGameplayStatics::ApplyPointDamage(Actor, FinalDamage, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
     }
 }
 
@@ -78,7 +78,7 @@ void FortWeaponRanged::ServerNotifyPawnHit(UObject* Context, FFrame& Stack)
     FVector& LocalSpaceImpactNormal = Stack.StepCompiledInRef<FVector>();
     Stack.StepCompiledIn(&bWasTargetingWhenProjectileFired);
     Stack.StepCompiledIn(&HitEntity);
-    ServerNotifyPawnHit_Implemenation((AFortWeaponRanged*)Context, Hit, ProjectileOriginPosition, ProjectileStartTimestamp, Context1, LocalSpaceImpactNormal, LocalSpaceImpactNormal, bWasTargetingWhenProjectileFired, HitEntity);
+    ServerNotifyPawnHit_Implemenation((AFortWeaponRanged*)Context, Hit, ProjectileOriginPosition, ProjectileStartTimestamp, Context1, LocalSpaceImpactPoint, LocalSpaceImpactNormal, bWasTargetingWhenProjectileFired, HitEntity);
 }
 
 void FortWeaponRanged::Init() {
