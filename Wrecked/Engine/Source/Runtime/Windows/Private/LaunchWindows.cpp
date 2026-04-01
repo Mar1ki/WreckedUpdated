@@ -200,7 +200,7 @@ void Main()
     FortPlayerPawn::Init();
     FortKismetLibrary::Init();
     FortLightWeightProjectileManager::Init();
-    FortProjectileAthena::Init();
+   // FortProjectileAthena::Init();
     FortMovementComp_Character::Init();
     FortAthenaVehicle::Hook();
     FortAthenaLivingWorldManager::Hook();
