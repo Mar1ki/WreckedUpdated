@@ -45,6 +45,6 @@ inline ABuildingSMActor* ABuildingSMActor::ReplaceBuildingActor(EBuildingReplace
 }
 inline int ABuildingSMActor::GetCostToRepair(AFortPlayerController *Controller)
 { 
-    static int (*GetCostToRepairInternal)(ABuildingSMActor*, AFortPlayerController *EditingController) = decltype(GetCostToRepairInternal)(this->VTable[0xE58]);
+    static int (*GetCostToRepairInternal)(ABuildingSMActor*, AFortPlayerController *EditingController) = decltype(GetCostToRepairInternal)(this->VTable[0xE58 / 8]);
     return GetCostToRepairInternal(this,Controller);
 }
