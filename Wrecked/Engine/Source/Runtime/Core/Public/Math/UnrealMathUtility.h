@@ -58,6 +58,7 @@ struct FMath
     static FORCEINLINE float Pow(float A, float B) { return powf(A, B); }
     static FORCEINLINE float InvSqrt(float F) { return 1.0f / sqrtf(F); }
     static FORCEINLINE float InvSqrtEst(float F) { return InvSqrt(F); }
+    static FORCEINLINE float Lerp(float A, float B, float Alpha) { return A + Alpha * (B - A); }
 
     static FORCEINLINE bool IsNaN(float A) { return ((*(uint32*)&A) & 0x7FFFFFFF) > 0x7F800000; }
     static FORCEINLINE bool IsFinite(float A) { return ((*(uint32*)&A) & 0x7F800000) != 0x7F800000; }
