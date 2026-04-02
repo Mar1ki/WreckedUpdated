@@ -196,12 +196,23 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
     }
     if (bLateGame)
     {
-        auto GoldDef = GetAssetManager()->GameDataBR->DefaultGlobalCurrencyItemDefinition.Get();
-        auto MetalDef = GetAssetManager()->GameDataCommon->MetalItemDefinition.Get();
-        auto StoneDef = GetAssetManager()->GameDataCommon->StoneItemDefinition.Get();
-        auto WoodDef = GetAssetManager()->GameDataCommon->WoodItemDefinition.Get();
-        
-        FortKismetLibrary::SpawnPickup(PlayerController->MyFortPawn->K2_GetActorLocation(), GoldDef, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, 25, 0);
+        if (KillerPawn->GetHealth() < 100.f)
+        {
+            float HealthNeeded = 100.f - KillerPawn->GetHealth();
+            float HealthToAdd = FMath::Min(50.f, HealthNeeded);
+            float Overflow = 50.f - HealthToAdd;
+
+            KillerPawn->SetHealth(KillerPawn->GetHealth() + HealthToAdd);
+
+            if (Overflow > 0.f)
+            {
+                KillerPawn->SetShield(FMath::Min(100.f, KillerPawn->GetShield() + Overflow));
+            }
+        }
+        else
+        {
+            KillerPawn->SetShield(FMath::Min(100.f, KillerPawn->GetShield() + 50.f));
+        }
     }
 
     if (!bLateGame && !GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
@@ -435,7 +446,6 @@ void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Con
         }
     }
 }
-
 void ServerSetFollowedPlayer_Implementation(AFortLiveSpectatorController* Controller, AFortPlayerState* NewPlayerToFollow, FVector* SpectatorLocation, bool bValidPos) {
     Controller->FollowedPlayerState = NewPlayerToFollow;
     UE_LOG(LogGameMode, Log, "ServerSetFollowedPlayer clalled!");
@@ -509,11 +519,6 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Comp->DiscoverAllAreas();
             Comp->DiscoverAllPois();
             Comp->DiscoveredData.MarkArrayDirty();
-        }
-        if (Command == "augment")
-        {
-            auto con = (AFortPlayerControllerGameplay*)Controller;
-            std::cout << con->AppliedInGameModifierAbilitySetHandles.Num() << std::endl;
         }
         if (Command == "mmetest")
         {
@@ -807,10 +812,10 @@ void FortPlayerController::Init()
     Hook->Detour = ServerCheat;
     UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
 
-    Hook->Address = 0x2440 / 8;
+   /* Hook->Address = 0x2440 / 8;
     Hook->Class = AFortLiveSpectatorController::StaticClass();
     Hook->Detour =ServerSetFollowedPlayer_Implementation;
-    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
+    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);*/
 
     Hook->Path = "/Script/FortniteGame.FortPawn.MovingEmoteStopped";
     Hook->Detour = MovingEmoteStopped;
