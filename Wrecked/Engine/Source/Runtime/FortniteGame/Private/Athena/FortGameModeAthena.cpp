@@ -256,11 +256,11 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 		SpawnCactuses();
 	}
 	FTransform Transform;
-	if (GetLogic()->GamePhase == EAthenaGamePhase::Warmup)
+	if (GetLogic()->GamePhase <= EAthenaGamePhase::Warmup)
 	{
-		if (NewPlayer->WarmupPlayerStart->PlayerClaimedCount > 1)
+		if (NewPlayer->WarmupPlayerStart->PlayerClaimedCount > 0)
 		{
-			GameMode->ChoosePlayerStart(NewPlayer);
+			NewPlayer->WarmupPlayerStart = (AFortPlayerStartWarmup*)GetGameMode()->ChoosePlayerStart(NewPlayer);
 		}
 		Transform = NewPlayer->WarmupPlayerStart->GetTransform();
 	} else
