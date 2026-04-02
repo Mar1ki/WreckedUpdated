@@ -47,12 +47,13 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResu
     // we could prob check if its a player if not we will use the env dmg 
     auto CalculateDamage = [&](const FHitResult& Hit, const FFortRangedWeaponStats* WeaponStats) -> float
     {
-        auto BoneName = Hit.BoneName.ToString();
-    
-        if (BoneName == "Head")
+        bool bIsPlayer = Actor->IsA(AFortPlayerPawn::StaticClass());
+        auto Pawn = (AFortPlayerPawn*)Actor;
+        
+        if (bIsPlayer && EFortDamageZone::Critical == Pawn->GetDamageZone(Hit))
             return WeaponStats->DmgPB * WeaponStats->DamageZone_Critical;
     
-        return WeaponStats->DmgPB * WeaponStats->DamageZone_Normal;
+        return bIsPlayer ? WeaponStats->DmgPB * WeaponStats->DamageZone_Normal :  WeaponStats->EnvDmgPB * WeaponStats->DamageZone_Normal;
     };
     
     if (bUseExperimentalDamaging)
