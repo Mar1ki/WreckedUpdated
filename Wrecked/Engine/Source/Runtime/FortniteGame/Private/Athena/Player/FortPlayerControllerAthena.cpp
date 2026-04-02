@@ -146,17 +146,22 @@ void ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
 
 }
 
-void FortPlayerControllerAthena::GetPlayerViewPoint(APlayerController* PlayerController, FVector& Loc, FRotator& Rot)
+void ServerSpectateActor(AFortPlayerControllerZone* PlayerController, AActor* NewViewTarget, const bool bAllowStateChange)
 {
-    if (PlayerController->StateName == UKismetStringLibrary::Conv_StringToName(L"Spectating"))
-    {
-        //std::cout << "Spectating bro" << std::endl;
-    } else
-    {
-        GetPlayerViewPointOG(PlayerController, Loc, Rot);
-    }
-}
+    auto State = UKismetStringLibrary::Conv_StringToName(L"Spectating");
+    auto lol = (AFortPlayerControllerZone*)NewViewTarget;
+    std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
+    PlayerController->StateName = State;
+    PlayerController->ClientGotoState(State);
+    
+    FViewTargetTransitionParams TransitionParams;
+    TransitionParams.BlendTime = 2.0f;
+    TransitionParams.bLockOutgoing = true;
+    TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
+    PlayerController->ClientSetViewTarget(NewViewTarget, TransitionParams);
 
+    FortPlayerControllerAthena::BeginSpectating(PlayerController,(AFortPlayerStateZone*)lol->PlayerState);
+}
 void FortPlayerControllerAthena::Init()
 {
     UHook* Hook = new UHook();
@@ -165,7 +170,7 @@ void FortPlayerControllerAthena::Init()
     Hook->Detour = ServerReturnToMainMenu;
     UKismetHookingLibrary::Hook(Hook, Exec);
     
-    Hook->Address = 0xa7;
+    Hook->Address = 0xA7;
     Hook->Class = UFortControllerComponent_Aircraft::StaticClass();
     Hook->Detour = ServerAttemptAircraftJump;
     UKismetHookingLibrary::Hook(Hook, VFT);
@@ -179,15 +184,15 @@ void FortPlayerControllerAthena::Init()
     Hook->Original = (void**)&ClientIsReadyToRespawnOG;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
     */
-
+    
     Hook->Path = "/Script/FortniteGame.FortPlayerControllerAthena.ServerGiveCreativeItem";
     Hook->Detour = ServerGiveCreativeItem;
     UKismetHookingLibrary::Hook(Hook, Exec);
-    delete Hook;
-
-    Hook->Address = 0x7F8/8;
-    Hook->Detour = GetPlayerViewPoint;
-    Hook->Original = (void**)&GetPlayerViewPointOG;
+    
+    Hook->Address = 0x23E8 / 8;
     Hook->Class = AFortPlayerControllerAthena::StaticClass();
+    Hook->Detour = ServerSpectateActor;
     UKismetHookingLibrary::Hook(Hook, EveryVFT);
+
+    delete Hook;
 }

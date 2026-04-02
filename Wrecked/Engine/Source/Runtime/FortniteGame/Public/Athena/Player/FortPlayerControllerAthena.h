@@ -6,5 +6,7 @@ namespace FortPlayerControllerAthena {
 	DefineOriginal(void, ClientIsReadyToRespawn, AFortPlayerControllerAthena* PlayerController);
 	//void ServerReturnToMainMenu(AFortPlayerControllerAthena* PlayerController);
 	DefineOriginal(void, GetPlayerViewPoint, APlayerController* PlayerController, FVector& Loc, FRotator& Rot);
+	static void (*BeginSpectating)(AFortPlayerControllerZone*, AFortPlayerStateZone*) = decltype(BeginSpectating)(ImageBase + 0xA291530);
+	
 	void Init();
 }
