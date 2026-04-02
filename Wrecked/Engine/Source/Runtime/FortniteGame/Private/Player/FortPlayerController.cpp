@@ -196,7 +196,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
     }
     if (bLateGame)
     {
-        if (KillerPawn->GetHealth() < 100.f)
+        if (KillerPawn && KillerPawn->GetHealth() < 100.f)
         {
             float HealthNeeded = 100.f - KillerPawn->GetHealth();
             float HealthToAdd = FMath::Min(50.f, HealthNeeded);
