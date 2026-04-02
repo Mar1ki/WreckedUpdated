@@ -114,23 +114,25 @@ double UnwindDegrees(double Angle) {
     return Angle;
 }
 
-void ServerMove(AFortPhysicsPawn* Pawn, FReplicatedPhysicsPawnState InState)
+void ServerMove(AFortPhysicsPawn* Pawn, FReplicatedPhysicsPawnState State)
 {
-    UPrimitiveComponent* RootComp = (UPrimitiveComponent*)Pawn->RootComponent;
-	
-    auto Rotation = FQuatToRot(InState.Rotation);
-    
-    Rotation.Yaw  = UnwindDegrees(Rotation.Yaw);
-    
-    Rotation.pitch = 0;
-    Rotation.Roll = 0;
 
-    RootComp->K2_SetWorldLocationAndRotation(InState.Translation, Rotation, false, nullptr, true);
-    RootComp->SetPhysicsLinearVelocity(InState.LinearVelocity, 0, FName(0));
-    RootComp->bComponentToWorldUpdated = true;
-    RootComp->SetPhysicsAngularVelocityInDegrees(InState.AngularVelocity, 0, FName(0));
-}   
 
+    State.Rotation.X -= 0.3f;
+    State.Rotation.Y /= -0.75f;
+    State.Rotation.Z += 0.15f;
+    State.Rotation.W /= 1.1f;
+
+    auto RootComponent = (UPrimitiveComponent*)Pawn->RootComponent;
+    if (RootComponent)
+    {
+        FTransform Transform = UKismetMathLibrary::MakeTransform(State.Translation, FQuatToRot(State.Rotation), FVector(1.0f, 1.0f, 1.0f));
+
+        RootComponent->K2_SetWorldTransform(Transform, false, nullptr, true);
+        RootComponent->SetPhysicsLinearVelocity(State.LinearVelocity, 0, FName(0));
+        RootComponent->SetPhysicsAngularVelocityInRadians(State.AngularVelocity, 0, FName(0));
+    }
+}
 void RepairAllDamageableParts(AFortAthenaVehicle* Vehicle, float NewHealthPercent) {
 
     if (!Vehicle) return;
