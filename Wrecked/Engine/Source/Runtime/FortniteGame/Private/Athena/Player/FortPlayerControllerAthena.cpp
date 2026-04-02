@@ -139,13 +139,10 @@ void ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
 
     auto PlayerController = static_cast<AFortPlayerControllerAthena*>(Context);
     auto Inventory = (AFortInventory*)PlayerController->WorldInventory.ObjectPointer;
-    std::cout << CreativeItem.WeaponModSlots.Num() << std::endl;
-    std::cout << CreativeItem.SavedWeaponModSlots.Num() << std::endl;
-    
     
     Inventory->Remove(ItemToRemoveGuid);
-    auto itemdef = (UFortItemDefinition*)CreativeItem.ItemDefinition;
-    Inventory->AddItem(itemdef, CreativeItem.Count, 10, CreativeItem.Level);
+    auto ItemDefinition = (UFortItemDefinition*)CreativeItem.ItemDefinition;
+    Inventory->AddItem(ItemDefinition, CreativeItem.Count, CreativeItem.LoadedAmmo, CreativeItem.Level);
 
 }
 
