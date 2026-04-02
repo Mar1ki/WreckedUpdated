@@ -27,7 +27,10 @@ bool FortWorldItem::SetPhantomReserveAmmo(UFortWorldItem* Item, int InCount)
 bool FortWorldItem::SetLoadedAmmo(UFortWorldItem* Item, int InCount)
 {
 	auto Inventory = Item->GetOwningController()->GetInventory();
-	
+
+	auto Stats = ((UFortWeaponItemDefinition*)Item->ItemEntry.ItemDefinition)->GetStats();
+	if (InCount > Stats->ClipSize)
+		return false;
 	Item->ItemEntry.LoadedAmmo = InCount;
 	Inventory->Update(&Item->ItemEntry);
 	
