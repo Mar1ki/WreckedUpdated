@@ -94,6 +94,7 @@ void ULateGameLibrary::GiveRandomLoadoutToPlayer(AFortPlayerControllerAthena* Pl
         bInited = true;
         Init();
         GetGameState()->DefaultParachuteDeployTraceForGroundDistance = 2500.f;
+        GetGameState()->bCanSpawnLoot = false;
     }
 
     auto Inventory = PlayerCotntroller->GetInventory();
