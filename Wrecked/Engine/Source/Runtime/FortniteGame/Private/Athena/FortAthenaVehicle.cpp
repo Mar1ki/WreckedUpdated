@@ -116,8 +116,6 @@ double UnwindDegrees(double Angle) {
 
 void ServerMove(AFortPhysicsPawn* Pawn, FReplicatedPhysicsPawnState State)
 {
-
-
     State.Rotation.X -= 0.3f;
     State.Rotation.Y /= -0.75f;
     State.Rotation.Z += 0.15f;
