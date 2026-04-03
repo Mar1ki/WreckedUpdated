@@ -938,8 +938,8 @@ ValueElementType* Search(PT Predicate)
 	class TSharedPtr
 	{
 	public:
-		T* Ptr;
-		FSharedReferencer Referencer;
+		T* Object;
+		FSharedReferencer SharedReferenceCount;
 	};
 
 	template<typename T>
