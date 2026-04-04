@@ -179,6 +179,7 @@
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortAthenaVehicle.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortGameModeAthena.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortPoiVolume.h" />
+    <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortQuestManager.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\FortVehicleMod.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\GameStateComponents\FortGameStateComponent_BattleRoyaleGamePhaseLogic.h" />
     <ClInclude Include="Engine\Source\Runtime\FortniteGame\Public\Athena\Player\FortPlayerControllerAthena.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortAthenaVehicle.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortGameModeAthena.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortPoiVolume.cpp" />
+    <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortQuestManager.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\FortVehicleMod.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\GameStateComponents\FortGameStateComponent_BattleRoyaleGamePhaseLogic.cpp" />
     <ClCompile Include="Engine\Source\Runtime\FortniteGame\Private\Athena\Player\FortPlayerControllerAthena.cpp">

@@ -10,6 +10,7 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Movement/FortMovementMode_BaseExtLogic.h"
 #include "SDK/SDK/VaultingCodeRuntime_classes.hpp"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
+#include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortQuestManager.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldEvent.h"
 void FortPlayerController::ServerAcknowledgePossession(AFortPlayerControllerAthena* Controller, AFortPawn* Pawn)
@@ -279,9 +280,9 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
         }
     }
     else {
-        if (GameState->PlayersLeft == 1) {
+      /*  if (GameState->PlayersLeft == 1) {
             ULateGameLibrary::RestartSafeZoneIndicator();
-        }
+        }*/
     }
 
     PlayerController->StateName = UKismetStringLibrary::Conv_StringToName(L"Spectating");
@@ -577,6 +578,11 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
                     Controller->ClientMessage(std::to_wstring(Num).c_str(), FName(), 1);
                 }
             }
+        }
+        if (Command == "kill")
+        {
+            auto gowno = StaticFindObject<UFortAccoladeItemDefinition>("/BattlePassPermanentQuests/Items/Accolades/AccoladeId_012_Elimination.AccoladeId_012_Elimination");
+            FortQuestManager::GiveAccolade(Controller, gowno);
         }
         if (Command == "teleport")
         {

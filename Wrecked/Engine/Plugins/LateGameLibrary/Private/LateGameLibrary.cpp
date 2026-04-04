@@ -75,7 +75,7 @@ void Init()
 
     FItemAndCount Shockwave;
     Shield.Item = StaticLoadObject<UItemDefinitionBase>("/Game/Athena/Items/Consumables/ShockwaveGrenade/Athena_ShockGrenade.Athena_ShockGrenade");
-    Shield.Count = 4;
+    Shield.Count = 6;
 
     RotationItems.Add(Shockwave);
     RotationItems.Add(NitroSplash);
