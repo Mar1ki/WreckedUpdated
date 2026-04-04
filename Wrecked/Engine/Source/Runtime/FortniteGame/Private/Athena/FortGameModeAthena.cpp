@@ -68,7 +68,7 @@ void SpawnBarrels() {
 							FBox CellBounds = RuntimeCelData->ContentBounds;
 							FVector Pos = UKismetMathLibrary::RandomPointInBoundingBox_Box(CellBounds);
 							FVector ContentCenter = UFortKismetLibrary::FindGroundLocationAt(GetWorld(), nullptr, Pos, -1000, 2500, UKismetStringLibrary::Conv_StringToName(L"FortDynamicMeshPhysics"));
-							UE_LOG(LogGameMode, Log, "Spawning Cactus at (%d, %d, %d)", ContentCenter.X, ContentCenter.Y, ContentCenter.Z);
+						//	UE_LOG(LogGameMode, Log, "Spawning Cactus at (%d, %d, %d)", ContentCenter.X, ContentCenter.Y, ContentCenter.Z);
 							GetWorld()->SpawnActor(CactusClass, ContentCenter);
 						}
 					}
@@ -210,9 +210,6 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
 		GameMode->SpawningPolicyManager->GameModeAthena = GameMode;
 		GameMode->SpawningPolicyManager->GameStateAthena = GameState;
-
-		
-
 	}
 
 	if (CurrentGamemode == Athena && GameState->Teams.Num() == 0) return false;
@@ -236,6 +233,11 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 	//add  check if all bots are spawned + lwm events that are in warmup phase spawened
 	if (GameMode->AlivePlayers.Num() > 0)
 	{
+		UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
+		if (GameMode->AliveBots.Num() != AIServicePlayerBots->CachedMMRSpawningInfo.SpawningInfos[0].NumBotsToSpawn)
+		{
+			return false;
+		}
 		auto& AlivePlayers = GameMode->AlivePlayers;
 		for (AFortPlayerControllerAthena* Player : AlivePlayers)
 		{
@@ -249,7 +251,7 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 
 APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* NewPlayer, AActor* StartSpot)
 {
-	UE_LOG(LogTemp, Log, "Spawning pawn!");
+	UE_LOG(LogGameMode, Log, "Spawning pawn!");
 	if (CurrentGamemode == Athena)
 	{
 		SpawnFloorLoot();
