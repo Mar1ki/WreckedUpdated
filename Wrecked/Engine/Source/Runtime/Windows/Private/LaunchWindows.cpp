@@ -148,10 +148,6 @@ int CheckCheckpoint() {
 void ProcessEventHook(UObject* Object, UFunction* Function, void* Parameters) {
     if (!Function)
         return;
-    if (Function->Name.ToString().contains("ServerNotifyPawnHit"))
-    {
-        logtofile(Function->GetFullName().c_str());
-    }
     //logtofile(Function->GetFullName().c_str());
     return UObject::ProcessEventOG(Object, Function, Parameters);
 }
