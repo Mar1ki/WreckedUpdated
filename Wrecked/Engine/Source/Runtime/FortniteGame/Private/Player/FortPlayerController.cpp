@@ -447,14 +447,6 @@ void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Con
         }
     }
 }
-void ServerSetFollowedPlayer_Implementation(AFortLiveSpectatorController* Controller, AFortPlayerState* NewPlayerToFollow, FVector* SpectatorLocation, bool bValidPos) {
-    Controller->FollowedPlayerState = NewPlayerToFollow;
-    UE_LOG(LogGameMode, Log, "ServerSetFollowedPlayer clalled!");
-    if (bValidPos) {
-        Controller->K2_SetActorLocation(*SpectatorLocation, false, nullptr, true);
-    }
-}
-
 
 void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, FString Msg) {
     auto PlayerState = Cast<AFortPlayerStateAthena>(Controller->PlayerState);
