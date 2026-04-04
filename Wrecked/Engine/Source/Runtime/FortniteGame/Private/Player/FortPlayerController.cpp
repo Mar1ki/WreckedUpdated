@@ -581,8 +581,8 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
         }
         if (Command == "kill")
         {
-            auto gowno = StaticFindObject<UFortAccoladeItemDefinition>("/BattlePassPermanentQuests/Items/Accolades/AccoladeId_012_Elimination.AccoladeId_012_Elimination");
-            FortQuestManager::GiveAccolade(Controller, gowno);
+            auto Accolade = StaticFindObject<UFortAccoladeItemDefinition>("/BattlePassPermanentQuests/Items/Accolades/AccoladeId_012_Elimination.AccoladeId_012_Elimination");
+            FortQuestManager::GiveAccolade(Controller, Accolade);
         }
         if (Command == "teleport")
         {
