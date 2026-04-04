@@ -148,19 +148,28 @@ void ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
 
 void ServerSpectateActor(AFortPlayerControllerZone* PlayerController, AActor* NewViewTarget, const bool bAllowStateChange)
 {
+    if (!PlayerController || !NewViewTarget)
+        return;
+
     auto State = UKismetStringLibrary::Conv_StringToName(L"Spectating");
-    auto lol = (AFortPlayerControllerZone*)NewViewTarget;
-    std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
+    auto PlayerControllerViewTarget = (AFortPlayerControllerZone*)NewViewTarget;
+
+   // std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
+
     PlayerController->StateName = State;
     PlayerController->ClientGotoState(State);
-    
+
     FViewTargetTransitionParams TransitionParams;
     TransitionParams.BlendTime = 2.0f;
     TransitionParams.bLockOutgoing = true;
     TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
     PlayerController->ClientSetViewTarget(NewViewTarget, TransitionParams);
 
-    FortPlayerControllerAthena::BeginSpectating(PlayerController,(AFortPlayerStateZone*)lol->PlayerState);
+    if (!PlayerControllerViewTarget->PlayerState)
+        return;
+    
+
+   // FortPlayerControllerAthena::BeginSpectating(PlayerController, (AFortPlayerStateZone*)lol->PlayerState);
 }
 void FortPlayerControllerAthena::Init()
 {
