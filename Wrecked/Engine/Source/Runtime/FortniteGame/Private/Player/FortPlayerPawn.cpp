@@ -153,7 +153,7 @@ void ServerThrowCarriedPlayer(UObject* Object, FFrame* Frame)
 // thats startdbno i think
 void FortPlayerPawn::test(__int64* a1, __int64* a2)
 {
-    std::cout << "helo" << std::endl;
+    std::cout << "STARTDBNO i think" << std::endl;
     testOG(a1, a2);
 }
 void FortPlayerPawn::Init() {

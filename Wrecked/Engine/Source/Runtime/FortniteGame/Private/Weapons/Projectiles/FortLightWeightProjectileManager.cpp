@@ -285,8 +285,6 @@ void FortLightWeightProjectileManager::ProjectileRequest(AFortLightweightProject
 		return;
 	
 
-	// type is always 1 so Single
-	std::cout <<  "Type: " << (int)Type << std::endl;
 	FFortLightweightProjectileRequest_Net ProjectileMultiCast;
 	
 	ProjectileMultiCast.StartDirection = (FVector_NetQuantizeNormal)Direction;

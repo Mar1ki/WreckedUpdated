@@ -61,7 +61,7 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResu
         auto Damage = CalculateDamage(Hit, WeaponStats);
         auto MovementComp =  (UFortMovementComp_Character*)Owner->MyFortPawn->CharacterMovement;
         auto FinalDamage = Damage / 2;
-        std::cout << "FinalDamage:" << FinalDamage << std::endl;
+     //   std::cout << "FinalDamage:" << Damage << std::endl;
         SendCue(Damage);
         if (!Actor->IsA(AFortPlayerPawn::StaticClass()))
         {
