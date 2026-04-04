@@ -58,11 +58,39 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResu
     
     if (bUseExperimentalDamaging)
     {
-        auto FinalDamage = CalculateDamage(Hit, WeaponStats);
-        std::cout << "FinalDamage:" << FinalDamage << std::endl;
+        auto Damage = CalculateDamage(Hit, WeaponStats);
         auto MovementComp =  (UFortMovementComp_Character*)Owner->MyFortPawn->CharacterMovement;
-        SendCue(FinalDamage);
-        UGameplayStatics::ApplyPointDamage(Actor, FinalDamage / 2, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+        auto FinalDamage = Damage / 2;
+        std::cout << "FinalDamage:" << FinalDamage << std::endl;
+        SendCue(Damage);
+        if (!Actor->IsA(AFortPlayerPawn::StaticClass()))
+        {
+            UGameplayStatics::ApplyPointDamage(Actor, FinalDamage, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+           // UGameplayStatics::ApplyDamage(Actor, FinalDamage, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+        }
+        if (Actor->IsA(AFortPlayerPawn::StaticClass()))
+        {
+            auto TargetPawn = (AFortPlayerPawnAthena*)Actor;
+            float Shield = TargetPawn->GetShield();
+
+            if (Shield > 0) {
+                if (Shield < FinalDamage) {
+                    float Remain = FinalDamage - Shield;
+                    TargetPawn->SetShield(0);
+
+                    UGameplayStatics::ApplyPointDamage(TargetPawn, Remain, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+                    TargetPawn->SpawnCameraLensEffectDirectional(TargetPawn->ScreenEffectShieldDamage, Weapon, Hit, true);
+                } else {
+                    TargetPawn->SetShield(Shield - FinalDamage);
+                    TargetPawn->SpawnCameraLensEffectDirectional(TargetPawn->ScreenEffectShieldDamage, Weapon, Hit, true);
+                    // thats scuffed but whatever
+                    UGameplayStatics::ApplyPointDamage(TargetPawn, 0.001f, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+                }
+            } else {
+                UGameplayStatics::ApplyPointDamage(TargetPawn, FinalDamage, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+                TargetPawn->SpawnCameraLensEffectDirectional(TargetPawn->ScreenEffectHealthDamage, Weapon, Hit, true);
+            }
+        }
     }
 }
 
