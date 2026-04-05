@@ -230,14 +230,9 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		bFirst = true;
 	}
 
-	//add  check if all bots are spawned + lwm events that are in warmup phase spawened
+	// add a check if all bots are spawned + lwm events that are in warmup phase spawened
 	if (GameMode->AlivePlayers.Num() > 0)
 	{
-		UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
-		if (GameMode->AliveBots.Num() != AIServicePlayerBots->CachedMMRSpawningInfo.SpawningInfos[0].NumBotsToSpawn)
-		{
-			return false;
-		}
 		auto& AlivePlayers = GameMode->AlivePlayers;
 		for (AFortPlayerControllerAthena* Player : AlivePlayers)
 		{
@@ -265,6 +260,7 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 			NewPlayer->WarmupPlayerStart = (AFortPlayerStartWarmup*)GetGameMode()->ChoosePlayerStart(NewPlayer);
 		}
 		Transform = NewPlayer->WarmupPlayerStart->GetTransform();
+		NewPlayer->WarmupPlayerStart->PlayerClaimedCount++; // thats gay bc it should auto increase but whatever
 	} else
 	{
 		Transform = StartSpot->GetTransform();
