@@ -433,7 +433,7 @@ bool UFortGameStateComponent_BattleRoyaleGamePhaseLogic::StartWarmupPhase() {
         UpdateBotsGamePhase();
         if (CurrentPlaylist)
         {
-            this->WarmupCountdownDuration = WarmupDuration;
+            this->WarmupCountdownDuration =  bLateGame ? LateGameWarmupDuration : WarmupDuration;
             this->WarmupCountdownEndTime = this->WarmupCountdownStartTime + WarmupCountdownDuration;
         }
 

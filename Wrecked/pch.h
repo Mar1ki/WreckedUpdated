@@ -721,9 +721,10 @@ inline FRotator VectorToRotatorManual(FVector DirectionVector)
 
     return FRotator(Pitch, Yaw, 0.0f);
 }
-constexpr bool bLateGame = false;
+constexpr bool bLateGame = true;
 constexpr bool bUseExperimentalDamaging = true;
-constexpr bool bEnableLWM = true;
+constexpr bool bEnableLWM = false;
 constexpr float WarmupDuration = 500.f;
+constexpr float LateGameWarmupDuration = 50.f;
 inline EGameModeType CurrentGamemode = EGameModeType::Athena;
 #endif //PCH_H
