@@ -41,7 +41,7 @@ void SpawnCactuses() {
 						if (RuntimeCelData) {
 							FBox CellBounds = RuntimeCelData->ContentBounds;
 							FVector Pos = UKismetMathLibrary::RandomPointInBoundingBox_Box(CellBounds);
-							FVector ContentCenter = UFortKismetLibrary::FindGroundLocationAt(GetWorld(), nullptr, Pos, -1000, 2500, UKismetStringLibrary::Conv_StringToName(L"FortDynamicMeshPhysics"));
+							FVector ContentCenter = UFortKismetLibrary::FindGroundLocationAt(GetWorld(), nullptr, Pos, 5000, -5000, UKismetStringLibrary::Conv_StringToName(L"BlockAll"));
 						//	UE_LOG(LogGameMode, Log, "Spawning Cactus at (%d, %d, %d)", ContentCenter.X, ContentCenter.Y, ContentCenter.Z);
 							GetWorld()->SpawnActor(CactusClass, ContentCenter);
 						}
