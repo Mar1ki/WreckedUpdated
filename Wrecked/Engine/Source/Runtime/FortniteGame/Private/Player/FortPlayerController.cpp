@@ -215,6 +215,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
             KillerPawn->SetShield(FMath::Min(100.f, KillerPawn->GetShield() + 50.f));
         }
     }
+    FortQuestManager::GiveAccolade(KillerPlayerController, StaticFindObject<UFortAccoladeItemDefinition>("/BattlePassPermanentQuests/Items/Accolades/AccoladeId_012_Elimination.AccoladeId_012_Elimination"));
 
     if (!bLateGame && !GameState->IsRespawningAllowed(PlayerState) && (PlayerController->MyFortPawn ? !PlayerController->MyFortPawn->IsDBNO() : true))
     {
