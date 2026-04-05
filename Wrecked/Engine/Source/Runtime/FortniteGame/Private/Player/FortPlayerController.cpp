@@ -195,7 +195,7 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
 
         return ClientOnPawnDiedOG(PlayerController, DeathReport);
     }
-    if (bLateGame)
+    if (bLateGame && GameState->PlayersLeft >= 1)
     {
         if (KillerPawn && KillerPawn->GetHealth() < 100.f)
         {

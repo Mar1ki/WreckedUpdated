@@ -12,10 +12,13 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResu
 
     auto WeaponStats = Weapon->WeaponData->GetStats();
     if (!WeaponStats) return;
-    
+
+    TWeakObjectPtr<AActor> Whateverthisis(Actor);
     // the main thing is we dont calculate the damage here okay 
     auto SendCue = [&](float Damage) {
-        bool bIsPlayer = Actor->IsA(AFortPlayerPawn::StaticClass());
+        auto Actor2 = Whateverthisis.Get();
+        if (!Actor2) return;
+        bool bIsPlayer = Actor2->IsA(AFortPlayerPawn::StaticClass());
 
         if (bIsPlayer && UFortKismetLibrary::OnSameSquad((AFortPlayerPawnAthena*)Owner->MyFortPawn, (AFortPlayerPawnAthena*)Actor))return;
         
@@ -66,7 +69,6 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResu
         if (!Actor->IsA(AFortPlayerPawn::StaticClass()))
         {
             UGameplayStatics::ApplyPointDamage(Actor, FinalDamage, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
-           // UGameplayStatics::ApplyDamage(Actor, FinalDamage, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
         }
         if (Actor->IsA(AFortPlayerPawn::StaticClass()))
         {

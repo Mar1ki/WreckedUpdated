@@ -143,7 +143,7 @@ void ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
 
 }
 
-void FortPlayerControllerAthena::ServerSpectateActor(AFortPlayerControllerZone* PlayerController, AActor* NewViewTarget, const bool bAllowStateChange)
+void FortPlayerControllerAthena::ServerSpectateActor(AFortPlayerControllerAthena* PlayerController, AActor* NewViewTarget, const bool bAllowStateChange)
 {
     if (!PlayerController || !NewViewTarget)
         return;
@@ -159,17 +159,17 @@ void FortPlayerControllerAthena::ServerSpectateActor(AFortPlayerControllerZone* 
     if (!PlayerControllerViewTarget || !PlayerControllerViewTarget->PlayerState)
         return;
 
-    //std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
-
-    //std::cout << "bAllowStateChange: " << bAllowStateChange << std::endl;
-
+    if (!bAllowStateChange)
+        return;
+        
     FViewTargetTransitionParams TransitionParams;
     TransitionParams.BlendTime = 2.0f;
     TransitionParams.bLockOutgoing = false;
     TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_Cubic;
-    ClientSetViewTarget_Implementation((AFortPlayerControllerAthena*)PlayerController, (AFortPlayerControllerAthena*)PlayerControllerViewTarget, &TransitionParams);
+    SetViewTargetAndNotifyClient(PlayerController, NewViewTarget, TransitionParams);
+ //   ClientSetViewTarget_Implementation((AFortPlayerControllerAthena*)PlayerController, (AFortPlayerControllerAthena*)PlayerControllerViewTarget, &TransitionParams);
     
-    BeginSpectating((AFortPlayerStateZone*)PlayerController->PlayerState, TargetPlayerState);
+   // BeginSpectating((AFortPlayerStateZone*)PlayerController->PlayerState, TargetPlayerState);
 }
 void FortPlayerControllerAthena::Init()
 {
