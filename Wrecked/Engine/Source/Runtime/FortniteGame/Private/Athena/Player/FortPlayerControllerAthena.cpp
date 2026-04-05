@@ -1,12 +1,9 @@
 #include "pch.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Player/FortPlayerControllerAthena.h"
-
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Plugins/LateGameLibrary/Public/LateGameLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/Stack.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
-#include "Engine/Source/Runtime/FortniteGame/Public/Player/FortPlayerController.h"
-
 
 void FortPlayerControllerAthena::ServerAttemptAircraftJump(UFortControllerComponent_Aircraft* Comp, FRotator ClientRot)
 {
@@ -162,14 +159,14 @@ void FortPlayerControllerAthena::ServerSpectateActor(AFortPlayerControllerZone* 
     if (!PlayerControllerViewTarget || !PlayerControllerViewTarget->PlayerState)
         return;
 
-    std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
+    //std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
 
-    std::cout << "bAllowStateChange: " << bAllowStateChange << std::endl;
+    //std::cout << "bAllowStateChange: " << bAllowStateChange << std::endl;
 
     FViewTargetTransitionParams TransitionParams;
     TransitionParams.BlendTime = 2.0f;
     TransitionParams.bLockOutgoing = false;
-    TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
+    TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_Cubic;
     ClientSetViewTarget_Implementation((AFortPlayerControllerAthena*)PlayerController, (AFortPlayerControllerAthena*)PlayerControllerViewTarget, &TransitionParams);
     
     BeginSpectating((AFortPlayerStateZone*)PlayerController->PlayerState, TargetPlayerState);
