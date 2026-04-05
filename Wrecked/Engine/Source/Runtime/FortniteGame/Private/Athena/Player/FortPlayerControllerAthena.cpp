@@ -146,30 +146,33 @@ void ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
 
 }
 
-void ServerSpectateActor(AFortPlayerControllerZone* PlayerController, AActor* NewViewTarget, const bool bAllowStateChange)
+void FortPlayerControllerAthena::ServerSpectateActor(AFortPlayerControllerZone* PlayerController, AActor* NewViewTarget, const bool bAllowStateChange)
 {
     if (!PlayerController || !NewViewTarget)
         return;
 
-    auto State = UKismetStringLibrary::Conv_StringToName(L"Spectating");
-    auto PlayerControllerViewTarget = (AFortPlayerControllerZone*)NewViewTarget;
+    auto PlayerPawnViewTarget = (AFortPlayerPawnAthena*)NewViewTarget;
+    auto PlayerControllerViewTarget = (AFortPlayerControllerZone*)PlayerPawnViewTarget->Controller;
+    auto TargetPlayerState = (AFortPlayerStateZone*)PlayerControllerViewTarget->PlayerState;
+    auto PlayerState = (AFortPlayerStateZone*)PlayerController->PlayerState;
 
-   // std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
+    if (PlayerState && PlayerState->SpectatingTarget == NewViewTarget)
+        return;
+    
+    if (!PlayerControllerViewTarget || !PlayerControllerViewTarget->PlayerState)
+        return;
 
-    PlayerController->StateName = State;
-    PlayerController->ClientGotoState(State);
+    std::cout << "NewViewTarget: " << NewViewTarget->Name.ToString().c_str() << std::endl;
+
+    std::cout << "bAllowStateChange: " << bAllowStateChange << std::endl;
 
     FViewTargetTransitionParams TransitionParams;
     TransitionParams.BlendTime = 2.0f;
-    TransitionParams.bLockOutgoing = true;
+    TransitionParams.bLockOutgoing = false;
     TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_Linear;
-    PlayerController->ClientSetViewTarget(NewViewTarget, TransitionParams);
-
-    if (!PlayerControllerViewTarget->PlayerState)
-        return;
+    ClientSetViewTarget_Implementation((AFortPlayerControllerAthena*)PlayerController, (AFortPlayerControllerAthena*)PlayerControllerViewTarget, &TransitionParams);
     
-
-   // FortPlayerControllerAthena::BeginSpectating(PlayerController, (AFortPlayerStateZone*)lol->PlayerState);
+    BeginSpectating((AFortPlayerStateZone*)PlayerController->PlayerState, TargetPlayerState);
 }
 void FortPlayerControllerAthena::Init()
 {
