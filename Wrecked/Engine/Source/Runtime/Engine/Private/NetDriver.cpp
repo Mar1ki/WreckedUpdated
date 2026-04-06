@@ -3,7 +3,8 @@
 #include "Engine/Source/Runtime/Engine/Classes/Engine/NetDriver.h"
 
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/FortControllerComponent_RechargeWeapons.h"
-
+/*
+ * your old code btw
 void NetDriver::SendClientMoveAdjustments(UNetDriver* Driver)
 {
 	static void (*SendClientAdjustment)(INetworkPredictionInterface*) = decltype(SendClientAdjustment)(ImageBase + 0x6A3F8A8);
@@ -33,26 +34,23 @@ void NetDriver::SendClientMoveAdjustments(UNetDriver* Driver)
             }
         }
     }
-}
+}*/
 
 void NetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 {
-    auto ReplicationSystem = *(UReplicationSystem**)(__int64(NetDriver) + 0x7c0);
+    auto ReplicationSystem = *(UReplicationSystem**)(__int64(NetDriver) + 0x7C0);
 	if (NetDriver->ClientConnections.Num() > 0 && ReplicationSystem)
 	{
-		static void(*UpdateReplicationViews)(UNetDriver*) = decltype(UpdateReplicationViews)(ImageBase + 0x6CE5844);
-		static void(*PreSendUpdate)(UReplicationSystem*, FSendUpdateParams&) = decltype(PreSendUpdate)(ImageBase + 0x5F8FD5C);
-
-		UpdateReplicationViews(NetDriver);
-		SendClientMoveAdjustments(NetDriver);
+		NetDriver->UpdateIrisReplicationViews();
+		NetDriver->SendClientMoveAdjustments();
 		
-		FSendUpdateParams Params;
+		FSendUpdateParams Params{};
 		Params.DeltaSeconds = DeltaSeconds;
+		Params.SendPass = EReplicationSystemSendPass::TickFlush;
+		
 		PreSendUpdate(ReplicationSystem, Params);
-		FortControllerComponent_RechargeWeapons::TickComponent(); // idk it might be making it slow too but im not sure
 	}
-	
-    return TickFlushOriginal(NetDriver, DeltaSeconds);
+    return TickFlushOG(NetDriver, DeltaSeconds);
 }
 
 float GetMaxTickRate(UEngine* Engine, float DeltaTime, bool bAllowFrameRateSmoothing)
@@ -64,7 +62,7 @@ void NetDriver::Init()
 	UHook* Hook = new UHook();
     
 	Hook->Address = ImageBase + 0x1E66424;
-	Hook->Original = (void**)&TickFlushOriginal;
+	Hook->Original = (void**)&TickFlushOG;
 	Hook->Detour = TickFlush;
 	UKismetHookingLibrary::Hook(Hook, Address);
 	

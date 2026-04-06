@@ -155,10 +155,52 @@ struct FNetRefhandleManagerInitParams
 
 namespace NetDriver
 {
-    inline void (*TickFlushOriginal)(UNetDriver*, float DeltaSeconds);
-    void TickFlush(UNetDriver* NetDriver, float DeltaSeconds);
-
-    void SendClientMoveAdjustments(UNetDriver* Driver);
-
+	DefineOriginal(void, TickFlush, UNetDriver* NetDriver, float DeltaSecodnds);
     void Init();
+}
+
+
+inline void UNetDriver::UpdateIrisReplicationViews() const
+{
+	static void(*UpdateReplicationViewsInternal)(const UNetDriver*) = decltype(UpdateReplicationViewsInternal)(ImageBase + 0x6CE5844);
+	UpdateReplicationViewsInternal(this);
+}
+
+inline void PreSendUpdate(UReplicationSystem* ReplicationSystem, FSendUpdateParams& Params)
+{
+	static void(*PreSendUpdateInternal)(UReplicationSystem*, FSendUpdateParams&) = decltype(PreSendUpdateInternal)(ImageBase + 0x5F8FD5C);
+	PreSendUpdateInternal(ReplicationSystem, Params);
+}
+
+inline void APlayerController::SendClientAdjustment()
+{
+	static void (__fastcall* SendClientAdjustmentInternal)(APlayerController*) = decltype(SendClientAdjustmentInternal)(ImageBase + 0x6DD2A10);
+	SendClientAdjustmentInternal(this);
+}
+
+
+inline void UNetDriver::SendClientMoveAdjustments()
+{
+
+	for (UNetConnection* Connection : this->ClientConnections)
+	{
+		if (Connection == nullptr || Connection->ViewTarget == nullptr)
+			continue;
+		
+
+		if (APlayerController* PC = Connection->PlayerController)
+			PC->SendClientAdjustment();
+		
+
+		for (UNetConnection* ChildConnection : Connection->Children)
+		{
+			if (ChildConnection == nullptr)
+				continue;
+			
+
+			if (APlayerController* PC = ChildConnection->PlayerController)
+				PC->SendClientAdjustment();
+			
+		}
+	}
 }
