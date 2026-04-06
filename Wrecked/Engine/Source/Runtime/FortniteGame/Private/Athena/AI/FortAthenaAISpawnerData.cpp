@@ -3,6 +3,9 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 #include "SDK/SDK/BP_PhoebePlayerController_classes.hpp"
+#include "SDK/SDK/BP_PhoebeController_NonParticipant_classes.hpp"
+
+
 
 void FortAthenaAISpawnerData::AIBotSkillsetOnSpawned(UFortAthenaAISpawnerDataComponent_AIBotSkillset* AIBotSkillset, AFortAIPawn* Pawn) {
 	auto AIBotController = (AFortAthenaAIBotController*)Pawn->Controller;
@@ -179,17 +182,8 @@ void FFortBotInventoryInfo::SetItem(UFortWorldItem* NewItem) {
 }
 
 bool AFortAthenaAIBotController::IsPlayerBot() {
-	UAthenaAIServicePlayerBots* AIServicePlayerBots = UAthenaAIBlueprintLibrary::GetAIServicePlayerBots(UWorld::GetWorld());
-
+	if (this->IsA(ABP_PhoebeController_NonParticipant_C::StaticClass())) return false;
 	if (this->IsA(ABP_PhoebePlayerController_C::StaticClass())) return true;
-	else return false;
-/*	for (auto Bot : AIServicePlayerBots->PlayerBots)
-	{
-		if (Bot.BotController == this)
-			return true;
-	}
-	return false;
-	*/
 }
 
 void FortAthenaAISpawnerData::AIBotInventoryBaseOnSpawned(UFortAthenaAISpawnerDataComponent_InventoryBase* Component, AFortAIPawn* Pawn) {
