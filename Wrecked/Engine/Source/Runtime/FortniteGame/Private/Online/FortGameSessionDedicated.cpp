@@ -3,7 +3,7 @@
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/CoreUObject/Public/UObject/UObjectGlobals.h"
 
-bool FortGameSessionDedicated::LoadMap(UEngine* Engine, FWorldContext* WorldContext, FURL URL, class UPendingNetGame* Pending, FString* Error) {
+bool FortGameSessionDedicated::LoadMap(UEngine* Engine, FWorldContext* WorldContext, FURL* URL, UPendingNetGame* Pending, FString* Error) {
 	auto res = LoadMapOG(Engine, WorldContext, URL, Pending, Error);
 	if (res)
 	{
