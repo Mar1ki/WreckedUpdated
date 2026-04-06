@@ -11750,6 +11750,8 @@ public:
 	uint8                                         Pad_7C0[0x90];                                     // 0x07C0(0x0090)(Fixing Struct Size After Last Property [ Dumper-7 ])
 
 public:
+	void UpdateIrisReplicationViews() const;
+	void SendClientMoveAdjustments();
 	static class UClass* StaticClass()
 	{
 		return StaticClassImpl<"NetDriver">();
@@ -12902,6 +12904,7 @@ public:
 	bool StreamingSourceShouldBlockOnSlowStreaming() const;
 	bool WasInputKeyJustPressed(const struct FKey& Key) const;
 	bool WasInputKeyJustReleased(const struct FKey& Key) const;
+	void SendClientAdjustment();
 
 public:
 	static class UClass* StaticClass()
