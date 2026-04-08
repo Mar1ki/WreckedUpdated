@@ -294,7 +294,7 @@ void Main()
     UKismetHookingLibrary::Hook(Hook, Byte);
 
     GetWorld()->OwningGameInstance->LocalPlayers.Remove(0);
-    *(bool*)(__int64(ImageBase) + 0x12BF67B0) = true;
+    *(bool*)(__int64(ImageBase) + 0x12BF67B0) = true; // iris bool ithink
     //*(int*)(__int64(ImageBase) + 0x12BCB068) = 7;
     //*(int*)(ImageBase + 0x12BCB280) = 7; //mme
     *(int*)(ImageBase + 0x12BCB180) = 7;
@@ -304,6 +304,21 @@ void Main()
     *(bool*)(ImageBase + 0x12D84D92) = false;
     *(int*)(ImageBase + 0x12BCFF68) = 7; // something with phoebe ais
 
+
+    auto ReplicationBridgeConfig = UObjectReplicationBridgeConfig::GetDefaultObj();
+
+    auto FortInventoryName = UKismetStringLibrary::Conv_StringToName(L"/Script/FortniteGame.FortInventory");
+    for (int i = 0; i < ReplicationBridgeConfig->FilterConfigs.Num(); i++)
+    {
+        auto& FilterConfig = ReplicationBridgeConfig->FilterConfigs[i];
+
+        if (FilterConfig.ClassName == FortInventoryName)
+        {
+            FilterConfig.DynamicFilterName = FName(0);
+            break;
+        }
+    }
+    
     if (CurrentGamemode == EGameModeType::Papaya)
     {
         UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"open Apollo_Papaya", nullptr);
@@ -333,7 +348,7 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"net.allowencryption 0", nullptr);
     //UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogIris VeryVerbose", nullptr);
     //UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogReplicationSystem VeryVerbose", nullptr);
-    UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"net.Iris.UseIrisReplication 1", nullptr);
+    //UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"net.Iris.UseIrisReplication 1", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogEOSSDK off", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogOnline off", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogFortAscenderZipline none", nullptr); // random logs that pretty much we dont care about 
