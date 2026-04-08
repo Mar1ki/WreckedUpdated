@@ -310,14 +310,14 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
         if (QueryResult == EFortStructuralGridQueryResults::CanAdd)
         {
             // what in the fuck is that 
-            for (int32 i = 0; i < BuildingActors.Num(); i++)
+           /* for (int32 i = 0; i < BuildingActors.Num(); i++)
             {
                 ABuildingActor* ExistingBuilding = BuildingActors[i];
                 if (!ExistingBuilding)
                     continue;
 
                 ExistingBuilding->K2_DestroyActor();
-            }
+            }*/
  
             if (!PlayerController->CanAffordToPlaceBuildableClass(&CreateBuildingData.BuildingClassData))
                 return;
@@ -332,9 +332,9 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
                 BuildingSMActor->SetMirrored(CreateBuildingData.bMirrored);
                 BuildingSMActor->bPlayerPlaced = true;
                 
-                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true, nullptr, false);
-
+                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true, nullptr, true);
                 
+                // this might be auto with some sort of func i think need to check tho
                 if (auto PlayerState = (AFortPlayerStateAthena*)PlayerController->PlayerState)
                 {
                     BuildingSMActor->TeamIndex = PlayerState->TeamIndex;
@@ -352,19 +352,20 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
     if (!PlayerStateZone || !BuildingActorToEdit || !PlayerController->MyFortPawn)
         return;
 
-    BuildingActorToEdit->SetNetDormancy(ENetDormancy(2 - (PlayerStateZone != nullptr)));
+    BuildingActorToEdit->SetNetDormancy(ENetDormancy::DORM_Awake);
     BuildingActorToEdit->ForceNetUpdate();
     BuildingActorToEdit->EditingPlayer = PlayerStateZone;
     BuildingActorToEdit->OnRep_EditingPlayer();
-    
+
+    // bro what
     static UFortEditToolItemDefinition* EditToolItemDefinition = GetAssetManager()->GameDataCommon->EditToolItem.Get();
     if (!EditToolItemDefinition)
-    {
         EditToolItemDefinition = GetAssetManager()->GameDataCommon->EditToolItem.Get();
-    }
+    
 
     // clean up whatever this is
     auto ItemEntry = PlayerController->GetInventory()->GetItemEntryByDef(EditToolItemDefinition);
+    
     if (ItemEntry && EditToolItemDefinition && PlayerController->MyFortPawn->EquipWeaponDefinition(EditToolItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false))
     {
         AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
@@ -374,6 +375,7 @@ void FortPlayerController::ServerBeginEditingBuildingActor(AFortPlayerController
             EditingTool->EditActor = BuildingActorToEdit;
             EditingTool->ForceNetUpdate();
             EditingTool->OnRep_EditActor();
+            EditingTool->ForceNetUpdate();
         }
     }
 }
@@ -393,28 +395,26 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
 void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit)
 {
     if (!BuildingActorToEdit || BuildingActorToEdit->EditingPlayer != PlayerController->PlayerState || BuildingActorToEdit->bDestroyed || !PlayerController->MyFortPawn) return;
-    auto PlayerState = (AFortPlayerState*)PlayerController->PlayerState;
-
     
-    BuildingActorToEdit->EditingPlayer = nullptr;
+    BuildingActorToEdit->SetNetDormancy(ENetDormancy::DORM_DormantAll);
     BuildingActorToEdit->ForceNetUpdate();
+    BuildingActorToEdit->EditingPlayer = nullptr;
     BuildingActorToEdit->OnRep_EditingPlayer();
 
     AFortWeap_EditingTool* EditingTool = Cast<AFortWeap_EditingTool>(PlayerController->MyFortPawn->CurrentWeapon);
     if (EditingTool)
     {
         EditingTool->EditActor = nullptr;
-        EditingTool->ForceNetUpdate();
         EditingTool->OnRep_EditActor();
+        EditingTool->ForceNetUpdate();
     }
 }
 
 void FortPlayerController::ServerRepairBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToRepair)
 {
-    auto aa = BuildingActorToRepair->GetCostToRepair(PlayerController);
+    auto RepairCost = BuildingActorToRepair->GetCostToRepair(PlayerController);
     PlayerController->PayBuildingRepairCost(BuildingActorToRepair);
-    std::cout << "repair" << std::endl;
-    BuildingActorToRepair->RepairBuilding(PlayerController, aa);
+    BuildingActorToRepair->RepairBuilding(PlayerController, RepairCost);
 }
 
 void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Controller, FGuid ItemGuid)
