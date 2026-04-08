@@ -180,11 +180,11 @@ void FortVehicleMod::Init()
     UKismetHookingLibrary::Hook(Hook, Interface);
     
     // vehicle mod rpc used for turrets
-    Hook->Address = 0x2110 / 8;
+   /* Hook->Address = 0x2110 / 8;
     Hook->Class = AFortPlayerControllerAthena::StaticClass();
     Hook->Detour = ServerVehicleModSeatRPC;
     Hook->Original =(void**)&ServerVehicleModSeatRPCOG;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);*/
     
     // AFortAthenaVehicle::AbsorbDamageIntoDamagablePart that has no impl
    /* Hook->Address = 0x11A8/8;

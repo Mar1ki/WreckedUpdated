@@ -31,89 +31,12 @@ void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
     } 
     Vehicle->OnRep_DamageableParts(Old);
 }
-
-
-
-static auto BGAClass = StaticFindObject<UClass>("/Script/Engine.BlueprintGeneratedClass");
-
-AFortAthenaVehicle* SpawnBasicSUV(FVector Location, FRotator Rotation) {
-    static auto VehicleClass = StaticLoadObject<UClass>("/BasicSUV/Vehicle/Valet_BasicSUV_Vehicle.Valet_BasicSUV_Vehicle_C", BGAClass);
-    auto SpawnedVehicle = GetWorld()->SpawnActor<AFortAthenaVehicle>(VehicleClass, Location, Rotation);
-  //  ApplyDamagableParts(SpawnedVehicle);
-    return SpawnedVehicle;
-}
-
-AFortAthenaVehicle* SpawnSportsCar(FVector Location, FRotator Rotation) {
-    static auto VehicleClass = StaticLoadObject<UClass>("/Valet/SportsCar/Valet_SportsCar_Vehicle.Valet_SportsCar_Vehicle_C", BGAClass);
-    auto SpawnedVehicle = GetWorld()->SpawnActor<AFortAthenaVehicle>(VehicleClass, Location, Rotation);
- //  ApplyDamagableParts(SpawnedVehicle);
-    return SpawnedVehicle;
-}
-AFortAthenaVehicle* SpawnDirtBikeVehicle(FVector Location, FRotator Rotation) {
-    static auto VehicleClass = StaticLoadObject<UClass>("/Dirtbike/Vehicle/Motorcycle_DirtBike_Vehicle.Motorcycle_DirtBike_Vehicle_C", BGAClass);
-    auto SpawnedVehicle = GetWorld()->SpawnActor<AFortAthenaVehicle>(VehicleClass, Location, Rotation);
-    return SpawnedVehicle;
-}
-AFortAthenaVehicle* SpawnBossVehicle1(FVector Location, FRotator Rotation) {
-    static auto VehicleClass = StaticLoadObject<UClass>("/MoonflaxBossVehicle/Gameplay/Vehicles/Valet_BossSportsCar_Moonflax_Vehicle.Valet_BossSportsCar_Moonflax_Vehicle_C", BGAClass);
-    auto SpawnedVehicle = GetWorld()->SpawnActor<AFortAthenaVehicle>(VehicleClass, Location, Rotation);
-    return SpawnedVehicle;
-}
-
 void FortAthenaVehicle::PostInitializeComponents(AFortAthenaVehicle* Vehicle) {
     PostInitializeComponentsOG(Vehicle);
 
     //UE_LOG(LogVehicles, Log, "Initializing Vehicle Damageable Parts");
     ApplyDamagableParts(Vehicle);
 }
-void FortAthenaVehicle::SpawnVehicles()
-{
-    static bool Spawned = false;
-    if (!Spawned)
-    {
-        Spawned = true;
-        TArray<AActor*> Spawners;
-        UGameplayStatics::GetAllActorsOfClass(GetWorld(), AFortAthenaLivingWorldVehiclePointProvider::StaticClass(), &Spawners);
-		static auto BasicSUVClass = StaticLoadObject<UClass>("/BasicSUV/LWSpawner/LW_BasicSUV_Spawner.LW_BasicSUV_Spawner_C", BGAClass);
-        static auto SportsCarSpawner = StaticLoadObject<UClass>("/Valet/LWSpawner/SportsCar/Valet_SportsCar_LWSpawner.Valet_SportsCar_LWSpawner_C", BGAClass);
-        static auto DirtBikeSpawner = StaticLoadObject<UClass>("/Dirtbike/LWSpawner/LW_DirtbikeVehicle_Spawner.LW_DirtbikeVehicle_Spawner_C", BGAClass);
-
-        // ig we can make a check if all spawners/points are there but who the fuck cares bc its called when a playe spawns so yh
-        for (auto Spawner : Spawners)
-        {
-            auto SpawnerLoc = Spawner->K2_GetActorLocation();
-            auto SpawnerRot = Spawner->K2_GetActorRotation();
-            if (Spawner->IsA(BasicSUVClass))
-            {
-                auto car = SpawnBasicSUV(SpawnerLoc, SpawnerRot);
-            }
-
-            if (Spawner->IsA(SportsCarSpawner))
-            {
-              auto car = SpawnSportsCar(SpawnerLoc, SpawnerRot);
-            }
-            if (Spawner->IsA(DirtBikeSpawner))
-            {
-                SpawnDirtBikeVehicle(SpawnerLoc, SpawnerRot);
-            }
-        }
-        UE_LOG(LogVehicles, Log, "Spawned Vehicles");
-    }
-}
-
-double UnwindDegrees(double Angle) {
-
-    Angle = fmod(Angle, 360.0f); // rat
-
-    if (Angle < 0.)
-        Angle += 360.;
-
-    if (Angle > 180.)
-        Angle -= 360.;
-
-    return Angle;
-}
-
 void ServerMove(AFortPhysicsPawn* Pawn, FReplicatedPhysicsPawnState State)
 {
     State.Rotation.X -= 0.3f;
@@ -178,7 +101,6 @@ void RepairDamageablePart(AFortAthenaVehicle* Vehicle, const FName* ShapeName, c
                         Vehicle->DamageableParts[i].Health = Found->MaxHealth.Evaluate();
                         break;
                     }
-                    
                 }
             }
             Vehicle->OnRep_DamageableParts(Old);
@@ -221,18 +143,15 @@ void FortAthenaVehicle::TryGiveMetalOnHarvest(IFortVehicleInterface *Interface, 
     auto FoundEntry = Inventory->GetItemEntryByDef(MetalItemDefinition);
     if (FoundEntry)
     {
-
         if (FoundEntry->Count == 500)
         {
             auto Pickup = FortKismetLibrary::SpawnPickup(DamageCauser->K2_GetActorLocation(), MetalItemDefinition, EFortPickupSourceTypeFlag::Tossed, EFortPickupSpawnSource::TossedByPlayer, MetalOnHit, 0, Pawn);
             Pickup->SetCombinePickupsWhenTossCompletes(true);
-            
         } else
         {
             FoundEntry->Count += MetalOnHit;
             Inventory->ReplaceEntry(*FoundEntry);
             PlayerController->ClientReportGotResourceFromVehicle(Vehicle, MetalOnHit);
-
         }
     } else
     {
