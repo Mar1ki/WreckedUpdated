@@ -77,8 +77,9 @@ void ServerReturnToMainMenu(UObject* Context, FFrame& Stack) {
     PlayerController->ClientReturnToMainMenuWithTextReason(UKismetTextLibrary::Conv_StringToText(L""));
     PlayerController->ClientEndOnlineSession();
   //  PlayerController->ClientEndGameKick();
+    auto lol = (AFortPlayerControllerZone*)PlayerController;
     if (PlayerController->MyFortPawn)
-        PlayerController->MyFortPawn->KillDisconnectedPawn();
+        lol->ServerSuicide();
 }
 
 void FortPlayerControllerAthena::ClientIsReadyToRespawn(AFortPlayerControllerAthena* PlayerController) {
