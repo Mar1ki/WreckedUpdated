@@ -113,46 +113,70 @@ void FortPlayerPawn::TryAutoPickup(AFortPlayerPawn* Pawn, AFortPickupAthena* Pic
     }
 }
 
-void ServerHoistDBNOPlayer(UObject* Object, FFrame* Frame)
+void FortPlayerPawn::ServerHoistDBNOPlayer(AFortPlayerPawn* Pawn, AFortPlayerPawn *InDBNOHoistee)
 {
-    AFortPlayerPawn* InDBNOHoistee;
-    Frame->StepCompiledIn(&InDBNOHoistee);
-    Frame->IncrementCode();
+    ServerHoistDBNOPlayerOG(Pawn, InDBNOHoistee);
+    if (!InDBNOHoistee)
+        return;
+    
+    auto HoisterController = Pawn->Controller;
+    if (!HoisterController)
+        return;
 
-    auto Pawn = (AFortPlayerPawn*)Object;
-    auto previous = Pawn->DBNOHoisterData;
+    auto HoisterPlayerController = (AFortPlayerControllerAthena*)HoisterController;
+    if (!HoisterPlayerController)
+        return;
 
-    Pawn->DBNOHoistee = InDBNOHoistee;
-    Pawn->DBNOHoisterData.DBNOCarryEvent = EFortDBNOCarryEvent::PickedUp;
-    Pawn->DBNOHoisterData.DBNOHoister = Pawn;
-
-    Pawn->OnRep_DBNOHoisterData(previous);
-    Pawn->OnRep_DBNOHoistee();
-
+    if (!CanHoistFromDBNO(InDBNOHoistee, HoisterPlayerController))
+        return;
+    
+    FFortDBNOCarryHoisterData PreviousHoisterData;
+    PreviousHoisterData.DBNOHoister = nullptr;
+    PreviousHoisterData.DBNOCarryEvent = EFortDBNOCarryEvent::PickedUp;
+    
     InDBNOHoistee->bIsBeingDBNOCarried = true;
-}
-
-void ServerThrowCarriedPlayer(UObject* Object, FFrame* Frame)
-{
-
-    auto Pawn = (AFortPlayerPawn*)Object;
-    auto previous = Pawn->DBNOHoisterData;
-
-    auto InDBNOHoistee = Pawn->GetDBNOHoistee();
+    
+    InDBNOHoistee->DBNOHoisterData.DBNOHoister = Pawn;
+    InDBNOHoistee->DBNOHoisterData.DBNOCarryEvent = EFortDBNOCarryEvent::PickedUp;
     Pawn->DBNOHoistee = InDBNOHoistee;
-    Pawn->DBNOHoisterData.DBNOHoister = Pawn;
-    Pawn->DBNOHoisterData.DBNOCarryEvent = EFortDBNOCarryEvent::Thrown;
-
-    Pawn->LocalThrowCarriedPlayer();
-
-    InDBNOHoistee->bIsBeingDBNOCarried = false;
-
-    Pawn->OnRep_DBNOHoisterData(previous);
+    
+    InDBNOHoistee->OnRep_DBNOHoisterData(PreviousHoisterData);
     Pawn->OnRep_DBNOHoistee();
+    
+    InDBNOHoistee->ForceNetUpdate();
+    Pawn->ForceNetUpdate();
 }
+void FortPlayerPawn::ServerThrowDBNOPlayer(UObject* Object, FFrame* Frame)
+{
+    ServerThrowDBNOPlayerOG(Object, Frame);
+    
+    auto Pawn = (AFortPlayerPawn*)Object;
+    AFortPlayerPawn* CurrentHoistee = Pawn->DBNOHoistee;
+    if (!CurrentHoistee)
+        return;
+    
+    FFortDBNOCarryHoisterData PreviousHoisterData = CurrentHoistee->DBNOHoisterData;
+    CurrentHoistee->bIsBeingDBNOCarried = false;
+    CurrentHoistee->DBNOHoisterData.DBNOHoister = nullptr;
+    CurrentHoistee->DBNOHoisterData.DBNOCarryEvent = EFortDBNOCarryEvent::Thrown;
+
+    Pawn->DBNOHoistee = nullptr;
+    Pawn->bIsDBNOCarrying = false;
+    
+    CurrentHoistee->OnRep_DBNOHoisterData(PreviousHoisterData);
+    Pawn->OnRep_DBNOHoistee();
+
+    CurrentHoistee->ForceNetUpdate();
+    Pawn->ForceNetUpdate();
+}
+
+// 	void ServerDropCarriedPlayer(); need to impl that too :sob
 // thats startdbno i think
 void FortPlayerPawn::test(__int64* a1, __int64* a2)
 {
+    auto Pawn = (AFortPlayerPawn*)a1;
+    Pawn->bIsDBNO = true;
+    Pawn->OnRep_IsDBNO();   
     std::cout << "STARTDBNO i think" << std::endl;
     testOG(a1, a2);
 }
@@ -174,14 +198,17 @@ void FortPlayerPawn::Init() {
     UKismetHookingLibrary::Hook(Hook, Address);
 
     // broken rn
-   /* Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerHoistDBNOPlayer";
+    Hook->Class = AFortPlayerPawn::StaticClass();
+    Hook->Address = 0x11C0 / 8;
     Hook->Detour = ServerHoistDBNOPlayer;
-    UKismetHookingLibrary::Hook(Hook, Exec);
+    Hook->Original = (void**)&ServerHoistDBNOPlayerOG;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
     Hook->Path = "/Script/FortniteGame.FortPlayerPawn.ServerThrowCarriedPlayer";
-    Hook->Detour = ServerThrowCarriedPlayer;
-    UKismetHookingLibrary::Hook(Hook, Exec);*/
-
+    Hook->Detour = ServerThrowDBNOPlayer;
+    Hook->Original = (void**)&ServerThrowDBNOPlayerOG;
+    UKismetHookingLibrary::Hook(Hook, Exec);
+    
     Hook->Address = 3224 / 8;
     Hook->Class = AFortPlayerPawn::StaticClass();
     Hook->Detour = test;

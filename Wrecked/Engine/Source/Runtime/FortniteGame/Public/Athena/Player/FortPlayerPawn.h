@@ -10,6 +10,11 @@ namespace FortPlayerPawn {
 	DefineOriginal(void, ServerReviveFromDBNO, AFortPlayerPawn* DbnoPawn, AFortPlayerControllerAthena* EventInstigator);
 	void ServerHandlePickupInfo(AFortPlayerPawn* Pawn, AFortPickup* Pickup, FFortPickupRequestInfo& Params);
 
+
+	DefineOriginal(void, ServerThrowDBNOPlayer, UObject* Object, FFrame* Frame);
+	DefineOriginal(void, ServerHoistDBNOPlayer, AFortPlayerPawn* Pawn, AFortPlayerPawn *InDBNOHoistee);
+
+
 	void Init();
 }
 
@@ -20,6 +25,7 @@ inline void AFortPlayerPawn::HandleZiplineStateChanged()
 	HandleZiplineStateChangedInternal(this);
 }
 
+inline char (*CanHoistFromDBNO)(AFortPlayerPawn*, AFortPlayerController*) = reinterpret_cast<char(*)(AFortPlayerPawn*, AFortPlayerController*)>(ImageBase + 0xA118990);
 
 inline void AFortPickup::SetPickupTarget(AFortPlayerPawn* PlayerPawn, float FlyTime, FVector Direction)
 {
