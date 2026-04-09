@@ -635,6 +635,16 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
             Comp->NewlyAddedMovementModeExtensionRuntimeData.Clear();
             Comp->ActiveLayeredMovementModeRuntimeData.Clear();
         }
+        if (Command == "llama")
+        {
+
+            static auto SpawnerClass = StaticLoadObject<UClass>("/Labrador/AISpawnerData/BP_AISpawnerData_Labrador.BP_AISpawnerData_Labrador_C");
+            auto ComponentList = UFortAthenaAISpawnerData::CreateComponentListFromClass(SpawnerClass, UWorld::GetWorld());
+           auto transform =  UKismetMathLibrary::MakeTransform(Pawn->K2_GetActorLocation(), Pawn->K2_GetActorRotation(), FVector(1, 1, 1));
+            
+            ((UAthenaAISystem*)UWorld::GetWorld()->AISystem)->AISpawner->RequestSpawn(ComponentList, transform, false);
+            
+        }
         if (Command == "spawnnpc")
         {
             static auto SpawnerClass = StaticLoadObject<UClass>("/NPCLibrary/NPCs/BaoBros/BaoBros/BP_AIBotSpawnerData_NPC_BaoBros.BP_AIBotSpawnerData_NPC_BaoBros_C");

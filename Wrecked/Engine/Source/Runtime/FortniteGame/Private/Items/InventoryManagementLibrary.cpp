@@ -91,7 +91,7 @@ void InventoryManagementLibrary::Init() {
     Hook->Detour = RemoveItem;
     UKismetHookingLibrary::Hook(Hook, Exec);
 
-    Hook->Path = "/Script/FortniteGame.InventoryManagementLibrary.RemoveItems";
+  /*  Hook->Path = "/Script/FortniteGame.InventoryManagementLibrary.RemoveItems";
     Hook->Detour = RemoveItems;
-    UKismetHookingLibrary::Hook(Hook, Exec);
+    UKismetHookingLibrary::Hook(Hook, Exec);*/
 }

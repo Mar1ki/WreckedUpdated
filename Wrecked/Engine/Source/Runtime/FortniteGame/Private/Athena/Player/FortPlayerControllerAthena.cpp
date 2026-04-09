@@ -76,7 +76,6 @@ void ServerReturnToMainMenu(UObject* Context, FFrame& Stack) {
     PlayerController->ServerSuicide();
     PlayerController->ClientReturnToMainMenuWithTextReason(UKismetTextLibrary::Conv_StringToText(L""));
     PlayerController->ClientEndOnlineSession();
-  //  PlayerController->ClientEndGameKick();
     auto lol = (AFortPlayerControllerZone*)PlayerController;
     if (PlayerController->MyFortPawn)
         lol->ServerSuicide();
