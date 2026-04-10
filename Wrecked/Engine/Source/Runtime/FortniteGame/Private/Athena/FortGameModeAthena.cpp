@@ -257,7 +257,7 @@ APawn* FortGameModeAthena::SpawnDefaultPawnFor(AFortGameModeAthena* GameMode, AF
 	{
 		if (NewPlayer->WarmupPlayerStart->PlayerClaimedCount > 0)
 		{
-			NewPlayer->WarmupPlayerStart = (AFortPlayerStartWarmup*)GetGameMode()->ChoosePlayerStart(NewPlayer);
+			NewPlayer->WarmupPlayerStart = (AFortPlayerStartWarmup*)ChoosePlayerStartInternal(GameMode, NewPlayer);
 		}
 		Transform = NewPlayer->WarmupPlayerStart->GetTransform();
 		NewPlayer->WarmupPlayerStart->PlayerClaimedCount++; // thats gay bc it should auto increase but whatever

@@ -18,7 +18,7 @@ namespace FortGameModeAthena
 
     static void (*NotifyGameMemberAdded)(AFortGameStateAthena*, uint8_t, uint8_t, FUniqueNetIdRepl*) = decltype(NotifyGameMemberAdded)(ImageBase + 0x26D37F4);
 
-    
+    static AActor* (*ChoosePlayerStartInternal)(AFortGameModeAthena* GameMode, AFortPlayerControllerAthena* Player) = decltype(ChoosePlayerStartInternal)(ImageBase + 0x8FC3E18);
     
     void Init();
 }
