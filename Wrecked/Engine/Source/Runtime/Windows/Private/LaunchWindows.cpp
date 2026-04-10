@@ -371,6 +371,8 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogOnlineSession VeryVerbose", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogFortPickup VeryVerbose", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogBeacon VeryVerbose", nullptr);
+    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogBuildingSMActorCueReplication none", nullptr);
+
 
 #endif
 #ifdef Client
