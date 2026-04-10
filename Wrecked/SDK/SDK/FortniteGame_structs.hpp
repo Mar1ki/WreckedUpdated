@@ -33799,7 +33799,7 @@ struct FMMERuntimeContext final
 {
 public:
 	float                                         DeltaTime;                                         // 0x0000(0x0004)(BlueprintVisible, BlueprintReadOnly, ZeroConstructor, IsPlainOldData, NoDestructor, HasGetValueTypeHash, NativeAccessSpecifierPublic)
-	uint8                                         Pad_4[0x8];                                        // 0x0004(0x0008)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	TWeakObjectPtr<class UFortMovementMode_BaseExtRuntimeData*>                  RuntimeData; 
 };
 
 struct FPlayerStateGroupTable {
