@@ -76,16 +76,15 @@ void ServerNotifyPawnHit_Implemenation(AFortWeaponRanged* Weapon, const FHitResu
             float Shield = TargetPawn->GetShield();
 
             if (Shield > 0) {
-                if (Shield < FinalDamage) {
-                    float Remain = FinalDamage - Shield;
+                if (Shield < Damage) {
+                    float Remain = Damage - Shield;
                     TargetPawn->SetShield(0);
 
-                    UGameplayStatics::ApplyPointDamage(TargetPawn, Remain, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
+                    UGameplayStatics::ApplyPointDamage(TargetPawn, Remain / 2, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
                     TargetPawn->SpawnCameraLensEffectDirectional(TargetPawn->ScreenEffectShieldDamage, Weapon, Hit, true);
                 } else {
-                    TargetPawn->SetShield(Shield - FinalDamage);
+                    TargetPawn->SetShield(Shield - Damage);
                     TargetPawn->SpawnCameraLensEffectDirectional(TargetPawn->ScreenEffectShieldDamage, Weapon, Hit, true);
-                    // thats scuffed but whatever
                     UGameplayStatics::ApplyPointDamage(TargetPawn, 0.001f, ProjectileOriginPosition, Hit, Owner, Weapon, MovementComp->ImpactDamageTypeClass);
                 }
             } else {
