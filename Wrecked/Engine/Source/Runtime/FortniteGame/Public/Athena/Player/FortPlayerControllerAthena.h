@@ -10,7 +10,6 @@ namespace FortPlayerControllerAthena {
 	static void (*SetViewTargetAndNotifyClient)(AFortPlayerControllerAthena*, AActor*, FViewTargetTransitionParams&) = decltype(SetViewTargetAndNotifyClient)(ImageBase + 0x9090C70);
 	
 	void ServerSpectateActor(AFortPlayerControllerAthena* PlayerController, AActor* NewViewTarget, bool bAllowStateChange);
-
-
+	
 	void Init();
 }

@@ -10,14 +10,17 @@ namespace FortPlayerController
     void ServerBeginEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit);
     void ServerEditBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* Building, TSubclassOf<ABuildingSMActor> ReplacementClass, uint8 Rot, bool Mirrored);
     void ServerEndEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit);
-    void ServerAttemptInventoryDrop(AFortPlayerController* Controller, const struct FGuid& ItemGuid, int32 Count, bool bTrash);
-    DefineOriginal(void, ServerLoadingScreenDropped, AFortPlayerControllerAthena* PC);
+    void ServerAttemptInventoryDrop(AFortPlayerController* Controller, const FGuid& ItemGuid, int32 Count, bool bTrash);
     void ServerRepairBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToRepair);
     void ServerPlayEmoteItem(AFortPlayerController* PlayerController, UFortMontageItemDefinitionBase* EmoteAsset, float EmoteRandomNumber);
     DefineOriginal(void, ServerReadyToStartMatch, AFortPlayerControllerAthena* PlayerController);
     void MovingEmoteStopped(UObject* Context, FFrame& Stack);
     void ServerCheat(AFortPlayerControllerAthena* Controller, FString Msg);
     DefineOriginal(void, ClientOnPawnDied, AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport);
+    void ServerSuicide(AFortPlayerController* PlayerController);
+    
+    static void (*ServerSuicideInternal)(AFortPlayerController*) = decltype(ServerSuicideInternal)(ImageBase + 0xA212408);
+    
     void Init();
 }
 

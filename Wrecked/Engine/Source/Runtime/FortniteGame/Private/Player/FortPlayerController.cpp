@@ -761,6 +761,10 @@ void FortPlayerController::ServerCheat(AFortPlayerControllerAthena* Controller, 
     }
 }
 
+void FortPlayerController::ServerSuicide(AFortPlayerController* PlayerController)
+{
+    ServerSuicideInternal(PlayerController);
+}
 
 void FortPlayerController::Init()
 {
@@ -820,15 +824,15 @@ void FortPlayerController::Init()
     Hook->Class = AFortPlayerController::StaticClass();
     Hook->Detour = ServerCheat;
     UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);
-
-   /* Hook->Address = 0x2440 / 8;
-    Hook->Class = AFortLiveSpectatorController::StaticClass();
-    Hook->Detour =ServerSetFollowedPlayer_Implementation;
-    UKismetHookingLibrary::Hook(Hook, EHook::EveryVFT);*/
-
+    
     Hook->Path = "/Script/FortniteGame.FortPawn.MovingEmoteStopped";
     Hook->Detour = MovingEmoteStopped;
-    UKismetHookingLibrary::Hook(Hook, EHook::Exec);
-
+    UKismetHookingLibrary::Hook(Hook, Exec);
+    
+    Hook->Class = AFortPlayerControllerAthena::StaticClass();
+    Hook->Address = 0x289;
+    Hook->Detour = ServerSuicide;
+    UKismetHookingLibrary::Hook(Hook, EveryVFT);
+    
     delete Hook;
 }
