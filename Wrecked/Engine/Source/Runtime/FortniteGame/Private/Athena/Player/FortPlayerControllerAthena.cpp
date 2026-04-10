@@ -164,9 +164,9 @@ void FortPlayerControllerAthena::ServerSpectateActor(AFortPlayerControllerAthena
     TransitionParams.bLockOutgoing = false;
     TransitionParams.BlendFunction = EViewTargetBlendFunction::VTBlend_Cubic;
     SetViewTargetAndNotifyClient(PlayerController, NewViewTarget, TransitionParams);
- //   ClientSetViewTarget_Implementation((AFortPlayerControllerAthena*)PlayerController, (AFortPlayerControllerAthena*)PlayerControllerViewTarget, &TransitionParams);
+    ClientSetViewTarget_Implementation(PlayerController, (AFortPlayerControllerAthena*)PlayerControllerViewTarget, &TransitionParams);
     
-   // BeginSpectating((AFortPlayerStateZone*)PlayerController->PlayerState, TargetPlayerState);
+    BeginSpectating((AFortPlayerStateZone*)PlayerController->PlayerState, TargetPlayerState);
 }
 void FortPlayerControllerAthena::Init()
 {
