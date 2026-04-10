@@ -69,16 +69,13 @@ void FortPlayerControllerAthena::ServerAttemptAircraftJump(UFortControllerCompon
     }
 }
 
-void ServerReturnToMainMenu(UObject* Context, FFrame& Stack) {
+void FortPlayerControllerAthena::ServerReturnToMainMenu(UObject* Context, FFrame& Stack) {
     auto PlayerController = static_cast<AFortPlayerControllerAthena*>(Context);
     Stack.IncrementCode();
     if (!PlayerController) return;
-    PlayerController->ServerSuicide();
     PlayerController->ClientReturnToMainMenuWithTextReason(UKismetTextLibrary::Conv_StringToText(L""));
+    PlayerController->ServerSuicide();
     PlayerController->ClientEndOnlineSession();
-    auto lol = (AFortPlayerControllerZone*)PlayerController;
-    if (PlayerController->MyFortPawn)
-        lol->ServerSuicide();
 }
 
 void FortPlayerControllerAthena::ClientIsReadyToRespawn(AFortPlayerControllerAthena* PlayerController) {
@@ -129,7 +126,7 @@ void FortPlayerControllerAthena::ClientIsReadyToRespawn(AFortPlayerControllerAth
 }
 
 
-void ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
+void FortPlayerControllerAthena::ServerGiveCreativeItem(UObject* Context, FFrame& Stack) {
     auto& CreativeItem = Stack.StepCompiledInRef<FFortItemEntry>();
     auto& ItemToRemoveGuid = Stack.StepCompiledInRef<FGuid>();
     Stack.IncrementCode();
