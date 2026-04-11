@@ -6245,7 +6245,9 @@ public:
 	struct FGameplayTagContainer                  BlockingMMETags;                                   // 0x00C8(0x0020)(Edit, DisableEditOnInstance, Protected, NativeAccessSpecifierProtected)
 	struct FGameplayTagContainer                  TagsToPush;                                        // 0x00E8(0x0020)(Edit, DisableEditOnInstance, Protected, NativeAccessSpecifierProtected)
 	bool                                          bShouldSkipRootMotionResimulation;                 // 0x0108(0x0001)(Edit, BlueprintVisible, BlueprintReadOnly, ZeroConstructor, DisableEditOnInstance, IsPlainOldData, NoDestructor, Protected, HasGetValueTypeHash, NativeAccessSpecifierProtected)
-	uint8                                         Pad_109[0x7];                                      // 0x0109(0x0007)(Fixing Struct Size After Last Property [ Dumper-7 ])
+	uint8                                         Pad_109[0x4];
+    bool                                          bNativeActionStopped;
+    uint8                                         Pad_10E[0x2];
 
 public:
 	void AddGameplayCue_NotReplicated(const struct FGameplayTag& GameplayCueTag);
