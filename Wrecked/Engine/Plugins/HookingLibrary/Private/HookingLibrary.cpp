@@ -144,31 +144,42 @@ void UKismetHookingLibrary::Hook(UHook* Hook, EHook Type)
         MH_EnableHook(LPVOID(Hook->Address));
         break;
     case Interface:
+        if (Hook->Interface == nullptr)
+            return;
+
         for (int i = 0; i < UObject::GObjects->Num(); i++)
         {
             auto Obj = UObject::GObjects->GetByIndex(i);
-            if (!Obj || !Obj->IsA(Hook->Class)) continue;
-        
+            
+            if (!Obj || !Obj->IsDefaultObject() || !Obj->IsA(Hook->Class))
+                continue;
+
             auto InterfaceAddress = Obj->GetInterface<void>(Hook->Interface);
-            if (!InterfaceAddress) continue;
+            if (!InterfaceAddress)
+                continue;
 
             auto VTable = (*(void***)InterfaceAddress);
-            if (!VTable || !VTable[Hook->Address]) continue;
+            if (!VTable)
+                continue;
+
+            if (!VTable[Hook->Address])
+                continue;
 
             if (Hook->Original && !*Hook->Original)
+            {
                 *Hook->Original = VTable[Hook->Address];
+            }
 
             DWORD oldProtect;
             if (!VirtualProtect(&VTable[Hook->Address], sizeof(void*), PAGE_EXECUTE_READWRITE, &oldProtect))
-                break;
+                continue;
 
             VTable[Hook->Address] = Hook->Detour;
 
             DWORD temp;
             VirtualProtect(&VTable[Hook->Address], sizeof(void*), oldProtect, &temp);
-        
-            break;
         }
+        break;
     default:
         break;
     }
