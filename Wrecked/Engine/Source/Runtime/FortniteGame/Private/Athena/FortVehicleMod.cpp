@@ -27,15 +27,10 @@ void ApplyVehicleModImplementation(IFortVehicleInterface* VehicleInterface, FGam
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.SpringsInfo = TireInfo->SpringTuning;
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.bTireModAdjustsPosition = true;
                 DagwoodVehicle->DagwoodRuntimeModifiedProperties.ServerTireModVersion++;
-
-                DagwoodVehicle->DagwoodRuntimeModifiedProperties.SpringsInfo = TireInfo->SpringTuning;
                 DagwoodConfig->GrassBehavior = TireInfo->GrassBehavior;
                 DagwoodConfig->MudBehavior = TireInfo->MudBehavior;
                 DagwoodConfig->RoadBehavior = TireInfo->RoadBehavior;
                 DagwoodVehicle->OnRep_VehicleAttributes(); // maybe
-
-                auto OldModifiedProperties = DagwoodVehicle->DagwoodRuntimeModifiedProperties;
-                DagwoodVehicle->OnRep_DagwoodRuntimeModifiers(OldModifiedProperties);
                 DagwoodVehicle->ApplyRuntimeModifiers();
             }
         }  
@@ -90,9 +85,13 @@ bool FortVehicleMod::CanApplyMod(IFortVehicleInterface* VehicleInterface, FGamep
 }
 
 //void Dummy(AFortAthenaVehicle *Vehicle, float *InOutDamage, const FGameplayTagContainer *InTags, FGameplayEffectContextHandle *EffectContextHandle)
-void Dummy(AFortAthenaVehicle* Vehicle, float* InOutDamage, const FGameplayTagContainer* InTags, FGameplayEffectContextHandle *EffectContextHandle, AController* Controller, AActor* Actor, AFortPlayerPawn* PlayerPawn)
+void Dummy(AFortAthenaVehicle* Vehicle, float* InOutDamage, const FGameplayTagContainer* InTags, const FGameplayEffectContextHandle *EffectContextHandle)
 {
     std::cout << std::hex << (uint64_t)_ReturnAddress() - ImageBase << std::endl;
+    auto Object = EffectContextHandle->Data.Object;
+    auto hitresult = Object->HitResult.Object;
+    UGameplayStatics::ApplyDamage((AActor*)hitresult->Component.Get(), *InOutDamage, nullptr, nullptr, nullptr);
+
    /* std::cout << "InOutDamage: " << InOutDamage << std::endl;
     auto EffectContext = (FGameplayEffectContext*)EffectContextHandle->Data.Object;
 
@@ -159,7 +158,19 @@ void FortVehicleMod::ServerVehicleModSeatRPC(AFortPlayerControllerAthena* Player
     }
     
 }
+bool HasTireMod(IFortVehicleInterface* Interface)
+{
+    auto Vehicle = (AFortAthenaVehicle*)(__int64(Interface) - 0x510);
 
+    for (const FGameplayTag& ExistingTag : Vehicle->AppliedVehicleModTags.GameplayTags)
+    {
+        if (ExistingTag.TagName.ToString().contains("Tire"))
+        {
+            return true;
+        }
+    }
+    return false;
+}
 void FortVehicleMod::Init()
 {
     
@@ -187,8 +198,14 @@ void FortVehicleMod::Init()
     UKismetHookingLibrary::Hook(Hook, EveryVFT);*/
     
     // AFortAthenaVehicle::AbsorbDamageIntoDamagablePart that has no impl
-   /* Hook->Address = 0x11A8/8;
+    Hook->Address = 0x11A8/8;
     Hook->Class = AFortAthenaVehicle::StaticClass();
     Hook->Detour = Dummy;
-    UKismetHookingLibrary::Hook(Hook, EveryVFT); */
+    UKismetHookingLibrary::Hook(Hook, EveryVFT); 
+
+    Hook->Class = AFortAthenaVehicle::StaticClass();
+    Hook->Interface = IFortVehicleInterface::StaticClass();
+    Hook->Address = 0x1D0 / 8;
+    Hook->Detour = HasTireMod;
+    UKismetHookingLibrary::Hook(Hook, Interface);
 }
