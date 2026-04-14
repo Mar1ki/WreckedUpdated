@@ -356,7 +356,7 @@ void Main()
     UKismetSystemLibrary::ExecuteConsoleCommand(GetWorld(), L"log LogOnlineGame VeryVerbose", nullptr);
     
     for (auto& Curie : GetObjectsOfClass<UCurieGlobals>())
-       Curie->bEnableCurie = false;
+       Curie->bEnableCurie = true;
     
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaAIServiceBots VeryVerbose", nullptr);
     UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"log LogAthenaBots VeryVerbose", nullptr);
