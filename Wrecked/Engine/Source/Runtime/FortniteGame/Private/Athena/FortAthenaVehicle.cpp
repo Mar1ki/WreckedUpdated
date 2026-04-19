@@ -18,7 +18,9 @@ void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
             New.ShapeName = Config.ShapeName;
             New.ConfigIndex = i;
             New.BoneName = Config.BoneName;
-            New.Health = 100; //scuffed it could be better 
+          //  New.Health = 100; //scuffed it could be better
+            New.MaxHealthOverride = Config.MaxHealth.Evaluate();
+            New.Health = Config.MaxHealth.Evaluate(); // goofy but whatever
             New.bConsideredCriticalHit = Config.bConsideredCriticalHit;
             Vehicle->DamageableParts.Add(New);
         }
@@ -33,7 +35,6 @@ void ApplyDamagableParts(AFortAthenaVehicle* Vehicle) {
 }
 void FortAthenaVehicle::PostInitializeComponents(AFortAthenaVehicle* Vehicle) {
     PostInitializeComponentsOG(Vehicle);
-
     //UE_LOG(LogVehicles, Log, "Initializing Vehicle Damageable Parts");
     ApplyDamagableParts(Vehicle);
 }
