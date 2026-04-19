@@ -49,6 +49,7 @@ void NetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 		Params.SendPass = EReplicationSystemSendPass::TickFlush;
 		
 		PreSendUpdate(ReplicationSystem, Params);
+		FortControllerComponent_RechargeWeapons::TickComponent();
 	}
     return TickFlushOG(NetDriver, DeltaSeconds);
 }
