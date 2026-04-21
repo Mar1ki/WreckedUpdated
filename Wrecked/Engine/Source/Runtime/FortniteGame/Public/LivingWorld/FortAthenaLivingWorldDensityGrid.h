@@ -8,5 +8,6 @@ namespace FortAthenaLivingWorldDensityGrid
 {
     void Hook();
     DefineOriginal(char, AddActor, FFortAthenaLivingWorldDensityGrid* DensityGrid, AActor* InActor, double DensityValue, double DensityRange);
-    static void (*InitializeGrid)(FFortAthenaLivingWorldDensityGrid*, TBox<double>*, int, int, int) = decltype(InitializeGrid)(ImageBase + 0xB68BA48);
+    static void (*InitializeGrid)(FFortAthenaLivingWorldDensityGrid* Grid, const TBox<double>* InGridBounds, int InGridCellSizeX, int InGridCellSizeY, int InGridCellSizeZ) = decltype(InitializeGrid)(ImageBase + 0xB68BA48);
+
 }

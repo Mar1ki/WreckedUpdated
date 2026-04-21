@@ -17,6 +17,7 @@ char FortAthenaLivingWorldDensityGrid::AddActor(FFortAthenaLivingWorldDensityGri
     return AddActorOG(DensityGrid, InActor, DensityValue, DensityRange);
 }
 
+
 void FortAthenaLivingWorldDensityGrid::Hook()
 {
     UHook* Hook = new UHook();
