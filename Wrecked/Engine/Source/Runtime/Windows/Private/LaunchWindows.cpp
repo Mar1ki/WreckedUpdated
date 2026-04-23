@@ -1,5 +1,6 @@
 #include "pch.h"
 
+#ifndef WreckedClient
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaMarkerComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/AthenaSpecialActorComponent.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/Components/FortControllerComponent_RechargeWeapons.h"
@@ -9,7 +10,6 @@
 #include "Engine/Source/Runtime/FortniteGame/Public/Items/FortPlayerAugmentItemDefinition.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldDensityGrid.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/LivingWorld/FortAthenaLivingWorldStaticPointProvider.h"
-#ifndef Client
 #include "Engine/Plugins/HookingLibrary/Public/HookingLibrary.h"
 #include "Engine/Source/Runtime/Engine/Classes/Engine//NetDriver.h"
 #include "Engine/Source/Runtime/FortniteGame/Public/Athena/FortAthenaCreativePortal.h"
@@ -168,7 +168,7 @@ void DebugFunc() {
 void Main()
 {
     MH_Initialize();
-#ifndef Client
+#ifndef WreckedClient
     AllocConsole();
     FILE* File = nullptr;
     freopen_s(&File, "CONOUT$", "w+", stdout);
@@ -375,14 +375,15 @@ void Main()
 
 
 #endif
-#ifdef Client
-    UEngine::GetEngine()->GameViewport->ViewportConsole = reinterpret_cast<UConsole*>(UGameplayStatics::SpawnObject(UConsole::StaticClass(), UEngine::GetEngine()->GameViewport));
-    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"net.allowencryption 0", nullptr);
-    *(bool*)(__int64(IMAGEBASE) + 0x12BF67B0) = true;
+#ifdef WreckedClient
     
-    UHook* Hook = new UHook();
-    Hook->Address = IMAGEBASE + 0x90957DC;
-    UKismetHookingLibrary::Hook(Hook, RFalse);
+    if (UEngine::GetEngine())
+        UEngine::GetEngine()->GameViewport->ViewportConsole = reinterpret_cast<UConsole*>(UGameplayStatics::SpawnObject(UConsole::StaticClass(), UEngine::GetEngine()->GameViewport));
+
+    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"net.allowencryption 0", nullptr);
+    *(bool*)(__int64(ImageBase) + 0x12BF67B0) = true;
+    MH_CreateHook(LPVOID(ImageBase + 0x90957DC), RetFalse, nullptr);
+    MH_EnableHook(LPVOID(ImageBase + 0x90957DC));
 #endif
 }
 
