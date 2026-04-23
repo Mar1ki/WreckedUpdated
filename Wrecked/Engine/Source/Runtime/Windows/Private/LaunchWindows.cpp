@@ -376,14 +376,23 @@ void Main()
 
 #endif
 #ifdef WreckedClient
-    
-    if (UEngine::GetEngine())
-        UEngine::GetEngine()->GameViewport->ViewportConsole = reinterpret_cast<UConsole*>(UGameplayStatics::SpawnObject(UConsole::StaticClass(), UEngine::GetEngine()->GameViewport));
+    std::thread([] {
+        auto start = std::chrono::high_resolution_clock::now();
+        while (true) {
+            if (std::chrono::high_resolution_clock::now() - start > std::chrono::seconds(30)) return;
 
-    UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"net.allowencryption 0", nullptr);
-    *(bool*)(__int64(ImageBase) + 0x12BF67B0) = true;
-    MH_CreateHook(LPVOID(ImageBase + 0x90957DC), RetFalse, nullptr);
-    MH_EnableHook(LPVOID(ImageBase + 0x90957DC));
+            auto Engine = UEngine::GetEngine();
+            if (Engine && Engine->GameViewport) {
+                *(bool*)(__int64(ImageBase) + 0x12BF67B0) = true;
+                MH_CreateHook(LPVOID(ImageBase + 0x90957DC), RetFalse, nullptr);
+                MH_EnableHook(LPVOID(ImageBase + 0x90957DC));
+                UKismetSystemLibrary::ExecuteConsoleCommand(UWorld::GetWorld(), L"net.allowencryption 0", nullptr);
+                UEngine::GetEngine()->GameViewport->ViewportConsole = reinterpret_cast<UConsole*>(UGameplayStatics::SpawnObject(UConsole::StaticClass(), UEngine::GetEngine()->GameViewport));
+                break;
+            }
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        }
+        }).detach();
 #endif
 }
 
