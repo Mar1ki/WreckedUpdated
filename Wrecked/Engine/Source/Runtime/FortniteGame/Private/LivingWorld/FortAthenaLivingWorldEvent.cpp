@@ -190,11 +190,11 @@ void FortAthenaLivingWorldEvent::CollectAllEvents()
            {
               auto SpawnerTag =  ActorDesc.SpawnerDataTagQuery.TagDictionary[0].TagName.ToString(); // these events have multiple tags for example valet
 
-               if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is npcs and specialists are some sort of npcs idk 
-               {
-                   AllEvents.Add({Event, ELagerEventType::Tandem});
-               }
-               else if (SpawnerTag.contains("Valet"))
+               // if (SpawnerTag.contains("Tandem") || SpawnerTag.contains("Specialist")) // tandem is npcs and specialists are some sort of npcs idk 
+               // {
+               //     AllEvents.Add({Event, ELagerEventType::Tandem});
+               // }
+                if (SpawnerTag.contains("Valet"))
                {
                    AllEvents.Add({Event, ELagerEventType::Valet});
                }
