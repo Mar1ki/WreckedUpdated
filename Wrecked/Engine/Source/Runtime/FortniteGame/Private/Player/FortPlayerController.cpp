@@ -124,6 +124,19 @@ void FortPlayerController::ServerAttemptInventoryDrop(AFortPlayerController* Con
     }
 }
 
+void AFortPlayerControllerAthena::DropInventoryItems() {
+    if (!this || !GetInventory() || !this->MyFortPawn) return;
+    auto ItemList = GetInventory()->Inventory.ReplicatedEntries;
+
+    GetInventory()->Inventory.ReplicatedEntries.Clear();
+    GetInventory()->Inventory.MarkArrayDirty();
+    GetInventory()->HandleInventoryLocalUpdate();
+
+    for (auto Item : ItemList) {
+        FortKismetLibrary::SpawnPickup(this->MyFortPawn->K2_GetActorLocation(), Item, EFortPickupSourceTypeFlag::Player, EFortPickupSpawnSource::PlayerElimination, this->MyFortPawn, 0, true, true, true);
+    }
+}
+
 // TODO: switch to AFortPlayerControllerAthena::OnPawnDied (proper func, fixes some issues)
 void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerController, FFortPlayerDeathReport& DeathReport) {
 
@@ -183,6 +196,9 @@ void FortPlayerController::ClientOnPawnDied(AFortPlayerControllerAthena* PlayerC
 
         auto KillerPC = (AFortPlayerControllerAthena*)KillerPlayerState->Owner;
     }
+    //ig this shoudl placed here, since our late game respawning logic need items to be dropped on death(ig)
+    PlayerController->DropInventoryItems();
+
     if (GameState->IsRespawningAllowed(PlayerState)) {
         AFortWeapon* DamageCauser = nullptr;
         if (auto Projectile = DeathReport.DamageCauser.Get() ? Cast<AFortProjectileBase>(DeathReport.DamageCauser.Get()) : nullptr)
@@ -323,16 +339,19 @@ void FortPlayerController::ServerCreateBuildingActor(AFortPlayerControllerAthena
                 return;
             
             PlayerController->PayBuildableClassPlacementCost(&CreateBuildingData.BuildingClassData);
-            
-            if (auto BuildingSMActor = GetWorld()->SpawnActor<ABuildingSMActor>(BuildingClass, CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot))
+            auto SpawnTransform = UKismetMathLibrary::MakeTransform(CreateBuildingData.BuildLoc, CreateBuildingData.BuildRot, FVector(1, 1, 1));
+            auto BuildingSMActor = (ABuildingSMActor*)UGameplayStatics::BeginDeferredActorSpawnFromClass(UWorld::GetWorld(), BuildingClass, SpawnTransform,ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn, nullptr, ESpawnActorScaleMethod::SelectDefaultAtRuntime);
+            if (BuildingSMActor)
             {
-                BuildingSMActor->CurrentBuildingLevel = CreateBuildingData.BuildingClassData.UpgradeLevel = 0;
+                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true, nullptr, true);
+
+                UGameplayStatics::FinishSpawningActor(BuildingSMActor, SpawnTransform, ESpawnActorScaleMethod::SelectDefaultAtRuntime);
+
+                BuildingSMActor->CurrentBuildingLevel = CreateBuildingData.BuildingClassData.UpgradeLevel;
                 BuildingSMActor->OnRep_CurrentBuildingLevel();
 
                 BuildingSMActor->SetMirrored(CreateBuildingData.bMirrored);
                 BuildingSMActor->bPlayerPlaced = true;
-                
-                BuildingSMActor->InitializeKismetSpawnedBuildingActor(BuildingSMActor, PlayerController, true, nullptr, true);
                 
                 // this might be auto with some sort of func i think need to check tho
                 if (auto PlayerState = (AFortPlayerStateAthena*)PlayerController->PlayerState)
@@ -440,11 +459,13 @@ void FortPlayerController::ServerExecuteInventoryItem(AFortPlayerController* Con
         if (ItemEntry->ItemDefinition->IsA(UFortGadgetItemDefinition::StaticClass()))
         {
             auto GadgetItemDefinition = Cast<UFortGadgetItemDefinition>(ItemEntry->ItemDefinition);
-            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)GadgetItemDefinition->WeaponItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false); 
+            auto Weapon = Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)GadgetItemDefinition->WeaponItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false); 
+            Weapon->ForceNetUpdate();
         }
         else
         {
-            Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)ItemEntry->ItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false); 
+            auto Weapon = Controller->MyFortPawn->EquipWeaponDefinition((UFortWeaponItemDefinition*)ItemEntry->ItemDefinition, ItemEntry->ItemGuid, ItemEntry->TrackerGuid, false);
+            Weapon->ForceNetUpdate();
         }
     }
 }

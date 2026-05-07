@@ -29527,6 +29527,7 @@ public:
 	void UpdateRichPresenceTimer();
 	void UpdateUGCRestrictedForVolume(class AFortVolume* Volume, bool bRestricted);
 	void WriteCreateBuildingAnalytics();
+	void DropInventoryItems();
 
 	void CancelCreativeMatchmakingReadyCheck() const;
 	bool CanFollowSpecialActor() const;
