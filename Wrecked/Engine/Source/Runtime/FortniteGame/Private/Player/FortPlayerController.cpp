@@ -406,9 +406,10 @@ void FortPlayerController::ServerEditBuildingActor(AFortPlayerController* Player
     
    auto NewBuild =  BuildingActorToEdit->ReplaceBuildingActor(EBuildingReplacementType::BRT_Edited, NewBuildingClass, BuildingActorToEdit->CurrentBuildingLevel, RotationIterations, bMirrored, PlayerController);
    if (NewBuild)
-    {
-        NewBuild->bPlayerPlaced = true;
-    }
+   {
+       NewBuild->bPlayerPlaced = true;
+       UFortAIFunctionLibrary::RequestNavUpdateForBuilding(NewBuild);// if it lags on some shit then idk but fuck it
+   }
 }
 
 void FortPlayerController::ServerEndEditingBuildingActor(AFortPlayerController* PlayerController, ABuildingSMActor* BuildingActorToEdit)
