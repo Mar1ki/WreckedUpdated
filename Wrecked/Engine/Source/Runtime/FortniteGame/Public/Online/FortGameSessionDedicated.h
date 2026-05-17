@@ -8,5 +8,6 @@ namespace FortGameSessionDedicated {
 	DefineOriginal(const wchar_t*, CommandLineGet);
 	DefineOriginal(UWorld*, GetWorldFromSmth, __int64 Smth);
 	char GetSquadIdForCurrentPlayer(AFortGameSessionDedicatedAthena* GameSession, FUniqueNetIdRepl UniqueId);
+	void Restart(AFortGameSessionDedicatedAthena* GameSession);
 	void Init();
 }

@@ -53,10 +53,10 @@ void NetDriver::TickFlush(UNetDriver* NetDriver, float DeltaSeconds)
 	}
     return TickFlushOG(NetDriver, DeltaSeconds);
 }
-
+// unproper
 float GetMaxTickRate(UEngine* Engine, float DeltaTime, bool bAllowFrameRateSmoothing)
 {
-	return 120.f;
+	return 30.f;
 }
 void NetDriver::Init()
 {

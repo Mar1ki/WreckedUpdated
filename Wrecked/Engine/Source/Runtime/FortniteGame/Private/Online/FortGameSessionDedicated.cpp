@@ -53,6 +53,11 @@ char FortGameSessionDedicated::GetSquadIdForCurrentPlayer(AFortGameSessionDedica
 	}
 	return 0;
 }
+// actual logic later
+void FortGameSessionDedicated::Restart(AFortGameSessionDedicatedAthena* GameSession)
+{
+	TerminateProcess(GetCurrentProcess(), 0);
+}
 
 void FortGameSessionDedicated::Init() {
 
@@ -84,6 +89,10 @@ void FortGameSessionDedicated::Init() {
 	
 	Hook->Address = ImageBase + 0x9E6CDF0;
 	Hook->Detour = GetSquadIdForCurrentPlayer;
+	UKismetHookingLibrary::Hook(Hook, Address);
+	
+	Hook->Address = ImageBase + 0x9E45DE0;
+	Hook->Detour = Restart;
 	UKismetHookingLibrary::Hook(Hook, Address);
 	
 	delete Hook;

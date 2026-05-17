@@ -185,18 +185,22 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Address = 0x108 / 8;
 	Hook->Detour = NeedsLoadForClient;
 	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	// we dont like any ai stuff for lategame we need full performance
+	if (!bLateGame)
+	{
+		Hook->Class = UNavigationSystemConfig::StaticClass();
+		Hook->Address = 0x2B8 / 8;
+		Hook->Detour = CreateAndConfigureNavigationSystem;
+		Hook->Original = (void**)&CreateAndConfigureNavigationSystemOG;
+		UKismetHookingLibrary::Hook(Hook, EveryVFT);
 	
-	Hook->Class = UNavigationSystemConfig::StaticClass();
-	Hook->Address = 0x2B8 / 8;
-	Hook->Detour = CreateAndConfigureNavigationSystem;
-	Hook->Original = (void**)&CreateAndConfigureNavigationSystemOG;
-	UKismetHookingLibrary::Hook(Hook, EveryVFT);
 
-	Hook->Class = UNavigationSystemV1::StaticClass();
-	Hook->Address = 0x2F0 / 8;
-	Hook->Detour = InitializeForWorld;
-	Hook->Original = (void**)&InitializeForWorldOG;
-	UKismetHookingLibrary::Hook(Hook, EveryVFT);
+		Hook->Class = UNavigationSystemV1::StaticClass();
+		Hook->Address = 0x2F0 / 8;
+		Hook->Detour = InitializeForWorld;
+		Hook->Original = (void**)&InitializeForWorldOG;
+		UKismetHookingLibrary::Hook(Hook, EveryVFT);
+	}
 
 	delete Hook;
 }

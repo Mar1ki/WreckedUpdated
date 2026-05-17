@@ -195,7 +195,7 @@ bool FortGameModeAthena::ReadyToStartMatch(AFortGameModeAthena* GameMode)
 		
 		
 		if (!GameMode->AIDirector)
-			GameMode->AIDirector = (AFortAIDirector*)GetWorld()->SpawnActor(AFortAIDirector::StaticClass(), {}, {}, GameMode);
+			GameMode->AIDirector = (AAthenaAIDirector*)GetWorld()->SpawnActor(AAthenaAIDirector::StaticClass(), {}, {}, GameMode);
 
 		GameMode->AIDirector->Activate();
 		GameMode->AISettings->bAllowAIDirector = true;
