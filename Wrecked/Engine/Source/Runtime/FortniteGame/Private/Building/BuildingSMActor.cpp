@@ -13,6 +13,7 @@ bool BuildingSMActor::AttemptSpawnResources(ABuildingSMActor* BuildingActor, FBu
 	auto WeakSpot = Params->bJustHitWeakspot;
 	auto Pawn = Params->InstigatorPawn.Get();
     auto PlayerController = (AFortPlayerControllerAthena*)Pawn->Controller;
+	if (PlayerController->IsA(AFortAthenaAIBotController::StaticClass())) return false;
     static auto CurveTable = StaticLoadObject<UCurveTable>("/Game/Balance/DataTables/ResourceRates.ResourceRates");
 	auto ClassData = GetSparseData<FBuildingSMActorClassData>(BuildingActor->Class);
 	

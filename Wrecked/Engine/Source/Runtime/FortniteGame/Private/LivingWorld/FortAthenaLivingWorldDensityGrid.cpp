@@ -7,9 +7,14 @@ char FortAthenaLivingWorldDensityGrid::AddActor(FFortAthenaLivingWorldDensityGri
     
     if (DensityGrid->GridBounds.Max.X == 0)
     {
+        TBox<double> ActorBounds;
+        GetActorBounds(DensityGrid, &ActorBounds, InActor);
+        
         // TODO: Get proper grid bounds size
-        DensityGrid->GridBounds.Min= { -150000.0, -150000.0, -50000.0 };
-        DensityGrid->GridBounds.Max= {  150000.0,  150000.0,  50000.0 };
+     //   DensityGrid->GridBounds.Min= { -150000.0, -150000.0, -50000.0 };
+      //  DensityGrid->GridBounds.Max= {  150000.0,  150000.0,  50000.0 };
+
+        DensityGrid->GridBounds = ActorBounds;
         
         InitializeGrid(DensityGrid, &DensityGrid->GridBounds, (int) WorldConfig->ActorDensityGridCellSize.Value, (int) WorldConfig->ActorDensityGridCellSize.Value, (int) WorldConfig->ActorDensityGridCellSize.Value);
     }
