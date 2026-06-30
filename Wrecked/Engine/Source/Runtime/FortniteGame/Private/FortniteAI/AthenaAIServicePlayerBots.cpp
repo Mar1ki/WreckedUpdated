@@ -147,6 +147,9 @@ void AthenaAIServicePlayerBots::Init() {
 	Hook->Original = (void**)&CheckForBotBrainActivationOG;
 	UKismetHookingLibrary::Hook(Hook, Address);
 
+	Hook->Address = ImageBase + 0x8CD5FC0;
+	UKismetHookingLibrary::Hook(Hook, RTrue);
+
 	Hook->Address = ImageBase + 0xA94E028;
 	Hook->Detour = SpawnAI;
 	Hook->Original = (void**)&SpawnAIOG;
