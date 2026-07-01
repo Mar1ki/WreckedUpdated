@@ -215,10 +215,10 @@ void Main()
     FortPlayerAugmentItemDefinition::Init();
     //AthenaSpecialActorComponent::Init();
     AthenaMarkerComponent::Init();
-    FortGameSessionDedicated::Init();
+  //  FortGameSessionDedicated::Init();
     FortAthenaPatrolPath::Init();
     FortAthenaBTService_PickUpLoot::Init();
-    FortAthenaLivingWorldDensityGrid::Hook();
+   // FortAthenaLivingWorldDensityGrid::Hook();
     FortControllerComponent_RechargeWeapons::Init();
     BuildingProp_ConversationCompatible::Init();
     BuildingSMActor::Init();
